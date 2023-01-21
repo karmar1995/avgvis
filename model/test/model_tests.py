@@ -17,12 +17,7 @@ class ModelTest(unittest.TestCase):
         initData.addEventSource(self.eventsSource)
         self.compositionRoot.initialize(initData)
 
-    def tearDown(self):
-        super().tearDown()
-
-
-class WhenAgvObjectIsRegisteredAndUpdatedViewRendersIt(ModelTest):
-    def test(self):
+    def test_WhenAgvObjectIsRegisteredAndUpdatedViewRendersIt(self):
         self.eventsSource.registerAgvObject(12)
         self.assertNotEqual(len(self.view.knownObjects), 0)
 
@@ -37,6 +32,10 @@ class WhenAgvObjectIsRegisteredAndUpdatedViewRendersIt(ModelTest):
         self.assertEqual(lastRenderedObject.getObjectId(), 12)
         self.assertEqual(lastRenderedObject.getX(), 200)
         self.assertEqual(lastRenderedObject.getY(), 413)
+
+
+    def tearDown(self):
+        super().tearDown()
 
 
 if __name__ == '__main__':
