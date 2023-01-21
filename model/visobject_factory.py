@@ -1,4 +1,4 @@
-from entities.agv import *
+from model.entities.agv import *
 
 
 class VisObjectFactory:

@@ -1,4 +1,4 @@
-from visobject import *
+from model.entities.visobject import *
 
 
 class AgvObjectData:
@@ -8,7 +8,7 @@ class AgvObjectData:
 
 
 class AgvObject(VisObject):
-    def __init__(self, avgObjectData):
-        super().__init__(avgObjectData.visObjectData)
-        self.battery = avgObjectData.battery
+    def __init__(self, agvObjectData):
+        super().__init__(agvObjectData.visObjectData)
+        self.battery = agvObjectData.battery
 

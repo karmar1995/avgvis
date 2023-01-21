@@ -5,6 +5,9 @@ class AbstractView:
     def renderObject(self, visObject):
         raise "Not implemented!"
 
+    def cleanupObject(self, visObjectId):
+        raise "Not implemented!"
+
     def showCollision(self, collidingObjects):
         raise "Not implemented!"
 
