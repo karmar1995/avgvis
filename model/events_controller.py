@@ -25,7 +25,9 @@ class EventsController:
         newObjectId = registerObjectEvent.objectId
         if not self.visobjectsRegistry.object(newObjectId):
             if registerObjectEvent.type == 'AGV':
-                visObjectData = VisObjectData(newObjectId, 0, 0, 0)
+                AGV_HEIGHT = 3  # #todo: read from configuration
+                AGV_WIDTH = 4  # #todo: read from configuration
+                visObjectData = VisObjectData(newObjectId, 0, 0, 0, AGV_WIDTH, AGV_HEIGHT)
                 agvObjectData = AgvObjectData(visObjectData, registerObjectEvent.properties['battery'])
                 self.visobjectsRegistry.registerObject(AgvObject(agvObjectData))
                 self.broadcastObjectsChanged([newObjectId])

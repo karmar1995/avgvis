@@ -17,8 +17,6 @@ class FakeView(AbstractView):
     def cleanupObject(self, visObjectId):
         if visObjectId in self.knownObjects:
             self.knownObjects.pop(visObjectId)
-        else:
-            raise "Unknown object: " + str(visObjectId)
 
     def showCollision(self, collidingObjects):
         pass

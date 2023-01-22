@@ -10,5 +10,16 @@ class AgvObjectData:
 class AgvObject(VisObject):
     def __init__(self, agvObjectData):
         super().__init__(agvObjectData.visObjectData)
-        self.battery = agvObjectData.battery
+        self.__battery = agvObjectData.battery
 
+    def updateProperties(self, properties):
+        self.__updateBattery(properties)
+
+    def getBattery(self):
+        return self.__battery
+
+    def __updateBattery(self, properties):
+        try:
+            self.__battery = properties['battery']
+        except KeyError:
+            pass

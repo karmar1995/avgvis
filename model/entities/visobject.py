@@ -1,9 +1,11 @@
 class VisObjectData:
-    def __init__(self, objectId, x, y, rotation):
+    def __init__(self, objectId, x, y, rotation, width, height):
         self.objectId = objectId
         self.x = x
         self.y = y
         self.rotation = rotation
+        self.width = width
+        self.height = height
 
 
 class VisObject:
@@ -12,6 +14,8 @@ class VisObject:
         self.__x = visObjectData.x
         self.__y = visObjectData.y
         self.__rotation = visObjectData.rotation
+        self.__width = visObjectData.width
+        self.__height = visObjectData.height
 
     def setX(self, x):
         self.__x = x
@@ -38,5 +42,10 @@ class VisObject:
     def getY(self):
         return self.__y
 
-    def rotation(self):
+    def getRotation(self):
         return self.__rotation
+
+    def getBoundingRect(self):
+        topLeft = (self.__x, self.__y)
+        bottomRight = (topLeft[0] + self.__width, topLeft[1] + self.__height)
+        return topLeft, bottomRight

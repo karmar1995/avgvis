@@ -9,6 +9,6 @@ class ErrorSink:
         self.listeners.pop(id(listener))
 
     def logError(self, errorMessage):
-        for listener in self.listeners:
-            listener.logError(errorMessage)
+        for listenerId in self.listeners:
+            self.listeners[listenerId].logError(errorMessage)
 
