@@ -10,28 +10,29 @@ MapData = namedtuple("MapData", 'x y width height')
 
 
 class InitData:
-    def __init__(self, view, errorListener, mapData):
-        self.view = view
-        self.eventSources = list()
-        self.errorListener = errorListener
+    def __init__(self, mapData):
         self.mapData = mapData
-
-    def addEventSource(self, source):
-        self.eventSources.append(source)
 
 
 class CompositionRoot:
-    def __init__(self):
-        self.objectsRegistry = VisObjectsRegistry()
-        self.objectsFactory = VisObjectFactory()
-        self.map = Map(self.objectsRegistry)
-        self.eventsHub = EventsHub()
-        self.errorSink = ErrorSink()
-        self.eventsController = EventsController(self.objectsRegistry, self.eventsHub, self.map, self.errorSink)
+    def __init__(self, view):
+        self.__objectsRegistry = VisObjectsRegistry()
+        self.__objectsFactory = VisObjectFactory()
+        self.__map = Map(self.__objectsRegistry)
+        self.__eventsHub = EventsHub()
+        self.__errorSink = ErrorSink()
+        self.__eventsController = EventsController(self.__objectsRegistry, self.__eventsHub, self.__map, self.__errorSink)
+        self.__view = view
 
     def initialize(self, initData):
         mapData = initData.mapData
-        self.map.initialize(mapData.x, mapData.y, mapData.height, mapData.width, initData.view)
-        for eventSource in initData.eventSources:
-            self.eventsHub.addEventsSource(eventSource)
-        self.errorSink.addListener(initData.errorListener)
+        self.__map.initialize(mapData.x, mapData.y, mapData.height, mapData.width, self.__view)
+
+    def objectsIdsGenerator(self):
+        return self.__objectsRegistry.idsGenerator()
+
+    def eventsHub(self):
+        return self.__eventsHub
+
+    def addErrorListener(self, errorListener):
+        self.__errorSink.addListener(errorListener)

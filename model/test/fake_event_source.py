@@ -21,7 +21,7 @@ class FakeEventsSource(AbstractEventSource):
             self.handlers.pop(id(handler))
 
     def registerAgvObject(self, objectId):
-        event = RegisterObjectEvent(objectId=objectId, type="AGV", properties={"battery": "10%"})
+        event = RegisterObjectEvent(objectId=objectId, type="AGV", properties={"battery": "10%"}, width=4, height=3)
         self.__broadcastEvent(event)
 
     def updateObjectPosition(self, objectId, x, y):

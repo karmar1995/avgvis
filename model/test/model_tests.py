@@ -11,11 +11,12 @@ class ModelTest(unittest.TestCase):
         self.view = FakeView()
         self.eventsSource = FakeEventsSource()
         self.errorSink = FakeErrorSink()
-        self.compositionRoot = CompositionRoot()
+        self.compositionRoot = CompositionRoot(self.view)
+        self.compositionRoot.addErrorListener(self.errorSink)
         mapData = MapData(10, 20, 1000, 2000)
-        initData = InitData(self.view, self.errorSink, mapData)
-        initData.addEventSource(self.eventsSource)
+        initData = InitData(mapData)
         self.compositionRoot.initialize(initData)
+        self.compositionRoot.eventsHub().addEventsSource(self.eventsSource)
 
     def test_WhenAgvObjectIsRegisteredAndUpdatedViewRendersIt(self):
         self.eventsSource.registerAgvObject(12)

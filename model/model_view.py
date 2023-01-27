@@ -1,4 +1,4 @@
-class AbstractView:
+class ModelView:
     def __init__(self):
         pass
 
