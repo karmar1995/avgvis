@@ -19,6 +19,8 @@ class CompositionRoot:
 
         self.useCaseController.addObjectFactory("OPC", self.opcRoot.objectsFactory())
 
-
     def initialize(self):
         self.useCaseController.driveInitialization(self.modelRoot, self.opcRoot)
+
+    def startApp(self):
+        self.modelRoot.startProcessingEvents()

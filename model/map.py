@@ -41,4 +41,5 @@ class Map:
             self.view.cleanupObject(visObjectId)
 
     def __updateCollisions(self):
-        self.view.showCollision(self.collidedObjects)
+        if len(self.collidedObjects) > 0:
+            self.view.showCollision(self.collidedObjects)

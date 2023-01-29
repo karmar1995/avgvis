@@ -1,3 +1,4 @@
+import time, sys
 from model.abstract_event_source import AbstractEventSource
 from model.abstract_event_handler import AbstractEventHandler
 from model.events import *
@@ -15,6 +16,9 @@ class EventsHub(AbstractEventSource, AbstractEventHandler):
         self.handlersMap[UpdateObjectRotationEvent] = self.__onUpdateObjectRotationEvent
         self.handlersMap[UpdateObjectPropertiesEvent] = self.__onUpdateObjectPropertiesEvent
         self.handlersMap[UnregisterObjectEvent] = self.__onUnregisterObjectEvent
+        self.handlersMap[ShutdownEvent] = self.__onShutdownEvent
+        self.eventsQueue = list()
+        self.exit = False
 
     def __del__(self):
         for source in self.sources:
@@ -31,7 +35,17 @@ class EventsHub(AbstractEventSource, AbstractEventHandler):
         self.handlers.pop(id(handler))
 
     def onEvent(self, event):
-        self.handlersMap[type(event)](event)
+        self.eventsQueue.append(event)
+
+    def start(self):
+        while not self.exit:
+            try:
+                if len(self.eventsQueue) > 0:
+                    event = self.eventsQueue.pop(0)
+                    self.handlersMap[type(event)](event)
+                time.sleep(0)
+            except KeyboardInterrupt:
+                sys.exit(0)
 
     def __onRegisterObjectEvent(self, event):
         for handlerId in self.handlers:
@@ -52,3 +66,6 @@ class EventsHub(AbstractEventSource, AbstractEventHandler):
     def __onUnregisterObjectEvent(self, event):
         for handlerId in self.handlers:
             self.handlers[handlerId].onUnregisterObject(event)
+
+    def __onShutdownEvent(self, event):
+        self.exit = True

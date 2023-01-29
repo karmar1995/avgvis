@@ -1,16 +1,16 @@
-class ModelView:
+class AbstractModelView:
     def __init__(self):
         pass
 
     def renderObject(self, visObject):
-        raise "Not implemented!"
+        raise Exception("Not implemented!")
 
     def cleanupObject(self, visObjectId):
-        raise "Not implemented!"
+        raise Exception("Not implemented!")
 
     def showCollision(self, collidingObjects):
-        raise "Not implemented!"
+        raise Exception("Not implemented!")
 
     def renderMap(self, visMap):
-        raise "Not implemented!"
+        raise Exception("Not implemented!")
 

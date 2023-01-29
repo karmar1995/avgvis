@@ -27,6 +27,7 @@ class CompositionRoot:
     def initialize(self, initData):
         mapData = initData.mapData
         self.__map.initialize(mapData.x, mapData.y, mapData.height, mapData.width, self.__view)
+        return True
 
     def objectsIdsGenerator(self):
         return self.__objectsRegistry.idsGenerator()
@@ -36,3 +37,7 @@ class CompositionRoot:
 
     def addErrorListener(self, errorListener):
         self.__errorSink.addListener(errorListener)
+
+    def startProcessingEvents(self):
+        self.__eventsHub.start()
+        
