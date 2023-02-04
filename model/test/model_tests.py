@@ -59,8 +59,8 @@ class ModelTest(unittest.TestCase):
         self.compositionRoot.startProcessingEvents()
         self.eventsSource.threadWorker.join()
 
-        self.assertEqual(self.view.renderedObjects[0].getBattery(), '10%')
-        self.assertEqual(self.view.renderedObjects[1].getBattery(), '20%')
+        self.assertEqual(self.view.renderedObjects[0].getProperties()['battery'], '10%')
+        self.assertEqual(self.view.renderedObjects[1].getProperties()['battery'], '20%')
 
     def test_IncorrectPositionEventIsIgnoredAndErrorIsLogged(self):
         self.eventsSource.registerAgvObject(12)

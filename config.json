@@ -2,7 +2,7 @@
 	"mapData": {
 		"x": 0,
 		"y": 0,
-		"width": 50,
+		"width": 100,
 		"height": 50
 	},
 	"objects": [
@@ -14,7 +14,7 @@
 			"type": "AGV",
 			"xSignal": "4:Forbot_History/4:FH_ID_6000/4:[NNS] - Natural Navigation Signals/2:X-coordinate",
 			"ySignal": "4:Forbot_History/4:FH_ID_6000/4:[NNS] - Natural Navigation Signals/2:Y-coordinate",
-			"updateInterval": 0.5
+			"updateInterval": 0.1
 		}
 	]
 }

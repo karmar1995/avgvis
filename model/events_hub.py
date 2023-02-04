@@ -21,7 +21,7 @@ class EventsHub(AbstractEventSource, AbstractEventHandler):
         self.exit = False
         self.thread = threading.Thread(target=self.eventLoop)
         self.thread.daemon = True
-
+        self.__event = threading.Event()
 
     def __del__(self):
         for source in self.sources:
@@ -39,14 +39,17 @@ class EventsHub(AbstractEventSource, AbstractEventHandler):
 
     def onEvent(self, event):
         self.eventsQueue.append(event)
+        self.__event.set()
 
     def eventLoop(self):
         while not self.exit:
             try:
-                if len(self.eventsQueue) > 0:
+                self.__event.wait()
+                while len(self.eventsQueue) > 0:
                     event = self.eventsQueue.pop(0)
                     self.handlersMap[type(event)](event)
                 time.sleep(0)
+                self.__event.clear()
             except KeyboardInterrupt:
                 sys.exit(0)
 

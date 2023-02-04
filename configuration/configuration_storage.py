@@ -3,22 +3,7 @@ from model.composition_root import MapData
 import json
 
 
-class ConfigurationInMemory:
-    def __init__(self):
-        pass
-
-    def hasMapData(self):
-        return False
-
-    def mapData(self):
-        return None
-
-    def saveMapData(self, mapData):
-        pass
-
-
-class ConfigurationInJson(ConfigurationInMemory):
-
+class ConfigurationInJson:
     def __init__(self):
         super().__init__()
         self.filename = "config.json"
@@ -32,6 +17,10 @@ class ConfigurationInJson(ConfigurationInMemory):
             return True
         except KeyError:
             return False
+
+    def saveMapData(self, mapData):
+        pass
+
 
     def mapData(self):
         node = self.data['mapData']

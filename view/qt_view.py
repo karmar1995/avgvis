@@ -6,12 +6,13 @@ from collections import namedtuple
 
 MapSize = namedtuple("MapSize", "x y width height")
 
-mapSize = MapSize(x=5, y=5, width=100, height=100)
+mapSize = MapSize(x=0, y=0, width=100, height=100)
 testObjectsNum = 10
 businessRules = FakeBusinessRules(range(0, testObjectsNum), 2, mapSize)
 
 app = QApplication([])
 
 window = Mainframe(businessRules)
-window.show()
+window.showMaximized()
+
 sys.exit(app.exec())

@@ -6,13 +6,12 @@ from model.events import *
 
 
 class PollingThread:
-    def __init__(self, client, signalsList, callback, event, pollingInterval):
+    def __init__(self, client, signalsList, callback, pollingInterval):
         self.__thread = None
         self.__client = client
         self.__signalsList = signalsList
         self.__callback = callback
         self.__stopped = False
-        self.__event = event
         self.__pollingInterval = pollingInterval
 
     def start(self):
@@ -31,15 +30,13 @@ class PollingThread:
             for signal in self.__signalsList:
                 signalsDict[str(signal)] = self.__client.getSignalValue(signal)
             self.__callback(signalsDict)
-            self.__event.set()
             time.sleep(self.__pollingInterval)
 
 
 class OpcEventSource(AbstractEventSource):
     def __init__(self, opcClient, objectId, xSignal, ySignal, updateInterval):
         super().__init__()
-        self.__event = threading.Event()
-        self.__pollingThread = PollingThread(opcClient, [xSignal, ySignal], self.__dataPolledCallback, self.__event, updateInterval)
+        self.__pollingThread = PollingThread(opcClient, [xSignal, ySignal], self.__dataPolledCallback, updateInterval)
 
         self.__handlers = dict()
         self.__opcClient = opcClient

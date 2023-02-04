@@ -1,11 +1,12 @@
 class VisObjectData:
-    def __init__(self, objectId, x, y, rotation, width, height):
+    def __init__(self, objectId, x, y, rotation, width, height, properties):
         self.objectId = objectId
         self.x = x
         self.y = y
         self.rotation = rotation
         self.width = width
         self.height = height
+        self.properties = properties
 
 
 class VisObject:
@@ -16,6 +17,7 @@ class VisObject:
         self.__rotation = visObjectData.rotation
         self.__width = visObjectData.width
         self.__height = visObjectData.height
+        self.__properties = visObjectData.properties
 
     def setX(self, x):
         self.__x = x
@@ -31,7 +33,7 @@ class VisObject:
         self.__rotation = rotation
 
     def updateProperties(self, properties):
-        pass
+        self.__properties = properties
 
     def getObjectId(self):
         return self.__objectId
@@ -55,3 +57,6 @@ class VisObject:
         topLeft = (self.__x, self.__y)
         bottomRight = (topLeft[0] + self.__width, topLeft[1] + self.__height)
         return topLeft, bottomRight
+
+    def getProperties(self):
+        return self.__properties

@@ -1,7 +1,7 @@
 import sys
 from business_rules.composition_root import CompositionRoot, DataInterfaces
 from data_access.opc_data_access import OpcClientFactory
-from configuration.configuration_in_memory import ConfigurationInJson
+from configuration.configuration_storage import ConfigurationInJson
 from PyQt6.QtWidgets import QApplication
 from view.mainframe import Mainframe
 
