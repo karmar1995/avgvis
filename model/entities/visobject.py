@@ -42,6 +42,12 @@ class VisObject:
     def getY(self):
         return self.__y
 
+    def getWidth(self):
+        return self.__width
+
+    def getHeight(self):
+        return self.__height
+
     def getRotation(self):
         return self.__rotation
 

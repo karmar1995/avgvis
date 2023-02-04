@@ -8,16 +8,19 @@ DataInterfaces = namedtuple('DataInterfaces', 'opcDataAccess configurationDataAc
 
 
 class CompositionRoot:
-    def __init__(self, viewInterfaces, dataInterfaces):
-        self.modelRoot = model_root.CompositionRoot(viewInterfaces.modelView)
+    def __init__(self, dataInterfaces):
+        self.modelRoot = model_root.CompositionRoot()
 
         self.opcRoot = opc_root.CompositionRoot(self.modelRoot.eventsHub(), dataInterfaces.opcDataAccess)
 
         self.useCaseController = UseCaseController(self.modelRoot.objectsIdsGenerator(),
-                                                   viewInterfaces.userView,
                                                    dataInterfaces.configurationDataAccess)
 
         self.useCaseController.addObjectFactory("OPC", self.opcRoot.objectsFactory())
+
+    def setViewInterfaces(self, viewInterfaces):
+        self.modelRoot.setView(viewInterfaces.modelView)
+        self.useCaseController.setView(viewInterfaces.userView)
 
     def initialize(self):
         self.useCaseController.driveInitialization(self.modelRoot, self.opcRoot)

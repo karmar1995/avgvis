@@ -3,11 +3,14 @@ import opc_adapter.composition_root as opc_root
 
 
 class UseCaseController:
-    def __init__(self, objectIdsGenerator, view, persistency):
+    def __init__(self, objectIdsGenerator, persistency):
         self.__objectFactoriesByType = dict()
         self.__objectIdsGenerator = objectIdsGenerator
-        self.__view = view
+        self.__view = None
         self.__persistency = persistency
+
+    def setView(self, view):
+        self.__view = view
 
     def driveInitialization(self, modelRoot, opcRoot):
         self.addObjectFactory("OPC", opcRoot.objectsFactory())

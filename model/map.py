@@ -1,19 +1,21 @@
 class Map:
     def __init__(self, objectsRegistry):
-        self.x = None
-        self.y = None
-        self.width = None
-        self.height = None
+        self.__x = None
+        self.__y = None
+        self.__width = None
+        self.__height = None
         self.view = None
+        self.startPoint = None
         self.objectsRegistry = objectsRegistry
         self.collidedObjects = list()
 
-    def initialize(self, x, y, width, height, view):
-        self.x = x
-        self.y = y
-        self.width = width
-        self.height = height
+    def initialize(self, x, y, width, height, view, startPoint="TopLeft"):
+        self.__x = x
+        self.__y = y
+        self.__width = width
+        self.__height = height
         self.view = view
+        self.startPoint = startPoint
         self.view.renderMap(self)
 
     def onChangedObjects(self, changedObjects):
@@ -21,10 +23,26 @@ class Map:
             self.__onObjectChanged(changedObject)
 
     def topLeft(self):
-        return self.x, self.y
+        return self.__x, self.__y
 
     def bottomRight(self):
-        return self.x + self.width, self.y + self.height
+        return self.__x + self.__width, self.__y + self.__height
+
+    def x(self):
+        return self.__x
+
+    def y(self):
+        return self.__y
+
+    def width(self):
+        return self.__width
+
+    def height(self):
+        return self.__height
+
+    def size(self):
+        return self.width(), self.height()
+
 
     def isValidPosition(self, x, y):
         if x >= self.topLeft()[0] and y >= self.topLeft()[1]:

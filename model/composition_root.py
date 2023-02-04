@@ -15,13 +15,16 @@ class InitData:
 
 
 class CompositionRoot:
-    def __init__(self, view):
+    def __init__(self):
         self.__objectsRegistry = VisObjectsRegistry()
         self.__objectsFactory = VisObjectFactory()
         self.__map = Map(self.__objectsRegistry)
         self.__eventsHub = EventsHub()
         self.__errorSink = ErrorSink()
         self.__eventsController = EventsController(self.__objectsRegistry, self.__eventsHub, self.__map, self.__errorSink)
+        self.__view = None
+
+    def setView(self, view):
         self.__view = view
 
     def initialize(self, initData):

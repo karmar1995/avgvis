@@ -10,3 +10,7 @@ class AbstractUserView:
     def requestObjectRegistration(self):
         raise Exception("Not implemented!")
 
+    def askForObjectsRegistration(self):
+        raise Exception("Not implemented!")
+
+

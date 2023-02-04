@@ -1,8 +1,8 @@
-from model.model_view import ModelView
+from model.model_view import AbstractModelView
 from copy import deepcopy
 
 
-class FakeView(ModelView):
+class FakeView(AbstractModelView):
     def __init__(self):
         super().__init__()
         self.renderedMap = None

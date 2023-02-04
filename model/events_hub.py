@@ -1,4 +1,4 @@
-import time, sys
+import time, sys, threading
 from model.abstract_event_source import AbstractEventSource
 from model.abstract_event_handler import AbstractEventHandler
 from model.events import *
@@ -19,6 +19,9 @@ class EventsHub(AbstractEventSource, AbstractEventHandler):
         self.handlersMap[ShutdownEvent] = self.__onShutdownEvent
         self.eventsQueue = list()
         self.exit = False
+        self.thread = threading.Thread(target=self.eventLoop)
+        self.thread.daemon = True
+
 
     def __del__(self):
         for source in self.sources:
@@ -37,7 +40,7 @@ class EventsHub(AbstractEventSource, AbstractEventHandler):
     def onEvent(self, event):
         self.eventsQueue.append(event)
 
-    def start(self):
+    def eventLoop(self):
         while not self.exit:
             try:
                 if len(self.eventsQueue) > 0:
@@ -46,6 +49,9 @@ class EventsHub(AbstractEventSource, AbstractEventHandler):
                 time.sleep(0)
             except KeyboardInterrupt:
                 sys.exit(0)
+
+    def start(self):
+        self.thread.start()
 
     def __onRegisterObjectEvent(self, event):
         for handlerId in self.handlers:
