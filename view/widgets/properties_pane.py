@@ -31,5 +31,5 @@ class PropertiesWidget(QWidget):
         currentRow = 0
         for propertyName in properties:
             self.propertiesGrid.setItem(currentRow, 0, QTableWidgetItem(propertyName))
-            self.propertiesGrid.setItem(currentRow, 1, QTableWidgetItem(properties[propertyName]))
+            self.propertiesGrid.setItem(currentRow, 1, QTableWidgetItem(str(properties[propertyName])))
             currentRow += 1

@@ -7,19 +7,23 @@ from business_rules.composition_root import ViewInterfaces
 from view.widgets.map_dock_widget import MapDockWidget
 from view.widgets.configuration_dock_widget import ConfigurationDockWidget
 from view.widgets.properties_pane import PropertiesDockWidget
+from view.widgets.alerts_pane import AlertsDockWidget
+from view.widgets.output_pane import OutputDockWidget
 
 
 class Mainframe(QMainWindow):
     def __init__(self, businessRules):
         super().__init__(parent=None)
         self.setWindowTitle("Visualization")
+        self.outputDockWidget = OutputDockWidget(parent=self)
+        self.alertsDockWidget = AlertsDockWidget(parent=self)
         self.mapDockWidget = MapDockWidget(parent=self, startAppCallback=self.__start)
-        self.configurationDockWidget = ConfigurationDockWidget(parent=self)
         self.propertiesDockWidget = PropertiesDockWidget(parent=self)
-        self.addDockWidget(Qt.DockWidgetArea.LeftDockWidgetArea, self.configurationDockWidget)
-        self.addDockWidget(Qt.DockWidgetArea.LeftDockWidgetArea,  self.mapDockWidget)
+#        self.addDockWidget(Qt.DockWidgetArea.LeftDockWidgetArea,  self.mapDockWidget)
         self.addDockWidget(Qt.DockWidgetArea.RightDockWidgetArea, self.propertiesDockWidget)
-        self.tabifyDockWidget(self.configurationDockWidget, self.mapDockWidget)
+        self.addDockWidget(Qt.DockWidgetArea.TopDockWidgetArea, self.alertsDockWidget)
+        self.addDockWidget(Qt.DockWidgetArea.BottomDockWidgetArea, self.outputDockWidget)
+        self.setCentralWidget(self.mapDockWidget)
         self.setTabPosition(Qt.DockWidgetArea.AllDockWidgetAreas, QTabWidget.TabPosition.North)
 
         # composition root

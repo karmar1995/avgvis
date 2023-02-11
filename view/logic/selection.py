@@ -6,11 +6,11 @@ class Selection:
 
     def updateSelection(self, newSelection):
         if self.__selectedObject:
-            self.__selectedObject.setObserver(None)
+            self.__selectedObject.removeObserver(self)
         self.__selectedObject = newSelection
         if self.__selectedObject:
-            self.__selectedObject.setObserver(self)
-        self.__broadcastSelectionChanged()
+            self.__selectedObject.addObserver(self)
+        self.__broadcastSelectedObjectChanged()
 
     def selectedObject(self):
         return self.__selectedObject
@@ -19,9 +19,9 @@ class Selection:
         self.__selectionListeners.append(listener)
 
     def objectChanged(self):
-        self.__broadcastSelectionChanged()
+        self.__broadcastSelectedObjectChanged()
 
-    def __broadcastSelectionChanged(self):
+    def __broadcastSelectedObjectChanged(self):
         for listener in self.__selectionListeners:
             listener.onSelectionChanged()
 

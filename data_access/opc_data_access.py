@@ -15,16 +15,29 @@ class OpcClient:
     def __init__(self):
         self.__client = None
         self.__keepAlive = None
+        self.__connected = False
 
     def connect(self, connectionString):
-        self.__client = opcua.client.client.Client(connectionString)
-        self.__client.connect()
-        self.__keepAlive = opcua.client.client.KeepAlive(self.__client, 0)
-        self.__keepAlive.daemon = True
-        self.__keepAlive.start()
+        try:
+            self.__client = opcua.client.client.Client(connectionString)
+            self.__client.connect()
+            self.__keepAlive = opcua.client.client.KeepAlive(self.__client, 0)
+            self.__keepAlive.daemon = True
+            self.__keepAlive.start()
+            self.__connected = True
+        except OSError:
+            pass #todo: log error
 
     def getSignalValue(self, signal):
-        return self.__client.get_objects_node().get_child(signal).get_value()
+        if self.__connected:
+            client = self.__client
+            if client is not None:
+                objectsNode = client.get_objects_node()
+                if objectsNode is not None:
+                    signalNode = objectsNode.get_child(signal)
+                    if signalNode:
+                        return signalNode.get_value()
+        return ""
 
 # connectionString = "opc.tcp://157.158.57.220:48040"
 # signalsList = [

@@ -12,7 +12,7 @@ class VisualizationWidgetLogic:
         self.__height = None
         self.__properties = None
         self.__selection = selection
-        self.__objectObserver = None
+        self.__objectObservers = dict()
         self.__modelX = None
         self.__modelY = None
 
@@ -23,17 +23,22 @@ class VisualizationWidgetLogic:
         self.__height = height
         self.__properties = properties
 
-    def setObserver(self, observer):
-        self.__objectObserver = observer
+    def addObserver(self, observer):
+        self.__objectObservers[id(observer)] = observer
+
+    def removeObserver(self, observer):
+        del self.__objectObservers[id(observer)]
 
     def setPosition(self, x, y):
         self.__x = x
         self.__y = y
-        self.__broadcastObjectChanged()
 
     def setModelPosition(self, x, y):
         self.__modelX = x
         self.__modelY = y
+
+    def setProperties(self, properties):
+        self.__properties = properties
 
     def getBoundingRect(self):
         top_left_x = self.__x - int(self.__width / 2)
@@ -63,9 +68,9 @@ class VisualizationWidgetLogic:
     def isSelected(self):
         return self.__selection.selectedObject() == self
 
-    def __broadcastObjectChanged(self):
-        if self.__objectObserver:
-            self.__objectObserver.objectChanged()
+    def broadcastObjectChanged(self):
+        for observerId in self.__objectObservers:
+            self.__objectObservers[observerId].objectChanged()
 
 
 class MapWidgetLogic:
@@ -89,6 +94,8 @@ class MapWidgetLogic:
         y = self.offsetY(visobject.getY())
         objectToUpdate.setPosition(x, y)
         objectToUpdate.setModelPosition(visobject.getX(), visobject.getY())
+        objectToUpdate.setProperties(visobject.getProperties())
+        objectToUpdate.broadcastObjectChanged()
         self.viewAccess.updateView()
 
     def registerObject(self, visobject):
@@ -121,8 +128,8 @@ class MapWidgetLogic:
     def updateScaling(self):
         viewSize = self.viewAccess.size()
         modelSize = self.modelMap.size()
-        self.xScaling = viewSize.width() / modelSize[1]
-        self.yScaling = viewSize.height() / modelSize[0]
+        self.xScaling = viewSize.width() / modelSize[0]
+        self.yScaling = viewSize.height() / modelSize[1]
 
     def updateOrigin(self):
         self.mapOrigin = self.modelMap.x(), self.modelMap.y()

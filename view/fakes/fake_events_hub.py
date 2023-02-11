@@ -5,6 +5,22 @@ import random
 from model.entities.visobject import VisObject, VisObjectData
 
 
+class FakeObject:
+    def __init__(self, objectId, x, y):
+        self.objectId = objectId
+        self.x = x
+        self.y = y
+        self.rotation = 0
+
+    def properties(self):
+        res = dict()
+        res['id'] = self.objectId
+        res['x'] = self.x
+        res['y'] = self.y
+        res['battery'] = random.randint(0, 100)
+        return res
+
+
 class FakeModelMap:
     def __init__(self, mapSize):
         self.__x = mapSize.x
@@ -32,10 +48,12 @@ class UpdatesGeneratingThread:
     def __init__(self, abstractView, objectsList, generationInterval, modelMap):
         self.__thread = None
         self.__abstractView = abstractView
-        self.__objectsList = objectsList
+        self.__objectsList = list()
         self.__stopped = False
         self.__generationInterval = generationInterval
         self.__modelMap = modelMap
+        for objectId in objectsList:
+            self.__objectsList.append(FakeObject(objectId, self.__modelMap.x(), self.__modelMap.y()))
 
     def start(self):
         self.__thread = threading.Thread(target=self.__generateUpdates)
@@ -49,18 +67,20 @@ class UpdatesGeneratingThread:
 
     def __generateUpdates(self):
         while not self.__stopped:
-            for objectId in self.__objectsList:
-                self.__generateObjectUpdate(objectId)
+            for object in self.__objectsList:
+                self.__generateObjectUpdate(object)
             time.sleep(self.__generationInterval)
 
-    def __generateObjectUpdate(self, objectId):
-        x = random.randint(self.__modelMap.x(), self.__modelMap.x() + self.__modelMap.width())
-        y = random.randint(self.__modelMap.y(), self.__modelMap.y() + self.__modelMap.height())
-        rotation = random.randint(0, 360)
+    def __generateObjectUpdate(self, object):
         objectWidth = 2
         objectHeight = 2
-        objectToUpdate = VisObject(VisObjectData(objectId, x, y, rotation, objectWidth, objectHeight))
+        objectToUpdate = VisObject(VisObjectData(object.objectId, object.x, object.y, 0, objectWidth, objectHeight, object.properties()))
         self.__abstractView.renderObject(objectToUpdate)
+        if object.x >= self.__modelMap.width():
+            object.y += self.__modelMap.height() / 10
+            object.x = self.__modelMap.x()
+        else:
+            object.x += self.__modelMap.width() / 20
 
 
 class FakeBusinessRules:

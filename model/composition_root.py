@@ -29,7 +29,7 @@ class CompositionRoot:
 
     def initialize(self, initData):
         mapData = initData.mapData
-        self.__map.initialize(mapData.x, mapData.y, mapData.height, mapData.width, self.__view)
+        self.__map.initialize(x=mapData.x, y=mapData.y, height=mapData.height, width=mapData.width, view=self.__view)
         return True
 
     def objectsIdsGenerator(self):
