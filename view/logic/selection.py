@@ -18,7 +18,7 @@ class Selection:
     def addListener(self, listener):
         self.__selectionListeners.append(listener)
 
-    def objectChanged(self):
+    def objectChanged(self, object):
         self.__broadcastSelectedObjectChanged()
 
     def __broadcastSelectedObjectChanged(self):

@@ -20,6 +20,14 @@ class FakeObject:
         res['battery'] = random.randint(0, 100)
         return res
 
+    def alerts(self):
+        res = dict()
+        res['Information'] = dict()
+        res['Warnings'] = dict()
+        res['Information']['Information1'] = "Information value 1"
+        res['Warnings']['Warning1'] = "Warning value 1"
+        return res
+
 
 class FakeModelMap:
     def __init__(self, mapSize):
@@ -80,7 +88,9 @@ class UpdatesGeneratingThread:
         objectWidth = 2
         objectHeight = 2
         objectToUpdate = VisObject(VisObjectData(object.objectId, object.x, object.y, 0, objectWidth, objectHeight, object.properties()))
+        objectToUpdate.updateAlerts(object.alerts())
         self.__abstractView.renderObject(objectToUpdate)
+        self.__abstractView.updateAlerts(objectToUpdate)
         if object.x >= self.__modelMap.width():
             object.y += self.__modelMap.height() / 10
             object.x = self.__modelMap.x()
@@ -104,6 +114,7 @@ class FakeBusinessRules:
         self.objectsIds = objectIds
         self.updatesInterval = updatesInterval
         self.fakeModelMap = FakeModelMap(mapSize)
+        self.errorsListener = None
 
     def setViewInterfaces(self, viewInterfaces):
         self.modelView = viewInterfaces.modelView
@@ -114,10 +125,11 @@ class FakeBusinessRules:
                                                         self.objectsIds,
                                                         self.updatesInterval,
                                                         self.fakeModelMap)
+        self.updatesGenerator.addErrorListener(self.errorsListener)
         self.modelView.renderMap(self.fakeModelMap)
 
     def startApp(self):
         self.updatesGenerator.start()
 
     def addErrorsListener(self, listener):
-        self.updatesGenerator.addErrorListener(listener)
+        self.errorsListener = listener

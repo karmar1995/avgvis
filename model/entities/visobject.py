@@ -18,6 +18,7 @@ class VisObject:
         self.__width = visObjectData.width
         self.__height = visObjectData.height
         self.__properties = visObjectData.properties
+        self.__alerts = None
 
     def setX(self, x):
         self.__x = x
@@ -34,6 +35,9 @@ class VisObject:
 
     def updateProperties(self, properties):
         self.__properties = properties
+
+    def updateAlerts(self, alerts):
+        self.__alerts = alerts
 
     def getObjectId(self):
         return self.__objectId
@@ -60,3 +64,6 @@ class VisObject:
 
     def getProperties(self):
         return self.__properties
+
+    def getAlerts(self):
+        return self.__alerts

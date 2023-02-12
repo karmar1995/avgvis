@@ -5,6 +5,9 @@ class AbstractModelView:
     def renderObject(self, visObject):
         raise Exception("Not implemented!")
 
+    def updateAlerts(self, visObject):
+        raise Exception("Not implemented!")
+
     def cleanupObject(self, visObjectId):
         raise Exception("Not implemented!")
 

@@ -31,13 +31,13 @@ class OutputWidgetLogic:
     def getLogs(self, logLevel):
         logs = dict()
         if logLevel >= LogLevel.Error:
-            logs['errors'] = self.__errorsLog
+            logs['Errors'] = self.__errorsLog
         if logLevel >= LogLevel.Warning:
-            logs['warnings'] = self.__warningsLog
+            logs['Warnings'] = self.__warningsLog
         if logLevel >= LogLevel.Information:
-            logs['information'] = self.__informationLog
+            logs['Information'] = self.__informationLog
         if logLevel >= LogLevel.Debug:
-            logs['debug'] = self.__debugLog
+            logs['Debug'] = self.__debugLog
         return logs
 
     def clear(self):

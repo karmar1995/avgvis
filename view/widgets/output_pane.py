@@ -95,6 +95,6 @@ class OutputWidget(QWidget):
 class OutputDockWidget(QDockWidget):
     def __init__(self, parent, outputWidgetLogic):
         super().__init__(parent=parent)
-        self.outputWidget = OutputWidget(self, outputWidgetLogic, LogLevel.Debug)
+        self.outputWidget = OutputWidget(self, outputWidgetLogic, LogLevel.Error)
         self.setWidget(self.outputWidget)
         self.setWindowTitle("Output")

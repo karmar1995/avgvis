@@ -15,6 +15,8 @@ class VisualizationWidgetLogic:
         self.__objectObservers = dict()
         self.__modelX = None
         self.__modelY = None
+        self.__name = "Dummy"
+        self.__alerts = None
 
     def initialize(self, x, y, width, height, properties):
         self.__x = x
@@ -39,6 +41,9 @@ class VisualizationWidgetLogic:
 
     def setProperties(self, properties):
         self.__properties = properties
+
+    def setAlerts(self, alerts):
+        self.__alerts = alerts
 
     def getBoundingRect(self):
         top_left_x = self.__x - int(self.__width / 2)
@@ -70,11 +75,17 @@ class VisualizationWidgetLogic:
 
     def broadcastObjectChanged(self):
         for observerId in self.__objectObservers:
-            self.__objectObservers[observerId].objectChanged()
+            self.__objectObservers[observerId].objectChanged(self)
+
+    def name(self):
+        return self.__name
+
+    def alerts(self):
+        return self.__alerts
 
 
 class MapWidgetLogic:
-    def __init__(self, viewAccess, selection):
+    def __init__(self, viewAccess, selection, alerts):
         self.modelMap = None
         self.viewAccess = viewAccess
         self.objectsDict = {}
@@ -84,6 +95,7 @@ class MapWidgetLogic:
         self.rowHeight = 10
         self.columnWidth = 10
         self.selection = selection
+        self.alerts = alerts
 
     def updateObject(self, visobject):
         if visobject.getObjectId() not in self.objectsDict:
@@ -98,6 +110,15 @@ class MapWidgetLogic:
         objectToUpdate.broadcastObjectChanged()
         self.viewAccess.updateView()
 
+    def updateObjectAlerts(self, visobject):
+        try:
+            objectToUpdate = self.objectsDict[visobject.getObjectId()]
+            objectToUpdate.setAlerts(visobject.getAlerts())
+            objectToUpdate.broadcastObjectChanged()
+            self.viewAccess.updateView()
+        except KeyError:
+            pass
+
     def registerObject(self, visobject):
         self.objectsDict[visobject.getObjectId()] = \
             VisualizationWidgetLogic(self.selection)
@@ -108,10 +129,12 @@ class MapWidgetLogic:
             height=visobject.getHeight() * self.yScaling,
             properties=visobject.getProperties()
         )
+        self.objectsDict[visobject.getObjectId()].addObserver(self.alerts)
         self.viewAccess.addObject(self.objectsDict[visobject.getObjectId()])
 
     def unregisterObject(self, visobjectId):
         try:
+            self.objectsDict[visobjectId].removeObserver(self.alerts)
             del self.objectsDict[visobjectId]
             self.viewAccess.eraseObject(visobjectId)
             self.viewAccess.updateView()
@@ -150,6 +173,9 @@ class ModelViewToMapLogicAdapter(AbstractModelView):
 
     def renderObject(self, visObject):
         self.mapLogic.updateObject(visObject)
+
+    def updateAlerts(self, visObject):
+        self.mapLogic.updateObjectAlerts(visObject)
 
     def cleanupObject(self, visObjectId):
         self.mapLogic.unregisterObject(visObjectId)
