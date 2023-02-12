@@ -8,11 +8,13 @@ class UseCaseController:
         self.__objectIdsGenerator = objectIdsGenerator
         self.__view = None
         self.__persistency = persistency
+        self.__errorSink = None
 
     def setView(self, view):
         self.__view = view
 
     def driveInitialization(self, modelRoot, opcRoot):
+        self.__errorSink = modelRoot.errorSink()
         self.addObjectFactory("OPC", opcRoot.objectsFactory())
         mapData = self.__getMapData()
         modelInitData = model_root.InitData(model_root.MapData(x=mapData[0], y=mapData[1], width=mapData[2], height=mapData[3]))
@@ -43,11 +45,12 @@ class UseCaseController:
     def __registerObject(self):
         registerData = self.__view.requestObjectRegistration()
         objectId = self.__objectIdsGenerator.generateId()
-        self.__objectFactoriesByType[registerData['sourceType']].createObject(objectId, registerData).registerObject()
+        self.__objectFactoriesByType[registerData['sourceType']].createObject(objectId, registerData, self.__errorSink).registerObject()
 
     def __registerObjectsFromPersistency(self):
         registerDataList = self.__persistency.objectsList()
         for registerData in registerDataList:
             objectId = self.__objectIdsGenerator.generateId()
             self.__objectFactoriesByType[registerData['sourceType']].createObject(objectId,
-                                                                                  registerData).registerObject()
+                                                                                  registerData,
+                                                                                  self.__errorSink).registerObject()

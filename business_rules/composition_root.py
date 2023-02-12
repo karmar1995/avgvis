@@ -27,3 +27,6 @@ class CompositionRoot:
 
     def startApp(self):
         self.modelRoot.startProcessingEvents()
+
+    def addErrorsListener(self, listener):
+        self.modelRoot.addErrorListener(listener)

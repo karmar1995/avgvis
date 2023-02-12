@@ -43,4 +43,6 @@ class CompositionRoot:
 
     def startProcessingEvents(self):
         self.__eventsHub.start()
-        
+
+    def errorSink(self):
+        return self.__errorSink

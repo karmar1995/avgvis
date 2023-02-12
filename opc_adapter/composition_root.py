@@ -6,9 +6,9 @@ class OpcFactory:
         self.__opcClientFactory = opcClientFactory
         self.__eventsHandler = eventsHandler
 
-    def createObject(self, objectId, registerData):
+    def createObject(self, objectId, registerData, errorSink):
         opcObject = OpcObject(objectId=objectId,
-                              opcClient=self.__opcClientFactory.createOpcClient(),
+                              opcClient=self.__opcClientFactory.createOpcClient(errorSink),
                               width=registerData['width'],
                               height=registerData['height'],
                               type=registerData['type'],

@@ -18,5 +18,5 @@ class FakeOpcClientsFactory(AbstractOpcClientFactory):
         super().__init__()
         self.__fakeOpcServer = fakeOpcServer
 
-    def createOpcClient(self):
+    def createOpcClient(self, errorSink):
         return FakeOpcClient(self.__fakeOpcServer)

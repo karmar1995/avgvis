@@ -7,15 +7,16 @@ class OpcClientFactory(AbstractOpcClientFactory):
         super().__init__()
         pass
 
-    def createOpcClient(self):
-        return OpcClient()
+    def createOpcClient(self, errorSink):
+        return OpcClient(errorSink)
 
 
 class OpcClient:
-    def __init__(self):
+    def __init__(self, errorSink):
         self.__client = None
         self.__keepAlive = None
         self.__connected = False
+        self.__errorSink = errorSink
 
     def connect(self, connectionString):
         try:
@@ -26,7 +27,7 @@ class OpcClient:
             self.__keepAlive.start()
             self.__connected = True
         except OSError:
-            pass #todo: log error
+            self.__errorSink.logError("Cannot connect to OPC server: " + connectionString)
 
     def getSignalValue(self, signal):
         if self.__connected:
@@ -39,8 +40,3 @@ class OpcClient:
                         return signalNode.get_value()
         return ""
 
-# connectionString = "opc.tcp://157.158.57.220:48040"
-# signalsList = [
-#     ['4:Forbot_History','4:FH_ID_6000','4:[NNS] - Natural Navigation Signals','2:X-coordinate'],
-#     ['4:Forbot_History','4:FH_ID_6000','4:[NNS] - Natural Navigation Signals','2:Y-coordinate']
-# ]

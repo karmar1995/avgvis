@@ -52,6 +52,7 @@ class UpdatesGeneratingThread:
         self.__stopped = False
         self.__generationInterval = generationInterval
         self.__modelMap = modelMap
+        self.__errorsListeners = list()
         for objectId in objectsList:
             self.__objectsList.append(FakeObject(objectId, self.__modelMap.x(), self.__modelMap.y()))
 
@@ -65,6 +66,9 @@ class UpdatesGeneratingThread:
         self.__thread.join()
         self.__thread = None
 
+    def addErrorListener(self, listener):
+        self.__errorsListeners.append(listener)
+
     def __generateUpdates(self):
         while not self.__stopped:
             for object in self.__objectsList:
@@ -72,6 +76,7 @@ class UpdatesGeneratingThread:
             time.sleep(self.__generationInterval)
 
     def __generateObjectUpdate(self, object):
+        self.__logInformation("Moving object: {} to position: {} {}".format(object.objectId, object.x, object.y))
         objectWidth = 2
         objectHeight = 2
         objectToUpdate = VisObject(VisObjectData(object.objectId, object.x, object.y, 0, objectWidth, objectHeight, object.properties()))
@@ -81,6 +86,14 @@ class UpdatesGeneratingThread:
             object.x = self.__modelMap.x()
         else:
             object.x += self.__modelMap.width() / 20
+
+    def __logError(self, message):
+        for listener in self.__errorsListeners:
+            listener.logError(message)
+
+    def __logInformation(self, message):
+        for listener in self.__errorsListeners:
+            listener.logInformation(message)
 
 
 class FakeBusinessRules:
@@ -106,3 +119,5 @@ class FakeBusinessRules:
     def startApp(self):
         self.updatesGenerator.start()
 
+    def addErrorsListener(self, listener):
+        self.updatesGenerator.addErrorListener(listener)

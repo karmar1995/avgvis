@@ -52,7 +52,7 @@ class OpcAdapterTests(unittest.TestCase):
         self.testObjects = list()
 
     def createTestObject(self, objectId, data):
-        testObject = self.compositionRoot.objectsFactory().createObject(objectId=objectId, registerData=data)
+        testObject = self.compositionRoot.objectsFactory().createObject(objectId=objectId, registerData=data, errorSink=None)
         self.testObjects.append(testObject)
         return testObject
 
