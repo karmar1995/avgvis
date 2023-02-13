@@ -1,5 +1,6 @@
 import opcua
 from opc_adapter.opc_client_factory import AbstractOpcClientFactory
+from copy import deepcopy
 
 
 class OpcClientFactory(AbstractOpcClientFactory):
@@ -40,6 +41,26 @@ class OpcClient:
                         if signalNode:
                             return signalNode.get_value()
         except Exception as e:
-            self.__errorSink.logError("GetSignalValue failed: " + str(e))
+            self.__errorSink.logError("GetSignalValue failed: " + str(e) + " for signal: " + str(signal))
         return ""
 
+    def getChildSignals(self, root):
+        try:
+            res = dict()
+            if self.__connected:
+                client = self.__client
+                if client is not None:
+                    objectsNode = client.get_objects_node()
+                    if objectsNode is not None:
+                        rootNode = objectsNode.get_child(root)
+                        if rootNode:
+                            children = rootNode.get_children()
+                            for childNode in children:
+                                browseName = childNode.get_browse_name()
+                                signalPath = deepcopy(root)
+                                signalPath.append(str(browseName.NamespaceIndex) + ":" + browseName.Name)
+                                res[browseName.Name] = signalPath
+            return res
+        except Exception as e:
+            self.__errorSink.logError("GetSignalValue failed: " + str(e))
+        return {}
