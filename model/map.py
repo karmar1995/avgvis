@@ -22,6 +22,14 @@ class Map:
         for changedObject in changedObjects:
             self.__onObjectChanged(changedObject)
 
+    def onObjectsPropertiesChanged(self, changedObjects):
+        for changedObject in changedObjects:
+            self.__onObjectPropertiesChanged(changedObject)
+
+    def onObjectsAlertsChanged(self, changedObjects):
+        for changedObject in changedObjects:
+            self.__onObjectAlertsChanged(changedObject)
+
     def topLeft(self):
         return self.__x, self.__y
 
@@ -57,6 +65,16 @@ class Map:
             self.__updateCollisions()
         else:
             self.view.cleanupObject(visObjectId)
+
+    def __onObjectPropertiesChanged(self, visObjectId):
+        visObject = self.objectsRegistry.object(visObjectId)
+        if visObject:
+            self.view.updateProperties(visObject)
+
+    def __onObjectAlertsChanged(self, visObjectId):
+        visObject = self.objectsRegistry.object(visObjectId)
+        if visObject:
+            self.view.updateAlerts(visObject)
 
     def __updateCollisions(self):
         if len(self.collidedObjects) > 0:

@@ -110,6 +110,15 @@ class MapWidgetLogic:
         objectToUpdate.broadcastObjectChanged()
         self.viewAccess.updateView()
 
+    def updateObjectProperties(self, visobject):
+        try:
+            objectToUpdate = self.objectsDict[visobject.getObjectId()]
+            objectToUpdate.setProperties(visobject.getProperties())
+            objectToUpdate.broadcastObjectChanged()
+            self.viewAccess.updateView()
+        except KeyError:
+            pass
+
     def updateObjectAlerts(self, visobject):
         try:
             objectToUpdate = self.objectsDict[visobject.getObjectId()]
@@ -173,6 +182,9 @@ class ModelViewToMapLogicAdapter(AbstractModelView):
 
     def renderObject(self, visObject):
         self.mapLogic.updateObject(visObject)
+
+    def updateProperties(self, visObject):
+        self.mapLogic.updateObjectProperties(visObject)
 
     def updateAlerts(self, visObject):
         self.mapLogic.updateObjectAlerts(visObject)

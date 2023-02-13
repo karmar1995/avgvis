@@ -31,9 +31,10 @@ class AlertsWidget(QWidget):
 
     def __buildOrUpdateAlertsForObject(self, objectName):
         alerts = self.__logic.alertsForObject(objectName)
-        root = self.__getOrCreateAlertsRootForObject(objectName)
-        for sectionName in alerts:
-            self.__buildOrUpdateSection(sectionName, alerts[sectionName], root)
+        if alerts is not None:
+            root = self.__getOrCreateAlertsRootForObject(objectName)
+            for sectionName in alerts:
+                self.__buildOrUpdateSection(sectionName, alerts[sectionName], root)
 
     def __buildAlertsWidget(self):
         self.__alertsWidget.headerItem().setText(0, "Alert Signal")

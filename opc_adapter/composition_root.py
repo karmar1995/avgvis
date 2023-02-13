@@ -8,14 +8,18 @@ class OpcFactory:
 
     def createObject(self, objectId, registerData, errorSink):
         opcObject = OpcObject(objectId=objectId,
+                              name = registerData['name'],
                               opcClient=self.__opcClientFactory.createOpcClient(errorSink),
                               width=registerData['width'],
                               height=registerData['height'],
                               type=registerData['type'],
                               xSignal=registerData['xSignal'],
                               ySignal=registerData['ySignal'],
+                              rotationSignal=registerData['rotationSignal'],
                               connectionString=registerData['connectionString'],
                               updateInterval=registerData['updateInterval'],
+                              propertiesSignals=registerData['properties'],
+                              alertsSignals=registerData['alerts'],
                               eventHandler=self.__eventsHandler)
         opcObject.initialize()
         return opcObject

@@ -20,7 +20,7 @@ class ModelTest(unittest.TestCase):
         self.compositionRoot.eventsHub().addEventsSource(self.eventsSource)
 
     def test_WhenAgvObjectIsRegisteredAndUpdatedViewRendersIt(self):
-        self.eventsSource.registerAgvObject(12)
+        self.eventsSource.registerAgvObject(12, "Dummy")
         self.eventsSource.updateObjectPosition(12, 100, 213)
         self.eventsSource.updateObjectPosition(12, 200, 413)
         self.eventsSource.updateObjectRotation(12, 120)
@@ -52,7 +52,7 @@ class ModelTest(unittest.TestCase):
         self.assertEqual(self.view.renderedObjects[3].getRotation(), 120)
 
     def test_AgvObjectCanUpdateBatteryState(self):
-        self.eventsSource.registerAgvObject(12)
+        self.eventsSource.registerAgvObject(12, "Dummy")
         self.eventsSource.updateObjectProperties(12, { 'battery': '20%' })
 
         self.eventsSource.processEventsQueue()
@@ -62,8 +62,21 @@ class ModelTest(unittest.TestCase):
         self.assertEqual(self.view.renderedObjects[0].getProperties()['battery'], '10%')
         self.assertEqual(self.view.renderedObjects[1].getProperties()['battery'], '20%')
 
+    def test_AgvObjectCanUpdateAlert(self):
+        self.eventsSource.registerAgvObject(12, "Dummy")
+        self.eventsSource.updateObjectAlerts(12, { 'alert': 'False' })
+        self.eventsSource.updateObjectAlerts(12, { 'alert': 'True' })
+
+        self.eventsSource.processEventsQueue()
+        self.compositionRoot.startProcessingEvents()
+        self.eventsSource.threadWorker.join()
+
+        self.assertEqual(self.view.renderedObjects[1].getAlerts()['alert'], 'False')
+        self.assertEqual(self.view.renderedObjects[2].getAlerts()['alert'], 'True')
+
+
     def test_IncorrectPositionEventIsIgnoredAndErrorIsLogged(self):
-        self.eventsSource.registerAgvObject(12)
+        self.eventsSource.registerAgvObject(12, "Dummy")
         self.eventsSource.updateObjectPosition(12, 100, 213)
         self.eventsSource.updateObjectPosition(12, 1, 2)
         self.eventsSource.updateObjectPosition(12, 1000000000, 200000000)
@@ -96,8 +109,8 @@ class ModelTest(unittest.TestCase):
         self.assertEqual(len(self.view.renderedObjects), 2)
 
     def test_WhenAgvObjectIsRegisteredTwiceOnlyOneInstanceExistsAndErrorIsLogged(self):
-        self.eventsSource.registerAgvObject(12)
-        self.eventsSource.registerAgvObject(12)
+        self.eventsSource.registerAgvObject(12, "Dummy")
+        self.eventsSource.registerAgvObject(12, "Dummy")
 
         self.eventsSource.processEventsQueue()
         self.compositionRoot.startProcessingEvents()
@@ -107,7 +120,7 @@ class ModelTest(unittest.TestCase):
         self.assertEqual(len(self.errorSink.errors), 1)
 
     def test_WhenObjectIsUnregisteredTwiceNoneInstanceExistsAndErrorIsLogged(self):
-        self.eventsSource.registerAgvObject(12)
+        self.eventsSource.registerAgvObject(12, "Dummy")
         self.eventsSource.unregisterObject(12)
         self.eventsSource.unregisterObject(12)
 
@@ -118,7 +131,7 @@ class ModelTest(unittest.TestCase):
         self.assertEqual(len(self.view.knownObjects), 0)
 
     def test_AgvObjectGetsCorrectBoundingRect(self):
-        self.eventsSource.registerAgvObject(12)
+        self.eventsSource.registerAgvObject(12, "Dummy")
         self.eventsSource.updateObjectPosition(12, 200, 413)
 
         self.eventsSource.processEventsQueue()

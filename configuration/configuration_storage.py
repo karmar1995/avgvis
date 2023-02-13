@@ -21,7 +21,6 @@ class ConfigurationInJson:
     def saveMapData(self, mapData):
         pass
 
-
     def mapData(self):
         node = self.data['mapData']
         mapData = MapData(x=node['x'], y=node['y'], width=node['width'], height=node['height'])
@@ -32,6 +31,7 @@ class ConfigurationInJson:
         objects = self.data['objects']
         for object in objects:
             registerData = dict()
+            registerData['name'] = object['name']
             registerData['sourceType'] = object['sourceType']
             registerData['width'] = float(object['width'])
             registerData['height'] = float(object['height'])
@@ -39,6 +39,14 @@ class ConfigurationInJson:
             registerData['connectionString'] = object['connectionString']
             registerData['xSignal'] = object['xSignal'].split('/')
             registerData['ySignal'] = object['ySignal'].split('/')
+            registerData['rotationSignal'] = object['rotationSignal'].split('/')
             registerData['updateInterval'] = float(object['updateInterval'])
+            registerData['properties'] = dict()
+            for propertyNode in object['properties']:
+                registerData['properties'][propertyNode] = object['properties'][propertyNode].split('/')
+            registerData['alerts'] = dict()
+            for alertNode in object['alerts']:
+                registerData['alerts'][alertNode] = object['alerts'][alertNode].split('/')
+
             objectsList.append(registerData)
         return objectsList

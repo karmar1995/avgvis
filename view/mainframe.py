@@ -18,6 +18,7 @@ class Mainframe(QMainWindow):
         super().__init__(parent=None)
         self.outputLogic = OutputWidgetLogic()
         self.alerts = AlertsWidgetLogic()
+        self.selection = Selection()
 
         self.setWindowTitle("Visualization")
         self.outputDockWidget = OutputDockWidget(parent=self, outputWidgetLogic=self.outputLogic)
@@ -31,7 +32,6 @@ class Mainframe(QMainWindow):
         self.setTabPosition(Qt.DockWidgetArea.AllDockWidgetAreas, QTabWidget.TabPosition.North)
 
         # composition root
-        self.selection = Selection()
         self.mapWidgetLogic = MapWidgetLogic(self.mapDockWidget.mapPane.mapWidget.mapAccess(), self.selection, self.alerts)
         self.propertiesLogic = PropertiesLogic(self.selection, self.propertiesDockWidget.propertiesWidget)
         self.modelViewAdapter = ModelViewToMapLogicAdapter(self.mapWidgetLogic)

@@ -14,6 +14,12 @@ class FakeView(AbstractModelView):
             self.knownObjects[visObject.getObjectId()] = visObject
         self.renderedObjects.append(deepcopy(visObject))
 
+    def updateProperties(self, visObject):
+        return self.renderObject(visObject)
+
+    def updateAlerts(self, visObject):
+        return self.renderObject(visObject)
+
     def cleanupObject(self, visObjectId):
         if visObjectId in self.knownObjects:
             self.knownObjects.pop(visObjectId)

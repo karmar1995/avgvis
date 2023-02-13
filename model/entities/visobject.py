@@ -1,5 +1,6 @@
 class VisObjectData:
-    def __init__(self, objectId, x, y, rotation, width, height, properties):
+    def __init__(self, name, objectId, x, y, rotation, width, height, properties):
+        self.name = name
         self.objectId = objectId
         self.x = x
         self.y = y
@@ -11,6 +12,7 @@ class VisObjectData:
 
 class VisObject:
     def __init__(self, visObjectData):
+        self.__name = visObjectData.name
         self.__objectId = visObjectData.objectId
         self.__x = visObjectData.x
         self.__y = visObjectData.y
@@ -67,3 +69,6 @@ class VisObject:
 
     def getAlerts(self):
         return self.__alerts
+
+    def getName(self):
+        return self.__name

@@ -23,8 +23,8 @@ class FakeEventsSource(AbstractEventSource):
         else:
             self.handlers.pop(id(handler))
 
-    def registerAgvObject(self, objectId):
-        event = RegisterObjectEvent(objectId=objectId, type="AGV", properties={"battery": "10%"}, width=4, height=3)
+    def registerAgvObject(self, objectId, name):
+        event = RegisterObjectEvent(objectId=objectId, type="AGV", properties={"battery": "10%"}, width=4, height=3, name=name)
         self.__enqueueEvent(event)
 
     def updateObjectPosition(self, objectId, x, y):
@@ -37,6 +37,10 @@ class FakeEventsSource(AbstractEventSource):
 
     def updateObjectProperties(self, objectId, properties):
         event = UpdateObjectPropertiesEvent(objectId=objectId, properties=properties)
+        self.__enqueueEvent(event)
+
+    def updateObjectAlerts(self, objectId, alerts):
+        event = UpdateObjectAlertsEvent(objectId=objectId, alerts=alerts)
         self.__enqueueEvent(event)
 
     def unregisterObject(self, objectId):

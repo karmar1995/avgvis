@@ -18,14 +18,23 @@ class EventsController:
         for observer in self.objectsObservers:
             observer.onChangedObjects(changedObjects)
 
+    def broadcastObjectsPropertiesChanged(self, changedObjects):
+        for observer in self.objectsObservers:
+            observer.onObjectsPropertiesChanged(changedObjects)
+
+    def broadcastObjectsAlertsChanged(self, changedObjects):
+        for observer in self.objectsObservers:
+            observer.onObjectsAlertsChanged(changedObjects)
+
     def __del__(self):
         self.eventsSource.removeHandler(self)
 
     def onRegisterObject(self, registerObjectEvent):
         newObjectId = registerObjectEvent.objectId
+        newObjectName = registerObjectEvent.name
         if not self.visobjectsRegistry.object(newObjectId):
             if registerObjectEvent.type == 'AGV':
-                visObjectData = VisObjectData(newObjectId, 0, 0, 0, registerObjectEvent.width, registerObjectEvent.height, registerObjectEvent.properties)
+                visObjectData = VisObjectData(newObjectName, newObjectId, 0, 0, 0, registerObjectEvent.width, registerObjectEvent.height, registerObjectEvent.properties)
                 agvObjectData = AgvObjectData(visObjectData)
                 self.visobjectsRegistry.registerObject(AgvObject(agvObjectData))
                 self.broadcastObjectsChanged([newObjectId])
@@ -65,7 +74,18 @@ class EventsController:
         visObject = self.visobjectsRegistry.object(objectId)
         if visObject:
             visObject.updateProperties(properties)
-            self.broadcastObjectsChanged([objectId])
+            self.broadcastObjectsPropertiesChanged([objectId])
+        else:
+            self.errorSink.logError("Object %s does not exists!".format(objectId))
+
+    def onUpdateObjectAlerts(self, updateObjectAlertsEvent):
+        objectId = updateObjectAlertsEvent.objectId
+        alerts = updateObjectAlertsEvent.alerts
+
+        visObject = self.visobjectsRegistry.object(objectId)
+        if visObject:
+            visObject.updateAlerts(alerts)
+            self.broadcastObjectsAlertsChanged([objectId])
         else:
             self.errorSink.logError("Object %s does not exists!".format(objectId))
 
