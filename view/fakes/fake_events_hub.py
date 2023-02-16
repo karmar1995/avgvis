@@ -87,7 +87,7 @@ class UpdatesGeneratingThread:
         self.__logInformation("Moving object: {} to position: {} {}".format(object.objectId, object.x, object.y))
         objectWidth = 2
         objectHeight = 2
-        objectToUpdate = VisObject(VisObjectData(object.objectId, object.x, object.y, 0, objectWidth, objectHeight, object.properties()))
+        objectToUpdate = VisObject(VisObjectData('dummy', object.objectId, object.x, object.y, 0, objectWidth, objectHeight, object.properties()))
         objectToUpdate.updateAlerts(object.alerts())
         self.__abstractView.renderObject(objectToUpdate)
         self.__abstractView.updateAlerts(objectToUpdate)
