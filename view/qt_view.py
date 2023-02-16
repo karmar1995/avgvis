@@ -6,7 +6,7 @@ from collections import namedtuple
 
 MapSize = namedtuple("MapSize", "x y width height")
 
-mapSize = MapSize(x=0, y=0, width=100, height=50)
+mapSize = MapSize(x=0, y=0, width=23, height=46.5)
 testObjectsNum = 1
 businessRules = FakeBusinessRules(range(0, testObjectsNum), 1, mapSize)
 

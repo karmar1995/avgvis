@@ -92,8 +92,8 @@ class MapWidgetLogic:
         self.xScaling = 1.0
         self.yScaling = 1.0
         self.mapOrigin = 0, 0
-        self.rowHeight = 10
-        self.columnWidth = 10
+        self.rowHeight = 5
+        self.columnWidth = 5
         self.selection = selection
         self.alerts = alerts
 
@@ -172,7 +172,8 @@ class MapWidgetLogic:
 
     def offsetY(self, y):
         modelDistance = y - self.mapOrigin[1]
-        return modelDistance * self.yScaling
+        scaledDistance = modelDistance * self.yScaling
+        return self.viewAccess.size().height() - scaledDistance
 
 
 class ModelViewToMapLogicAdapter(AbstractModelView):

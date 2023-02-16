@@ -38,7 +38,7 @@ class MapWidget(QWidget):
 
     def __init__(self, parent):
         super().__init__(parent=parent)
-        self.pixmap = QPixmap("/home/kmarszal/Documents/dev/avgvis/view/resources/map.png")
+        self.pixmap = QPixmap("/home/kmarszal/Documents/dev/avgvis/view/resources/map.jpg")
         self.visualObjects = list()
         self.setMouseTracking(True)
         self.hoveredObject = None
