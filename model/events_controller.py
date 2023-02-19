@@ -39,7 +39,7 @@ class EventsController:
                 self.visobjectsRegistry.registerObject(AgvObject(agvObjectData))
                 self.broadcastObjectsChanged([newObjectId])
         else:
-            self.errorSink.logError("Object %s already exists!".format(newObjectId))
+            self.errorSink.logError("Object {} already exists!".format(newObjectId))
 
     def onUpdateObjectPosition(self, updateObjectPositionEvent):
         objectId = updateObjectPositionEvent.objectId
@@ -52,9 +52,9 @@ class EventsController:
                 visObject.setPosition(x, y)
                 self.broadcastObjectsChanged([objectId])
             else:
-                self.errorSink.logError("Invalid position: (%s, %s)".format(x, y))
+                self.errorSink.logError("Invalid position: ({}, {})".format(x, y))
         else:
-            self.errorSink.logError("Object %s does not exists!".format(objectId))
+            self.errorSink.logError("Object {} does not exists!".format(objectId))
 
     def onUpdateObjectRotation(self, updateObjectRotationEvent):
         objectId = updateObjectRotationEvent.objectId
@@ -65,7 +65,7 @@ class EventsController:
             visObject.setRotation(rotation)
             self.broadcastObjectsChanged([objectId])
         else:
-            self.errorSink.logError("Object %s does not exists!".format(objectId))
+            self.errorSink.logError("Object {} does not exists!".format(objectId))
 
     def onUpdateObjectProperties(self, updateObjectPropertiesEvent):
         objectId = updateObjectPropertiesEvent.objectId
@@ -76,7 +76,7 @@ class EventsController:
             visObject.updateProperties(properties)
             self.broadcastObjectsPropertiesChanged([objectId])
         else:
-            self.errorSink.logError("Object %s does not exists!".format(objectId))
+            self.errorSink.logError("Object {} does not exists!".format(objectId))
 
     def onUpdateObjectAlerts(self, updateObjectAlertsEvent):
         objectId = updateObjectAlertsEvent.objectId
@@ -87,7 +87,7 @@ class EventsController:
             visObject.updateAlerts(alerts)
             self.broadcastObjectsAlertsChanged([objectId])
         else:
-            self.errorSink.logError("Object %s does not exists!".format(objectId))
+            self.errorSink.logError("Object {} does not exists!".format(objectId))
 
     def onUnregisterObject(self, unregisterObjectEvent):
         objectId = unregisterObjectEvent.objectId

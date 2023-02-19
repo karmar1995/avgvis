@@ -15,7 +15,6 @@ class UseCaseController:
 
     def driveInitialization(self, modelRoot, opcRoot):
         self.__errorSink = modelRoot.errorSink()
-        self.addObjectFactory("OPC", opcRoot.objectsFactory())
         mapData = self.__getMapData()
         modelInitData = model_root.InitData(model_root.MapData(x=mapData[0], y=mapData[1], width=mapData[2], height=mapData[3]))
 
@@ -51,6 +50,10 @@ class UseCaseController:
         registerDataList = self.__persistency.objectsList()
         for registerData in registerDataList:
             objectId = self.__objectIdsGenerator.generateId()
-            self.__objectFactoriesByType[registerData['sourceType']].createObject(objectId,
+            visObject = self.__objectFactoriesByType[registerData['sourceType']].createObject(objectId,
                                                                                   registerData,
-                                                                                  self.__errorSink).registerObject()
+                                                                                  self.__errorSink)
+            if visObject:
+                visObject.registerObject()
+            else:
+                self.__errorSink.logError("Object not created: " + registerData['name'])

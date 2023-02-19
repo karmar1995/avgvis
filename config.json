@@ -8,21 +8,21 @@
 	"objects": [
 		{
 			"name": "AGV 1",
-			"sourceType": "OPC",
-			"connectionString": "opc.tcp://157.158.57.220:48040",
+			"sourceType": "FAKE_OPC",
+			"connectionString": "not_used",
 			"width": 2,
 			"height": 2,
 			"type": "AGV",
-			"xSignal": "4:Forbot_History/4:FH_ID_6000/4:[NNS] - Natural Navigation Signals/2:X-coordinate",
-			"ySignal": "4:Forbot_History/4:FH_ID_6000/4:[NNS] - Natural Navigation Signals/2:Y-coordinate",
-			"rotationSignal": "4:Forbot_History/4:FH_ID_6000/4:[NNS] - Natural Navigation Signals/2:Heading",
+			"xSignal": "x",
+			"ySignal": "y",
+			"rotationSignal": "heading",
 			"updateInterval": 0.1,
 			"properties" : {
-				"battery" : "4:Forbot_History/4:FH_ID_6000/4:[ENS] - Energy Signals/2:SOC - State Of Charge"
+				"battery" : "battery"
 			},
 			"alerts": {
-				"information": "4:Forbot_History/4:FH_ID_6000/4:[AI] - ALARM INFORMATION",
-				"warnings": "4:Forbot_History/4:FH_ID_6000/4:[WI] - WARNING INFORMATION"
+				"information": "information",
+				"warnings": "warnings"
 			}
 		}
 	]
