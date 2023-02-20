@@ -3,20 +3,18 @@ from opc_adapter.opc_events_source import OpcEventSource
 
 class OpcObject:
 
-    def __init__(self, opcClient, objectId, name, width, height, type, xSignal, ySignal, rotationSignal, propertiesSignals, alertsSignals, connectionString, updateInterval, eventHandler):
+    def __init__(self, opcClient, objectId, name, width, height, type, xSignal, ySignal, rotationSignal, propertiesSignals, alertsSignals, connectionString, updateInterval, eventHandler, errorSink):
         self.__name = name
         self.__objectId = objectId
         self.__opcClient = opcClient
-        self.__opcEventSource = OpcEventSource(opcClient, objectId, xSignal, ySignal, rotationSignal, propertiesSignals, updateInterval)
+        self.__opcEventSource = OpcEventSource(opcClient, objectId, xSignal, ySignal, rotationSignal, propertiesSignals, updateInterval, errorSink, connectionString)
         self.__width = width
         self.__height = height
         self.__type = type
-        self.__connectionString = connectionString
         self.__eventHandler = eventHandler
         self.__alertsSignalsRoots = alertsSignals
 
     def initialize(self):
-        self.__opcClient.connect(self.__connectionString)
         self.__initializeAlerts()
         self.__opcEventSource.addHandler(self.__eventHandler)
         self.__opcEventSource.start()

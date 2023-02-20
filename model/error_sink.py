@@ -12,3 +12,15 @@ class ErrorSink:
         for listenerId in self.listeners:
             self.listeners[listenerId].logError(errorMessage)
 
+    def logWarning(self, errorMessage):
+        for listenerId in self.listeners:
+            self.listeners[listenerId].logWarning(errorMessage)
+
+    def logInformation(self, errorMessage):
+        for listenerId in self.listeners:
+            self.listeners[listenerId].logInformation(errorMessage)
+
+    def logDebug(self, errorMessage):
+        for listenerId in self.listeners:
+            self.listeners[listenerId].logDebug(errorMessage)
+

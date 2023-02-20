@@ -21,7 +21,8 @@ class OpcFactory:
                               updateInterval=registerData['updateInterval'],
                               propertiesSignals=registerData['properties'],
                               alertsSignals=registerData['alerts'],
-                              eventHandler=self.__eventsHandler)
+                              eventHandler=self.__eventsHandler,
+                              errorSink=self.__errorSink)
         try:
             opcObject.initialize()
             return opcObject

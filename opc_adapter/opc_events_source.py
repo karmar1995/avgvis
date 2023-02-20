@@ -6,13 +6,16 @@ from model.events import *
 
 
 class PollingThread:
-    def __init__(self, client, signalsList, callback, pollingInterval):
+    def __init__(self, client, signalsList, callback, pollingInterval, errorSink, connectionString):
         self.__thread = None
         self.__client = client
         self.__signalsList = signalsList
         self.__callback = callback
         self.__stopped = False
         self.__pollingInterval = pollingInterval
+        self.__errorSink = errorSink
+        self.__connectionString = connectionString
+        self.__connected = False
 
     def addSignal(self, signal):
         self.__signalsList.append(signal)
@@ -28,17 +31,39 @@ class PollingThread:
         self.__thread = None
 
     def __pollingMethod(self):
+        self.__ensureConnection()
+
         while not self.__stopped:
-            signalsDict = {}
-            for signal in self.__signalsList:
-                if len(signal) > 0:
-                    signalsDict[str(signal)] = self.__client.getSignalValue(signal)
-            self.__callback(signalsDict)
-            time.sleep(self.__pollingInterval)
+            try:
+                signalsDict = {}
+                for signal in self.__signalsList:
+                    if len(signal) > 0:
+                        signalsDict[str(signal)] = self.__client.getSignalValue(signal)
+                self.__callback(signalsDict)
+                time.sleep(self.__pollingInterval)
+            except Exception as e:
+                self.__errorSink.logDebug("Exception during polling: " + str(e))
+            except:
+                self.__errorSink.logDebug("OpcEventsSource PollingThread: ignored unhandled exception")
+                pass
+
+    def __ensureConnection(self):
+        timeoutPeriod = 5*60
+        if not self.__connected:
+            try:
+                self.__client.connect(self.__connectionString)
+                self.__connected = True
+            except Exception as e:
+                self.__errorSink.logInformation("Cannot connect to: {}, entering wait for: {} s".format(self.__connectionString, timeoutPeriod))
+                time.sleep(timeoutPeriod)
+            except:
+                self.__errorSink.logDebug("Unhandled exception while connection, killing opc object")
+                self.stop()
+
 
 
 class OpcEventSource(AbstractEventSource):
-    def __init__(self, opcClient, objectId, xSignal, ySignal, rotationSignal, propertiesSignalsDict, updateInterval):
+    def __init__(self, opcClient, objectId, xSignal, ySignal, rotationSignal, propertiesSignalsDict, updateInterval, errorSink, connectionString):
         super().__init__()
         signalsList = [xSignal, ySignal, rotationSignal]
         self.__handlers = dict()
@@ -55,7 +80,7 @@ class OpcEventSource(AbstractEventSource):
             self.__propertiesSignalsStrings[propertyName] = str(signal)
             self.__currentSignalsState[str(signal)] = 0
             signalsList.append(signal)
-        self.__pollingThread = PollingThread(opcClient, signalsList, self.__dataPolledCallback, updateInterval)
+        self.__pollingThread = PollingThread(opcClient, signalsList, self.__dataPolledCallback, updateInterval, errorSink, connectionString)
 
     def addHandler(self, handler):
         self.__handlers[id(handler)] = handler

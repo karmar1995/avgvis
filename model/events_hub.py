@@ -57,6 +57,9 @@ class EventsHub(AbstractEventSource, AbstractEventHandler):
     def start(self):
         self.thread.start()
 
+    def stop(self):
+        self.__onShutdownEvent(None)
+
     def __onRegisterObjectEvent(self, event):
         for handlerId in self.handlers:
             self.handlers[handlerId].onRegisterObject(event)

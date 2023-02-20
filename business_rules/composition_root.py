@@ -32,5 +32,8 @@ class CompositionRoot:
     def startApp(self):
         self.modelRoot.startProcessingEvents()
 
+    def killApp(self):
+        self.modelRoot.stopProcessingEvents()
+
     def addErrorsListener(self, listener):
         self.modelRoot.addErrorListener(listener)

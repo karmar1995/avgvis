@@ -17,12 +17,13 @@ KnownSignals = [
     str(warningSignal1),
     str(informationSignal1)]
 FailureProbability = 0.1  # how often communication with serve will fail
-MinX = -20  # outside the map origin
-MinY = -20  # outside the map origin
-MaxX = 70  # a bit larger than map width
-MaxY = 70  # a bit larger than map height
+MinX = -5  # outside the map origin
+MinY = -5  # outside the map origin
+MaxX = 30  # a bit larger than map width
+MaxY = 55  # a bit larger than map height
 UpdateInterval = 0.1  # s
 ConnectionTime = 1  # s
+Steps = 40
 
 
 class FakeOpcClientFactory(AbstractOpcClientFactory):
@@ -67,19 +68,23 @@ class StrategyBase:
 
     def __updateMethod(self):
         while True:
+            self._onBeforeUpdate()
             self._objectState.setSignalValue(xSignal, self._updateX())
             self._objectState.setSignalValue(ySignal, self._updateY())
             self._objectState.setSignalValue(headingSignal, self._updateHeading())
             self._objectState.setSignalValue(batterySignal, random.randint(0, 100))
             self._objectState.setSignalValue(warningSignal1, random.randint(0, 1) == 1)
             self._objectState.setSignalValue(informationSignal1, random.randint(0, 1) == 1)
-            time.sleep(UpdateInterval)
+            time.sleep((1+random.random()) * UpdateInterval)
 
     def _updateX(self):
         raise Exception("Not Implemented")
 
     def _updateY(self):
         raise Exception("Not Implemented")
+
+    def _onBeforeUpdate(self):
+        pass
 
     def _updateHeading(self):
         return random.random()
@@ -92,7 +97,7 @@ class HorizontalMovingStrategy(StrategyBase):
         self.__nextUpdateY = False
 
     def _updateX(self):
-        step = (MaxX - MinX) / 20
+        step = (MaxX - MinX) / Steps
         res = self._objectState.getSignalValue(xSignal) + step
         if res > MaxX:
             self.__nextUpdateY = True
@@ -103,7 +108,7 @@ class HorizontalMovingStrategy(StrategyBase):
         y = self._objectState.getSignalValue(ySignal)
         if self.__nextUpdateY:
             self.__nextUpdateY = False
-            step = (MaxY - MinY) / 20
+            step = (MaxY - MinY) / Steps
             res = y + step
             if res > MaxY:
                 return MinY
@@ -112,28 +117,79 @@ class HorizontalMovingStrategy(StrategyBase):
 
 
 class VerticalMovingStrategy(StrategyBase):
-    pass
+    def __init__(self, objectState):
+        super().__init__(objectState)
+        self.__nextUpdateX = False
+
+    def _updateX(self):
+        x = self._objectState.getSignalValue(xSignal)
+        if self.__nextUpdateX:
+            self.__nextUpdateX = False
+            step = (MaxX - MinX) / Steps
+            res = x + step
+            if res > MaxX:
+                return MinX
+            return res
+        return x
+
+    def _updateY(self):
+        step = (MaxY - MinY) / Steps
+        res = self._objectState.getSignalValue(ySignal) + step
+        if res > MaxY:
+            self.__nextUpdateX = True
+            return MinY
+        return res
 
 
-class DiagonalMovingStrategy(StrategyBase):
-    pass
+class PointsMovingStrategy(StrategyBase):
+    Points = [
+        (MinX + ((MaxX - MinX) * 0.25), MinY + ((MaxY - MinY) * 0.25)),
+        (MinX + ((MaxX - MinX) * 0.75), MinY + ((MaxY - MinY) * 0.25)),
+        (MinX + ((MaxX - MinX) * 0.75), MinY + ((MaxY - MinY) * 0.75)),
+        (MinX + ((MaxX - MinX) * 0.25), MinY + ((MaxY - MinY) * 0.75))
+    ]
 
+    def __init__(self, objectState):
+        super().__init__(objectState)
+        self.__assignPoint(1)
+        self.__x = self.Points[0][0]
+        self.__y = self.Points[0][1]
 
-class RoundMovingStrategy(StrategyBase):
-    pass
+    def _onBeforeUpdate(self):
+        xDistance = self.__targetPoint[0] - self.__x
+        yDistance = self.__targetPoint[1] - self.__y
+        stepExecuted = False
+        if abs(xDistance) > 0:
+            self.__x += (xDistance / self.__steps)
+            stepExecuted = True
+        if abs(yDistance) > 0:
+            self.__y += (yDistance / self.__steps)
+            stepExecuted = True
+        if stepExecuted:
+            self.__steps -= 1
+        if abs(xDistance) == 0 and abs(yDistance) == 0:
+            self.__targetIndex += 1
+            if self.__targetIndex >= len(self.Points):
+                self.__targetIndex = 0
+            self.__assignPoint(self.__targetIndex)
 
+    def _updateX(self):
+        return self.__x
 
-class RandomStrategy(StrategyBase):
-    pass
+    def _updateY(self):
+        return self.__y
+
+    def __assignPoint(self, index):
+        self.__targetIndex = index
+        self.__targetPoint = self.Points[self.__targetIndex]
+        self.__steps = Steps
 
 
 class FakeOpcClient:
     MovingStrategies = [
         HorizontalMovingStrategy,
-        # VerticalMovingStrategy,
-        # DiagonalMovingStrategy,
-        # RoundMovingStrategy,
-        # RandomStrategy
+        VerticalMovingStrategy,
+        PointsMovingStrategy,
     ]  # possible map traversing algorithms
 
     def __init__(self, errorSink):
@@ -150,6 +206,8 @@ class FakeOpcClient:
         self.__strategy.start()
 
     def getSignalValue(self, signal):
+        if random.random() <= FailureProbability:
+            self.__throw()
         return self.__objectState.getSignalValue(signal)
 
     def getChildSignals(self, root):

@@ -8,9 +8,15 @@ class OutputWidgetAccess(QObject):
     def __init__(self, parent, outputWidget):
         super().__init__(parent=parent)
         self.outputWidget = outputWidget
+        self.__outputWidgetDestroyed = False
+        self.outputWidget.destroyed.connect(self.__onDestroyed)
 
     def updateLogs(self):
-        self.outputWidget.updateLogs.emit()
+        if not self.__outputWidgetDestroyed:
+            self.outputWidget.updateLogs.emit()
+
+    def __onDestroyed(self):
+        self.__outputWidgetDestroyed = True
 
 
 class OutputWidget(QWidget):

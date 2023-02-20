@@ -11,6 +11,7 @@ from view.widgets.configuration_dock_widget import ConfigurationDockWidget
 from view.widgets.properties_pane import PropertiesDockWidget
 from view.widgets.alerts_pane import AlertsDockWidget
 from view.widgets.output_pane import OutputDockWidget
+from PyQt6.QtCore import QCoreApplication
 
 
 class Mainframe(QMainWindow):
@@ -30,6 +31,7 @@ class Mainframe(QMainWindow):
         self.addDockWidget(Qt.DockWidgetArea.BottomDockWidgetArea, self.outputDockWidget)
         self.setCentralWidget(self.mapDockWidget)
         self.setTabPosition(Qt.DockWidgetArea.AllDockWidgetAreas, QTabWidget.TabPosition.North)
+        QCoreApplication.instance().aboutToQuit.connect(self.__stop)
 
         # composition root
         self.mapWidgetLogic = MapWidgetLogic(self.mapDockWidget.mapPane.mapWidget.mapAccess(), self.selection, self.alerts)
@@ -55,6 +57,7 @@ class Mainframe(QMainWindow):
     def __start(self):
         self.businessRules.startApp()
 
-
+    def __stop(self):
+        self.businessRules.killApp()
 
 
