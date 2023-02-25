@@ -7,23 +7,23 @@ from view.fakes.fake_ui.fake_properties_widget import FakePropertiesWidget
 
 class Mainframe:
     def __init__(self, businessRules):
-        super().__init__(parent=None)
         self.mainframeLogic = MainframeLogic(businessRules)
 
-        self.outputDockWidget = FakeOutputWidget(widgetLogic=self.mainframeLogic.outputLogic)
-        self.alertsDockWidget = FakeAlertsWidget(widgetLogic=self.mainframeLogic.alerts)
-        self.mapDockWidget = FakeMapWidget(widgetLogic=self.mainframeLogic.mapWidgetLogic)
-        self.propertiesDockWidget = FakePropertiesWidget(widgetLogic=self.mainframeLogic.propertiesLogic)
+        self.outputWidget = FakeOutputWidget(widgetLogic=self.mainframeLogic.outputLogic)
+        self.alertsWidget = FakeAlertsWidget(widgetLogic=self.mainframeLogic.alerts)
+        self.mapWidget = FakeMapWidget(widgetLogic=self.mainframeLogic.mapWidgetLogic)
+        self.propertiesWidget = FakePropertiesWidget(widgetLogic=self.mainframeLogic.propertiesLogic)
 
-        self.__initialize()
+    def setViewSize(self, width, height):
+        self.mapWidget.setSize((width, height))
 
-    def __initialize(self):
+    def initialize(self):
         self.mainframeLogic.initialize()
 
-    def __start(self):
+    def start(self):
         self.mainframeLogic.start()
 
-    def __stop(self):
+    def stop(self):
         self.mainframeLogic.stop()
 
 

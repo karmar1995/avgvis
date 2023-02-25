@@ -83,6 +83,11 @@ class VisualizationWidgetLogic:
     def alerts(self):
         return self.__alerts
 
+    def x(self):
+        return self.__x
+
+    def y(self):
+        return self.__y
 
 class MapWidgetLogic:
     def __init__(self, selection, alerts):
@@ -107,6 +112,13 @@ class MapWidgetLogic:
         objectToUpdate = self.objectsDict[visobject.getObjectId()]
         x = self.offsetX(visobject.getX())
         y = self.offsetY(visobject.getY())
+
+        viewSize = self.viewAccess.size()
+        if x < 0 or x > viewSize.width():
+            return
+        if y < 0 or y > viewSize.height():
+            return
+
         objectToUpdate.setPosition(x, y)
         objectToUpdate.setModelPosition(visobject.getX(), visobject.getY())
         objectToUpdate.setProperties(visobject.getProperties())

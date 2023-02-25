@@ -1,8 +1,4 @@
-import threading
-import time
 import random
-
-from model.entities.visobject import VisObject, VisObjectData
 
 
 class FakeObject:
@@ -11,6 +7,8 @@ class FakeObject:
         self.x = x
         self.y = y
         self.rotation = 0
+        self.width = 2
+        self.height = 2
 
     def properties(self):
         res = dict()
@@ -52,67 +50,12 @@ class FakeModelMap:
         return self.width(), self.height()
 
 
-class UpdatesGeneratingThread:
-    def __init__(self, abstractView, objectsList, generationInterval, modelMap):
-        self.__thread = None
-        self.__abstractView = abstractView
-        self.__objectsList = list()
-        self.__stopped = False
-        self.__generationInterval = generationInterval
-        self.__modelMap = modelMap
-        self.__errorsListeners = list()
-        for objectId in objectsList:
-            self.__objectsList.append(FakeObject(objectId, self.__modelMap.x(), self.__modelMap.y()))
-
-    def start(self):
-        self.__thread = threading.Thread(target=self.__generateUpdates)
-        self.__thread.daemon = True
-        self.__thread.start()
-
-    def stop(self):
-        self.__stopped = True
-        self.__thread.join()
-        self.__thread = None
-
-    def addErrorListener(self, listener):
-        self.__errorsListeners.append(listener)
-
-    def __generateUpdates(self):
-        while not self.__stopped:
-            for object in self.__objectsList:
-                self.__generateObjectUpdate(object)
-            time.sleep(self.__generationInterval)
-
-    def __generateObjectUpdate(self, object):
-        self.__logInformation("Moving object: {} to position: {} {}".format(object.objectId, object.x, object.y))
-        objectWidth = 2
-        objectHeight = 2
-        objectToUpdate = VisObject(VisObjectData('dummy', object.objectId, object.x, object.y, 0, objectWidth, objectHeight, object.properties()))
-        objectToUpdate.updateAlerts(object.alerts())
-        self.__abstractView.renderObject(objectToUpdate)
-        self.__abstractView.updateAlerts(objectToUpdate)
-        if object.x >= self.__modelMap.width():
-            object.y += self.__modelMap.height() / 10
-            object.x = self.__modelMap.x()
-        else:
-            object.x += self.__modelMap.width() / 20
-
-    def __logError(self, message):
-        for listener in self.__errorsListeners:
-            listener.logError(message)
-
-    def __logInformation(self, message):
-        for listener in self.__errorsListeners:
-            listener.logInformation(message)
-
-
 class FakeBusinessRules:
-    def __init__(self, objectIds, updatesInterval, mapSize):
+    def __init__(self, objectIds, mapSize, updatesGenerator):
         self.modelView = None
         self.userView = None
-        self.updatesGenerator = None
+        self.updatesGenerator = updatesGenerator
         self.objectsIds = objectIds
-        self.updatesInterval = updatesInterval
         self.fakeModelMap = FakeModelMap(mapSize)
         self.errorsListener = None
 
@@ -121,10 +64,7 @@ class FakeBusinessRules:
         self.userView = viewInterfaces.userView
 
     def initialize(self):
-        self.updatesGenerator = UpdatesGeneratingThread(self.modelView,
-                                                        self.objectsIds,
-                                                        self.updatesInterval,
-                                                        self.fakeModelMap)
+        self.updatesGenerator.initialize(self.modelView, self.objectsIds, self.fakeModelMap)
         self.updatesGenerator.addErrorListener(self.errorsListener)
         self.modelView.renderMap(self.fakeModelMap)
 
