@@ -85,9 +85,9 @@ class VisualizationWidgetLogic:
 
 
 class MapWidgetLogic:
-    def __init__(self, viewAccess, selection, alerts):
+    def __init__(self, selection, alerts):
         self.modelMap = None
-        self.viewAccess = viewAccess
+        self.viewAccess = None
         self.objectsDict = {}
         self.xScaling = 1.0
         self.yScaling = 1.0
@@ -96,6 +96,9 @@ class MapWidgetLogic:
         self.columnWidth = 5
         self.selection = selection
         self.alerts = alerts
+
+    def setViewAccess(self, viewAccess):
+        self.viewAccess = viewAccess
 
     def updateObject(self, visobject):
         if visobject.getObjectId() not in self.objectsDict:

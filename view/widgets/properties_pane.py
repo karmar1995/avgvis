@@ -2,16 +2,16 @@ from PyQt6.QtWidgets import *
 
 
 class PropertiesDockWidget(QDockWidget):
-    def __init__(self, parent):
+    def __init__(self, parent, propertiesLogic):
         super().__init__(parent=parent)
-        self.propertiesWidget = PropertiesWidget(parent = self, properties={})
+        self.propertiesWidget = PropertiesWidget(parent = self, properties={}, widgetLogic=propertiesLogic)
         self.setWidget(self.propertiesWidget)
         self.setWindowTitle("Properties")
 
 
 class PropertiesWidget(QWidget):
     
-    def __init__(self, parent, properties):
+    def __init__(self, parent, properties, widgetLogic):
         super().__init__(parent=parent)
         layout = QHBoxLayout()
 
@@ -25,6 +25,8 @@ class PropertiesWidget(QWidget):
         self.propertiesGrid.setEditTriggers(QAbstractItemView.EditTrigger.NoEditTriggers)
         layout.addWidget(self.propertiesGrid)
         self.setLayout(layout)
+        self.__logic = widgetLogic
+        self.__logic.setViewAccess(self)
 
     def setProperties(self, properties):
         self.propertiesGrid.setRowCount(len(properties))

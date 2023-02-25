@@ -15,3 +15,5 @@ class QtViewToAbstractUserView(AbstractUserView):
     def askForObjectsRegistration(self):
         return False
 
+    def askForConfigPath(self):
+        return "config.json"

@@ -6,9 +6,10 @@ import json
 class ConfigurationInJson:
     def __init__(self):
         super().__init__()
-        self.filename = "config.json"
         self.data = None
-        with open(self.filename, 'r') as f:
+
+    def read(self, filename):
+        with open(filename, 'r') as f:
             self.data = json.load(f)
 
     def hasMapData(self):

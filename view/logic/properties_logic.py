@@ -1,10 +1,13 @@
 class PropertiesLogic:
-    def __init__(self, selection, propertiesView):
+    def __init__(self, selection):
         self.selection = selection
-        self.view = propertiesView
+        self.viewAccess = None
         self.selection.addListener(self)
+
+    def setViewAccess(self, viewAccess):
+        self.viewAccess = viewAccess
 
     def onSelectionChanged(self):
         if self.selection.selectedObject() is not None:
-            self.view.setProperties(self.selection.selectedObject().properties())
+            self.viewAccess.setProperties(self.selection.selectedObject().properties())
 

@@ -15,6 +15,7 @@ class UseCaseController:
 
     def driveInitialization(self, modelRoot, opcRoot):
         self.__errorSink = modelRoot.errorSink()
+        self.__persistency.read(self.__view.askForConfigPath())
         mapData = self.__getMapData()
         modelInitData = model_root.InitData(model_root.MapData(x=mapData[0], y=mapData[1], width=mapData[2], height=mapData[3]))
 

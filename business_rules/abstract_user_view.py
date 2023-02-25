@@ -13,4 +13,6 @@ class AbstractUserView:
     def askForObjectsRegistration(self):
         raise Exception("Not implemented!")
 
+    def askForConfigPath(self):
+        raise Exception("Not implemented!")
 

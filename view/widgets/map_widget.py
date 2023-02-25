@@ -36,7 +36,7 @@ class MapWidget(QWidget):
     addObjectSignal = pyqtSignal(VisualizationWidgetLogic, name="addObjectSignal")
     updateGridSignal = pyqtSignal(int, int, name="updateGridSignal")
 
-    def __init__(self, parent):
+    def __init__(self, parent, widgetLogic):
         super().__init__(parent=parent)
         self.pixmap = QPixmap("/home/kmarszal/Documents/dev/avgvis/view/resources/map.jpg")
         self.visualObjects = list()
@@ -49,6 +49,8 @@ class MapWidget(QWidget):
         self.addObjectSignal.connect(self.addObject)
         self.updateGridSignal.connect(self.updateGrid)
         self.gridWidget = GridWidget(parent=self, columnWidth=100, rowHeight=100)
+        self.__logic = widgetLogic
+        self.__logic.setViewAccess(self.__mapAccess)
 
     def addObject(self, widgetLogic : VisualizationWidgetLogic):
         self.visualObjects.append(VisualizationObjectWidget(self, widgetLogic))

@@ -4,7 +4,7 @@ from view.widgets.map_widget import MapWidget
 
 
 class MapPane(QWidget):
-    def __init__(self, parent, startAppCallback):
+    def __init__(self, parent, startAppCallback, mapWidgetLogic):
         super().__init__(parent=parent)
         self.scrollArea = QScrollArea(parent=self)
         self.scrollAreaWidget = QWidget(parent=self.scrollArea)
@@ -12,7 +12,7 @@ class MapPane(QWidget):
         self.startVisualizationButton = QPushButton(parent=self)
         self.startVisualizationButton.setText("Start")
 
-        self.mapWidget = MapWidget(parent=self)
+        self.mapWidget = MapWidget(parent=self, widgetLogic=mapWidgetLogic)
         upperLayout = QHBoxLayout()
         upperLayout.addWidget(self.startVisualizationButton)
         upperLayout.addStretch()
