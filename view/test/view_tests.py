@@ -33,6 +33,61 @@ class ViewTests(unittest.TestCase):
         self.assertEqual(objectWidget.x(), 40)
         self.assertEqual(objectWidget.y(), 320)
 
+    def test_viewLogicCalculatesPositionOfObjectOnMapWithNegativeOrigin(self):
+        mapSize = MapSize(x=-10, y=-10, width=50, height=100)
+        updatesGenerator = UpdatesSequenceGenerator()
+        fakeApp = createFakeApp(mapSize, defaultViewSize(), updatesGenerator)
+
+        updatesGenerator.updateObjectPosition(0, -10, -10)
+        objectWidget = fakeApp.mainframe.mapWidget.objectWidget(0)
+        self.assertEqual(objectWidget.x(), 0)
+        self.assertEqual(objectWidget.y(), 400)
+
+        updatesGenerator.updateObjectPosition(0, 0, 0)
+        objectWidget = fakeApp.mainframe.mapWidget.objectWidget(0)
+        self.assertEqual(objectWidget.x(), 40)
+        self.assertEqual(objectWidget.y(), 360)
+
+        updatesGenerator.updateObjectPosition(0, 10, 10)
+        objectWidget = fakeApp.mainframe.mapWidget.objectWidget(0)
+        self.assertEqual(objectWidget.x(), 80)
+        self.assertEqual(objectWidget.y(), 320)
+
+    def test_viewLogicCalculatesPositionOfObjectOnMapWithPositiveOrigin(self):
+        mapSize = MapSize(x=10, y=10, width=50, height=100)
+        updatesGenerator = UpdatesSequenceGenerator()
+        fakeApp = createFakeApp(mapSize, defaultViewSize(), updatesGenerator)
+
+        updatesGenerator.updateObjectPosition(0, 10, 10)
+        objectWidget = fakeApp.mainframe.mapWidget.objectWidget(0)
+        self.assertEqual(objectWidget.x(), 0)
+        self.assertEqual(objectWidget.y(), 400)
+
+        updatesGenerator.updateObjectPosition(0, 20, 20)
+        objectWidget = fakeApp.mainframe.mapWidget.objectWidget(0)
+        self.assertEqual(objectWidget.x(), 40)
+        self.assertEqual(objectWidget.y(), 360)
+
+        updatesGenerator.updateObjectPosition(0, 30, 30)
+        objectWidget = fakeApp.mainframe.mapWidget.objectWidget(0)
+        self.assertEqual(objectWidget.x(), 80)
+        self.assertEqual(objectWidget.y(), 320)
+
+    def test_viewLogicCalculatesPositionOfObjectOnMapWithFractionalOriginAndSize(self):
+        mapSize = MapSize(x=1.25, y=1.25, width=10.25, height=20.5)
+        updatesGenerator = UpdatesSequenceGenerator()
+        fakeApp = createFakeApp(mapSize, defaultViewSize(), updatesGenerator)
+
+        updatesGenerator.updateObjectPosition(0, 1.25, 1.25)
+        objectWidget = fakeApp.mainframe.mapWidget.objectWidget(0)
+        self.assertEqual(objectWidget.x(), 0)
+        self.assertEqual(objectWidget.y(), 400)
+
+        updatesGenerator.updateObjectPosition(0, 2.25, 2.25)
+        objectWidget = fakeApp.mainframe.mapWidget.objectWidget(0)
+        self.assertEqual(round(objectWidget.x(), 2), 19.51)
+        self.assertEqual(round(objectWidget.y(), 2), 380.49)
+
     def test_incorrectPositionDoesNotUpdateObject(self):
         updatesGenerator = UpdatesSequenceGenerator()
         fakeApp = createFakeApp(defaultMapSize(), defaultViewSize(), updatesGenerator)
