@@ -1,5 +1,6 @@
 from collections import namedtuple
 from model.model_view import AbstractModelView
+import math
 
 Point = namedtuple('Point', 'x y')
 
@@ -17,6 +18,7 @@ class VisualizationWidgetLogic:
         self.__modelY = None
         self.__name = "Dummy"
         self.__alerts = None
+        self.__heading = None
 
     def initialize(self, x, y, width, height, properties):
         self.__x = x
@@ -45,6 +47,9 @@ class VisualizationWidgetLogic:
     def setAlerts(self, alerts):
         self.__alerts = alerts
 
+    def setHeading(self, heading):
+        self.__heading = heading
+
     def getBoundingRect(self):
         top_left_x = self.__x - int(self.__width / 2)
         top_left_y = self.__y - int(self.__height / 2)
@@ -55,16 +60,20 @@ class VisualizationWidgetLogic:
         shape_width = self.__width / 4
         shape_height = self.__height / 4
         origin_x = self.__x
-        origin_y = self.__y - shape_height / 2
-        points.append(Point(int(origin_x), int(origin_y)))
-        points.append(Point(int(origin_x + shape_width / 2), int(origin_y + shape_height)))
-        points.append(Point(int(origin_x - shape_width / 2), int(origin_y + shape_height)))
+        origin_y = self.__y
+        p1 = self.__rotatePoint(Point(0, int(-shape_height / 2)))
+        p2 = self.__rotatePoint(Point(int(shape_width / 2), int(shape_height / 2)))
+        p3 = self.__rotatePoint(Point(int(-shape_width / 2), int(shape_height / 2)))
+        points.append(Point(x=int(p1.x + origin_x), y=int(p1.y + origin_y)))
+        points.append(Point(x=int(p2.x + origin_x), y=int(p2.y + origin_y)))
+        points.append(Point(x=int(p3.x + origin_x), y=int(p3.y + origin_y)))
         return points
 
     def properties(self):
         properties_dict = dict()
         properties_dict['x'] = str(self.__modelX)
         properties_dict['y'] = str(self.__modelY)
+        properties_dict['heading'] = str(self.__heading)
         return { **self.__properties, **properties_dict }
 
     def updateSelection(self):
@@ -88,6 +97,17 @@ class VisualizationWidgetLogic:
 
     def y(self):
         return self.__y
+
+    def __rotatePoint(self, point):
+        angle = self.__heading * -1
+        sin = math.sin(math.radians(angle))
+        cos = math.cos(math.radians(angle))
+        x = point.x
+        y = point.y
+        newX = int(x * cos + y * sin)
+        newY = int(y * cos - x * sin)
+        return Point(x=newX, y=newY)
+
 
 class MapWidgetLogic:
     def __init__(self, selection, alerts):
@@ -121,6 +141,7 @@ class MapWidgetLogic:
 
         objectToUpdate.setPosition(x, y)
         objectToUpdate.setModelPosition(visobject.getX(), visobject.getY())
+        objectToUpdate.setHeading(visobject.getRotation())
         objectToUpdate.setProperties(visobject.getProperties())
         objectToUpdate.broadcastObjectChanged()
         self.viewAccess.updateView()

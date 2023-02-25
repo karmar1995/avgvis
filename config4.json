@@ -1,0 +1,220 @@
+{
+	"mapData": {
+		"x": 0,
+		"y": 0,
+		"width": 23,
+		"height": 46.5
+	},
+	"objects": [
+		{
+			"name": "AGV 1",
+			"sourceType": "FAKE_OPC",
+			"connectionString": "not_used",
+			"width": 2,
+			"height": 2,
+			"type": "AGV",
+			"xSignal": "x",
+			"ySignal": "y",
+			"rotationSignal": "heading",
+			"updateInterval": 0.1,
+			"properties" : {
+				"battery" : "battery"
+			},
+			"alerts": {
+				"information": "information",
+				"warnings": "warnings"
+			}
+		},
+		{
+			"name": "AGV 2",
+			"sourceType": "FAKE_OPC",
+			"connectionString": "not_used",
+			"width": 2,
+			"height": 2,
+			"type": "AGV",
+			"xSignal": "x",
+			"ySignal": "y",
+			"rotationSignal": "heading",
+			"updateInterval": 0.1,
+			"properties" : {
+				"battery" : "battery"
+			},
+			"alerts": {
+				"information": "information",
+				"warnings": "warnings"
+			}
+		},
+		{
+			"name": "AGV 3",
+			"sourceType": "FAKE_OPC",
+			"connectionString": "not_used",
+			"width": 2,
+			"height": 2,
+			"type": "AGV",
+			"xSignal": "x",
+			"ySignal": "y",
+			"rotationSignal": "heading",
+			"updateInterval": 0.1,
+			"properties" : {
+				"battery" : "battery"
+			},
+			"alerts": {
+				"information": "information",
+				"warnings": "warnings"
+			}
+		},
+		{
+			"name": "AGV 4",
+			"sourceType": "FAKE_OPC",
+			"connectionString": "not_used",
+			"width": 2,
+			"height": 2,
+			"type": "AGV",
+			"xSignal": "x",
+			"ySignal": "y",
+			"rotationSignal": "heading",
+			"updateInterval": 0.1,
+			"properties" : {
+				"battery" : "battery"
+			},
+			"alerts": {
+				"information": "information",
+				"warnings": "warnings"
+			}
+		},
+		{
+			"name": "AGV 5",
+			"sourceType": "FAKE_OPC",
+			"connectionString": "not_used",
+			"width": 2,
+			"height": 2,
+			"type": "AGV",
+			"xSignal": "x",
+			"ySignal": "y",
+			"rotationSignal": "heading",
+			"updateInterval": 0.1,
+			"properties" : {
+				"battery" : "battery"
+			},
+			"alerts": {
+				"information": "information",
+				"warnings": "warnings"
+			}
+		},
+		{
+			"name": "AGV 6",
+			"sourceType": "FAKE_OPC",
+			"connectionString": "not_used",
+			"width": 2,
+			"height": 2,
+			"type": "AGV",
+			"xSignal": "x",
+			"ySignal": "y",
+			"rotationSignal": "heading",
+			"updateInterval": 0.1,
+			"properties" : {
+				"battery" : "battery"
+			},
+			"alerts": {
+				"information": "information",
+				"warnings": "warnings"
+			}
+		},
+		{
+			"name": "AGV 7",
+			"sourceType": "FAKE_OPC",
+			"connectionString": "not_used",
+			"width": 2,
+			"height": 2,
+			"type": "AGV",
+			"xSignal": "x",
+			"ySignal": "y",
+			"rotationSignal": "heading",
+			"updateInterval": 0.1,
+			"properties" : {
+				"battery" : "battery"
+			},
+			"alerts": {
+				"information": "information",
+				"warnings": "warnings"
+			}
+		},
+		{
+			"name": "AGV 8",
+			"sourceType": "FAKE_OPC",
+			"connectionString": "not_used",
+			"width": 2,
+			"height": 2,
+			"type": "AGV",
+			"xSignal": "x",
+			"ySignal": "y",
+			"rotationSignal": "heading",
+			"updateInterval": 0.1,
+			"properties" : {
+				"battery" : "battery"
+			},
+			"alerts": {
+				"information": "information",
+				"warnings": "warnings"
+			}
+		},
+		{
+			"name": "AGV 9",
+			"sourceType": "FAKE_OPC",
+			"connectionString": "not_used",
+			"width": 2,
+			"height": 2,
+			"type": "AGV",
+			"xSignal": "x",
+			"ySignal": "y",
+			"rotationSignal": "heading",
+			"updateInterval": 0.1,
+			"properties" : {
+				"battery" : "battery"
+			},
+			"alerts": {
+				"information": "information",
+				"warnings": "warnings"
+			}
+		},
+		{
+			"name": "AGV 10",
+			"sourceType": "FAKE_OPC",
+			"connectionString": "not_used",
+			"width": 2,
+			"height": 2,
+			"type": "AGV",
+			"xSignal": "x",
+			"ySignal": "y",
+			"rotationSignal": "heading",
+			"updateInterval": 0.1,
+			"properties" : {
+				"battery" : "battery"
+			},
+			"alerts": {
+				"information": "information",
+				"warnings": "warnings"
+			}
+		},
+		{
+			"name": "AGV 11",
+			"sourceType": "FAKE_OPC",
+			"connectionString": "not_used",
+			"width": 2,
+			"height": 2,
+			"type": "AGV",
+			"xSignal": "x",
+			"ySignal": "y",
+			"rotationSignal": "heading",
+			"updateInterval": 0.1,
+			"properties" : {
+				"battery" : "battery"
+			},
+			"alerts": {
+				"information": "information",
+				"warnings": "warnings"
+			}
+		}
+
+	]
+}

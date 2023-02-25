@@ -23,7 +23,8 @@ MaxX = 30  # a bit larger than map width
 MaxY = 55  # a bit larger than map height
 UpdateInterval = 0.1  # s
 ConnectionTime = 1  # s
-Steps = 40
+Steps = 25
+RotationSteps = 7
 
 
 class FakeOpcClientFactory(AbstractOpcClientFactory):
@@ -149,13 +150,43 @@ class PointsMovingStrategy(StrategyBase):
         (MinX + ((MaxX - MinX) * 0.25), MinY + ((MaxY - MinY) * 0.75))
     ]
 
+    Headings = [ 180, 90, 0, 270 ]
+
     def __init__(self, objectState):
         super().__init__(objectState)
-        self.__assignPoint(1)
         self.__x = self.Points[0][0]
         self.__y = self.Points[0][1]
+        self.__assignPoint(1)
 
     def _onBeforeUpdate(self):
+        if self.__rotationSteps > 0:
+            self.__updateRotationBeforeUpdate()
+        else:
+            self.__updatePositionBeforeUpdate()
+
+    def _updateX(self):
+        return self.__x
+
+    def _updateY(self):
+        return self.__y
+
+    def _updateHeading(self):
+        return self.__rotation
+
+    def __assignPoint(self, index):
+        self.__targetIndex = index
+        self.__targetPoint = self.Points[self.__targetIndex]
+        self.__steps = Steps
+        self.__rotation = self.Headings[self.__targetIndex - 1]
+        self.__targetRotation = self.Headings[self.__targetIndex]
+        self.__rotationSteps = RotationSteps
+        d1 = (self.__targetRotation - self.__rotation)
+        d2 = (360 - d1)
+        self.__rotationIncrement = min(d1, d2) / self.__rotationSteps
+        if d1 > d2:
+            self.__rotationIncrement *= -1
+
+    def __updatePositionBeforeUpdate(self):
         xDistance = self.__targetPoint[0] - self.__x
         yDistance = self.__targetPoint[1] - self.__y
         stepExecuted = False
@@ -173,22 +204,15 @@ class PointsMovingStrategy(StrategyBase):
                 self.__targetIndex = 0
             self.__assignPoint(self.__targetIndex)
 
-    def _updateX(self):
-        return self.__x
-
-    def _updateY(self):
-        return self.__y
-
-    def __assignPoint(self, index):
-        self.__targetIndex = index
-        self.__targetPoint = self.Points[self.__targetIndex]
-        self.__steps = Steps
+    def __updateRotationBeforeUpdate(self):
+        self.__rotation += self.__rotationIncrement
+        self.__rotationSteps -= 1
 
 
 class FakeOpcClient:
     MovingStrategies = [
-        HorizontalMovingStrategy,
-        VerticalMovingStrategy,
+#        HorizontalMovingStrategy,
+#        VerticalMovingStrategy,
         PointsMovingStrategy,
     ]  # possible map traversing algorithms
 

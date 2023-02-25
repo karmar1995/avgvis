@@ -61,7 +61,6 @@ class PollingThread:
                 self.stop()
 
 
-
 class OpcEventSource(AbstractEventSource):
     def __init__(self, opcClient, objectId, xSignal, ySignal, rotationSignal, propertiesSignalsDict, updateInterval, errorSink, connectionString):
         super().__init__()
@@ -117,6 +116,7 @@ class OpcEventSource(AbstractEventSource):
 
     def __signalsDictToEvent(self, signalsDict):
         self.__processPositionSignals(signalsDict)
+        self.__processRotationSignal(signalsDict)
         self.__processPropertiesSignals(signalsDict)
 
     def __processPositionSignals(self, signalsDict):
@@ -158,3 +158,12 @@ class OpcEventSource(AbstractEventSource):
             signalValue = self.__currentSignalsState[signalStr]
             res[propertyName] = signalValue
         return res
+
+    def __processRotationSignal(self, signalsDict):
+        newRotation = signalsDict[self.__rotationSignalStr]
+        if newRotation != self.__currentSignalsState[self.__rotationSignalStr]:
+            self.__currentSignalsState[self.__rotationSignalStr] = newRotation
+            self.__onRotationChanged(newRotation)
+
+    def __onRotationChanged(self, newRotation):
+        self.__broadcastEvent(UpdateObjectRotationEvent(objectId=self.__id, rotation=newRotation))
