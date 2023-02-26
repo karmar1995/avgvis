@@ -27,7 +27,7 @@ class CompositionRoot:
         self.useCaseController.setView(viewInterfaces.userView)
 
     def initialize(self):
-        self.useCaseController.driveInitialization(self.modelRoot, self.opcRoot)
+        return self.useCaseController.driveInitialization(self.modelRoot, self.opcRoot)
 
     def startApp(self):
         self.modelRoot.startProcessingEvents()

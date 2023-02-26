@@ -2,18 +2,26 @@ from business_rules.abstract_user_view import AbstractUserView
 
 
 class QtViewToAbstractUserView(AbstractUserView):
-    def __init__(self, view):
+    def __init__(self):
         super().__init__()
-        self.view = view
+        self.__configurationWizard = None
+        self.__configurationPicker = None
+        self.__incorrectConfigDialog = None
 
-    def requestMapData(self):
-        return None
-
-    def requestObjectRegistration(self):
-        pass
-
-    def askForObjectsRegistration(self):
-        return False
+    def driveConfigCreation(self, persistency):
+        self.__configurationWizard.driveConfiguration(persistency)
 
     def askForConfigPath(self):
-        return "config.json"
+        return self.__configurationPicker.getConfigurationPath()
+
+    def onIncorrectConfig(self, configFile):
+        self.__incorrectConfigDialog.onIncorrectConfig(configFile)
+
+    def setConfigurationWizard(self, configurationWizard):
+        self.__configurationWizard = configurationWizard
+
+    def setConfigurationPicker(self, configurationPicker):
+        self.__configurationPicker = configurationPicker
+
+    def setIncorrectConfigDialog(self, incorrectConfigDialog):
+        self.__incorrectConfigDialog = incorrectConfigDialog

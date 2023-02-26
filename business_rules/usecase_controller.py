@@ -15,37 +15,40 @@ class UseCaseController:
 
     def driveInitialization(self, modelRoot, opcRoot):
         self.__errorSink = modelRoot.errorSink()
-        self.__persistency.read(self.__view.askForConfigPath())
-        mapData = self.__getMapData()
-        modelInitData = model_root.InitData(model_root.MapData(x=mapData[0], y=mapData[1], width=mapData[2], height=mapData[3]))
+        configPath = self.__view.askForConfigPath()
 
-        if not modelRoot.initialize(modelInitData):
-            pass #todo: handle error on model initialization
-        if not opcRoot.initialize():
-            pass #todo: handle error on opc adapter initialization
+        if not self.__persistency.fileExists(configPath):
+            self.__persistency.setFilename(configPath)
+            self.__view.driveConfigCreation(self.__persistency)
 
-        self.__registerObjectsFromPersistency()
+        try:
+            self.__persistency.read(configPath)
+            mapData = self.__getMapData()
+            modelInitData = model_root.InitData(
+                model_root.MapData(x=mapData[0], y=mapData[1], width=mapData[2], height=mapData[3]))
 
-        if self.__startObjectsRegistration():
-            self.__registerObject()
+            if not modelRoot.initialize(modelInitData):
+                return False
+            if not opcRoot.initialize():
+                return False
+
+            self.__registerObjectsFromPersistency()
+            return True
+
+        except:
+            self.__view.onIncorrectConfig(configPath)
+            return False
 
     def addObjectFactory(self, typeName, factory):
         self.__objectFactoriesByType[typeName] = factory
 
     def __getMapData(self):
-        if self.__persistency.hasMapData():
-            return self.__persistency.mapData()
-        mapData = self.__view.requestMapData()
-        self.__persistency.saveMapData(mapData)
-        return mapData
+        return self.__persistency.mapData()
 
-    def __startObjectsRegistration(self):
-        return self.__view.askForObjectsRegistration()
-
-    def __registerObject(self):
-        registerData = self.__view.requestObjectRegistration()
-        objectId = self.__objectIdsGenerator.generateId()
-        self.__objectFactoriesByType[registerData['sourceType']].createObject(objectId, registerData, self.__errorSink).registerObject()
+    # def __registerObject(self):
+    #     registerData = self.__view.requestObjectRegistration()
+    #     objectId = self.__objectIdsGenerator.generateId()
+    #     self.__objectFactoriesByType[registerData['sourceType']].createObject(objectId, registerData, self.__errorSink).registerObject()
 
     def __registerObjectsFromPersistency(self):
         registerDataList = self.__persistency.objectsList()

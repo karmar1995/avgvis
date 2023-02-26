@@ -14,7 +14,7 @@ class MainframeLogic:
         self.selection = Selection()
         self.mapWidgetLogic = MapWidgetLogic(self.selection, self.alerts)
         self.propertiesLogic = PropertiesLogic(self.selection)
-        self.userViewAdapter = QtViewToAbstractUserView(self)
+        self.userViewAdapter = QtViewToAbstractUserView()
         self.modelViewAdapter = ModelViewToMapLogicAdapter(self.mapWidgetLogic)
         self.businessRules = businessRules
 
@@ -25,7 +25,7 @@ class MainframeLogic:
 
         self.businessRules.addErrorsListener(self.outputLogic)
         self.businessRules.setViewInterfaces(viewInterfaces)
-        self.businessRules.initialize()
+        return self.businessRules.initialize()
 
     def start(self):
         self.businessRules.startApp()

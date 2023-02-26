@@ -1,20 +1,27 @@
 from model.composition_root import MapData
-
+from os.path import exists
 import json
 
 
 class ConfigurationInJson:
     def __init__(self):
         super().__init__()
-        self.data = None
+        self.__data = None
+        self.__filename = ""
+
+    def fileExists(self, filename):
+        return exists(filename)
+
+    def setFilename(self, filename):
+        self.__filename = filename
 
     def read(self, filename):
         with open(filename, 'r') as f:
-            self.data = json.load(f)
+            self.__data = json.load(f)
 
     def hasMapData(self):
         try:
-            tmp = self.data['mapData']
+            tmp = self.__data['mapData']
             return True
         except KeyError:
             return False
@@ -23,13 +30,13 @@ class ConfigurationInJson:
         pass
 
     def mapData(self):
-        node = self.data['mapData']
+        node = self.__data['mapData']
         mapData = MapData(x=node['x'], y=node['y'], width=node['width'], height=node['height'])
         return mapData
 
     def objectsList(self):
         objectsList = list()
-        objects = self.data['objects']
+        objects = self.__data['objects']
         for object in objects:
             registerData = dict()
             registerData['name'] = object['name']
