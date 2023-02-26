@@ -26,7 +26,7 @@ class VisualizationObjectWidget(QWidget):
         return super().mousePressEvent(e)
 
     def paintObject(self, painter):
-        self.__drawObjectBackground(painter)
+#        self.__drawObjectBackground(painter)
         self.__drawObjectBorder(painter)
         self.__drawObjectShape(painter)
 
@@ -41,28 +41,28 @@ class VisualizationObjectWidget(QWidget):
     def rect(self) -> QtCore.QRect:
         return QtCore.QRect(*self.__widgetLogic.getBoundingRect())
 
-    def __drawObjectBackground(self, painter):
-        brush = QBrush()
+    def __drawObjectBorder(self, painter):
+        backgroundBrush = QBrush()
         color = QColor(0, 0, 0, 50)
         if self.__widgetLogic.isSelected():
             color = QColor(50, 150, 50, 50)
         if self.__hovered:
             color = QColor(0, 0, 0, 150)
-        brush.setColor(color)
-        brush.setStyle(Qt.BrushStyle.SolidPattern)
-        rect = QtCore.QRect(*self.__widgetLogic.getBoundingRect())
-        painter.fillRect(rect, brush)
 
-    def __drawObjectBorder(self, painter):
-        brush = QBrush()
-        brush.setColor(QColor(0, 0, 0))
-        brush.setStyle(Qt.BrushStyle.SolidPattern)
-        rect = QtCore.QRect(*self.__widgetLogic.getBoundingRect())
+        backgroundBrush.setColor(color)
+        backgroundBrush.setStyle(Qt.BrushStyle.SolidPattern)
+        borderBrush = QBrush()
+        borderBrush.setColor(QColor(0, 0, 0))
+        borderBrush.setStyle(Qt.BrushStyle.SolidPattern)
+        polygon = QPolygon(self.__pointsToQPoints(self.__widgetLogic.getBorderPoints()))
         pen = QPen()
-        pen.setBrush(brush)
-        pen.setWidth(3)
+        pen.setBrush(borderBrush)
+        pen.setWidth(5)
         painter.setPen(pen)
-        painter.drawRect(rect)
+        painter.drawPolygon(polygon)
+        painterPath = QPainterPath()
+        painterPath.addPolygon(polygon.toPolygonF())
+        painter.fillPath(painterPath, backgroundBrush)
 
     def __drawObjectShape(self, painter):
         borderBrush = QBrush()

@@ -50,6 +50,22 @@ class VisualizationWidgetLogic:
     def setHeading(self, heading):
         self.__heading = heading
 
+    def getBorderPoints(self):
+        points = list()
+        shape_width = self.__width
+        shape_height = self.__height
+        origin_x = self.__x
+        origin_y = self.__y
+        p1 = self.__rotatePoint(Point(int(-shape_width /2), int(-shape_height / 2)))
+        p2 = self.__rotatePoint(Point(int(shape_width /2), int(-shape_height / 2)))
+        p3 = self.__rotatePoint(Point(int(shape_width / 2), int(shape_height / 2)))
+        p4 = self.__rotatePoint(Point(int(-shape_width / 2), int(shape_height / 2)))
+        points.append(Point(x=int(p1.x + origin_x), y=int(p1.y + origin_y)))
+        points.append(Point(x=int(p2.x + origin_x), y=int(p2.y + origin_y)))
+        points.append(Point(x=int(p3.x + origin_x), y=int(p3.y + origin_y)))
+        points.append(Point(x=int(p4.x + origin_x), y=int(p4.y + origin_y)))
+        return points
+
     def getBoundingRect(self):
         top_left_x = self.__x - int(self.__width / 2)
         top_left_y = self.__y - int(self.__height / 2)
