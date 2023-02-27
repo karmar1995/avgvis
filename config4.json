@@ -15,7 +15,7 @@
 			"type": "AGV",
 			"xSignal": "x",
 			"ySignal": "y",
-			"rotationSignal": "heading",
+			"headingSignal": "heading",
 			"updateInterval": 0.1,
 			"properties" : {
 				"battery" : "battery"
@@ -34,7 +34,7 @@
 			"type": "AGV",
 			"xSignal": "x",
 			"ySignal": "y",
-			"rotationSignal": "heading",
+			"headingSignal": "heading",
 			"updateInterval": 0.1,
 			"properties" : {
 				"battery" : "battery"
@@ -53,7 +53,7 @@
 			"type": "AGV",
 			"xSignal": "x",
 			"ySignal": "y",
-			"rotationSignal": "heading",
+			"headingSignal": "heading",
 			"updateInterval": 0.1,
 			"properties" : {
 				"battery" : "battery"
@@ -72,7 +72,7 @@
 			"type": "AGV",
 			"xSignal": "x",
 			"ySignal": "y",
-			"rotationSignal": "heading",
+			"headingSignal": "heading",
 			"updateInterval": 0.1,
 			"properties" : {
 				"battery" : "battery"
@@ -91,7 +91,7 @@
 			"type": "AGV",
 			"xSignal": "x",
 			"ySignal": "y",
-			"rotationSignal": "heading",
+			"headingSignal": "heading",
 			"updateInterval": 0.1,
 			"properties" : {
 				"battery" : "battery"
@@ -110,7 +110,7 @@
 			"type": "AGV",
 			"xSignal": "x",
 			"ySignal": "y",
-			"rotationSignal": "heading",
+			"headingSignal": "heading",
 			"updateInterval": 0.1,
 			"properties" : {
 				"battery" : "battery"
@@ -129,7 +129,7 @@
 			"type": "AGV",
 			"xSignal": "x",
 			"ySignal": "y",
-			"rotationSignal": "heading",
+			"headingSignal": "heading",
 			"updateInterval": 0.1,
 			"properties" : {
 				"battery" : "battery"
@@ -148,7 +148,7 @@
 			"type": "AGV",
 			"xSignal": "x",
 			"ySignal": "y",
-			"rotationSignal": "heading",
+			"headingSignal": "heading",
 			"updateInterval": 0.1,
 			"properties" : {
 				"battery" : "battery"
@@ -167,7 +167,7 @@
 			"type": "AGV",
 			"xSignal": "x",
 			"ySignal": "y",
-			"rotationSignal": "heading",
+			"headingSignal": "heading",
 			"updateInterval": 0.1,
 			"properties" : {
 				"battery" : "battery"
@@ -186,7 +186,7 @@
 			"type": "AGV",
 			"xSignal": "x",
 			"ySignal": "y",
-			"rotationSignal": "heading",
+			"headingSignal": "heading",
 			"updateInterval": 0.1,
 			"properties" : {
 				"battery" : "battery"
@@ -205,7 +205,7 @@
 			"type": "AGV",
 			"xSignal": "x",
 			"ySignal": "y",
-			"rotationSignal": "heading",
+			"headingSignal": "heading",
 			"updateInterval": 0.1,
 			"properties" : {
 				"battery" : "battery"

@@ -3,11 +3,26 @@ from os.path import exists
 import json
 
 
+class ConfigBuilder:
+    def __init__(self):
+        self.dictToDump = dict()
+
+    def setMapData(self, mapData):
+        self.dictToDump["mapData"] = mapData
+
+    def setObjects(self, objects):
+        self.dictToDump["objects"] = objects
+
+    def reset(self):
+        self.dictToDump = dict()
+
+
 class ConfigurationInJson:
     def __init__(self):
         super().__init__()
         self.__data = None
         self.__filename = ""
+        self.__builder = ConfigBuilder()
 
     def fileExists(self, filename):
         return exists(filename)
@@ -27,7 +42,35 @@ class ConfigurationInJson:
             return False
 
     def saveMapData(self, mapData):
-        pass
+        self.__builder = ConfigBuilder()
+        toDump = dict()
+        toDump['url'] = mapData[0]
+        toDump['x'] = mapData[1]
+        toDump['y'] = mapData[2]
+        toDump['width'] = mapData[3]
+        toDump['height'] = mapData[4]
+        self.__builder.setMapData(toDump)
+
+    def saveObjects(self, objects):
+        objectsAsDicts = list()
+        for __obj in objects:
+            objectAsDict = __obj._asdict()
+            properties = dict()
+            for property in __obj.properties:
+                properties[property[0]] = property[1]
+            alerts = dict()
+            for alert in __obj.alerts:
+                alerts[alert[0]] = alert[1]
+            objectAsDict['properties'] = properties
+            objectAsDict['alerts'] = alerts
+            objectsAsDicts.append(objectAsDict)
+
+        self.__builder.setObjects(objectsAsDicts)
+
+    def write(self):
+        toWrite = json.dumps(self.__builder.dictToDump, indent=2)
+        with open(self.__filename, 'w') as f:
+            f.write(toWrite)
 
     def mapData(self):
         node = self.__data['mapData']
@@ -43,11 +86,11 @@ class ConfigurationInJson:
             registerData['sourceType'] = object['sourceType']
             registerData['width'] = float(object['width'])
             registerData['height'] = float(object['height'])
-            registerData['type'] = object['type']
+            registerData['type'] = "AGV"
             registerData['connectionString'] = object['connectionString']
             registerData['xSignal'] = object['xSignal'].split('/')
             registerData['ySignal'] = object['ySignal'].split('/')
-            registerData['rotationSignal'] = object['rotationSignal'].split('/')
+            registerData['rotationSignal'] = object['headingSignal'].split('/')
             registerData['updateInterval'] = float(object['updateInterval'])
             registerData['properties'] = dict()
             for propertyNode in object['properties']:

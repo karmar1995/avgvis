@@ -45,10 +45,10 @@ class UseCaseController:
     def __getMapData(self):
         return self.__persistency.mapData()
 
-    # def __registerObject(self):
-    #     registerData = self.__view.requestObjectRegistration()
-    #     objectId = self.__objectIdsGenerator.generateId()
-    #     self.__objectFactoriesByType[registerData['sourceType']].createObject(objectId, registerData, self.__errorSink).registerObject()
+    def __registerObject(self):
+        registerData = self.__view.requestObjectRegistration()
+        objectId = self.__objectIdsGenerator.generateId()
+        self.__objectFactoriesByType[registerData['sourceType']].createObject(objectId, registerData, self.__errorSink).registerObject()
 
     def __registerObjectsFromPersistency(self):
         registerDataList = self.__persistency.objectsList()
