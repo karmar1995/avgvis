@@ -19,7 +19,7 @@ class MapAccess(QObject):
         self.mapWidget.addObjectSignal.emit(visualizationWidgetLogic)
 
     def eraseObject(self, visualizationWidgetLogicId):
-        pass
+        self.mapWidget.deleteObjectSignal.emit(visualizationWidgetLogicId)
 
     def updateView(self):
         self.mapWidget.update()
@@ -34,12 +34,13 @@ class MapAccess(QObject):
 class MapWidget(QWidget):
     showMapSignal = pyqtSignal(name='showMapSignal')
     addObjectSignal = pyqtSignal(VisualizationWidgetLogic, name="addObjectSignal")
+    deleteObjectSignal = pyqtSignal(int, name="deleteObjectSignal")
     updateGridSignal = pyqtSignal(int, int, name="updateGridSignal")
 
     def __init__(self, parent, widgetLogic):
         super().__init__(parent=parent)
         self.pixmap = QPixmap("/home/kmarszal/Documents/dev/avgvis/view/resources/map.jpg")
-        self.visualObjects = list()
+        self.visualObjects = dict()
         self.setMouseTracking(True)
         self.hoveredObject = None
         self.setFixedSize(self.pixmap.size())
@@ -47,13 +48,18 @@ class MapWidget(QWidget):
         self.__mapAccess = MapAccess(self, self)
         self.showMapSignal.connect(self.showMap)
         self.addObjectSignal.connect(self.addObject)
+        self.deleteObjectSignal.connect(self.deleteObject)
         self.updateGridSignal.connect(self.updateGrid)
         self.gridWidget = GridWidget(parent=self, columnWidth=100, rowHeight=100)
         self.__logic = widgetLogic
         self.__logic.setViewAccess(self.__mapAccess)
 
     def addObject(self, widgetLogic : VisualizationWidgetLogic):
-        self.visualObjects.append(VisualizationObjectWidget(self, widgetLogic))
+        self.visualObjects[widgetLogic.id()] = VisualizationObjectWidget(self, widgetLogic)
+
+    def deleteObject(self, objectId):
+        self.visualObjects[objectId].destroy()
+        del self.visualObjects[objectId]
 
     def showMap(self):
         self.setVisible(True)
@@ -100,13 +106,14 @@ class MapWidget(QWidget):
         brush.setTexture(self.pixmap)
         rect = QtCore.QRect(0, 0, self.pixmap.width(), self.pixmap.height())
         painter.fillRect(rect, brush)
-        for visualObject in self.visualObjects:
-            visualObject.paintObject(painter)
+        for visualObjectId in self.visualObjects:
+            self.visualObjects[visualObjectId].paintObject(painter)
         self.gridWidget.paintGrid(painter)
         painter.end()
 
     def __getVisualObjectWidgetFromPoint(self, pos):
-        for visualObjectWidget in self.visualObjects:
+        for visualObjectWidgetId in self.visualObjects:
+            visualObjectWidget = self.visualObjects[visualObjectWidgetId]
             if visualObjectWidget.rect().contains(pos.toPoint()):
                 return visualObjectWidget
         return None

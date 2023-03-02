@@ -4,6 +4,7 @@ from model.events_controller import EventsController
 from model.events_hub import EventsHub
 from model.map import Map
 from model.error_sink import ErrorSink
+from model.events import *
 from collections import namedtuple
 
 MapData = namedtuple("MapData", 'x y width height')
@@ -46,6 +47,10 @@ class CompositionRoot:
 
     def stopProcessingEvents(self):
         self.__eventsHub.stop()
+
+    def disconnectObject(self, visobjectId):
+        event = UnregisterObjectEvent(visobjectId)
+        self.__eventsHub.onEvent(event)
 
     def errorSink(self):
         return self.__errorSink

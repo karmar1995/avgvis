@@ -9,14 +9,16 @@ from business_rules.composition_root import ViewInterfaces
 
 class MainframeLogic:
     def __init__(self, businessRules):
+        self.businessRules = businessRules
         self.outputLogic = OutputWidgetLogic()
         self.alerts = AlertsWidgetLogic()
         self.selection = Selection()
-        self.mapWidgetLogic = MapWidgetLogic(self.selection, self.alerts)
+        self.mapWidgetLogic = MapWidgetLogic(self.selection,
+                                             self.alerts,
+                                             self.businessRules.useCaseController)
         self.propertiesLogic = PropertiesLogic(self.selection)
         self.userViewAdapter = QtViewToAbstractUserView()
         self.modelViewAdapter = ModelViewToMapLogicAdapter(self.mapWidgetLogic)
-        self.businessRules = businessRules
 
     def initialize(self):
         modelView = self.modelViewAdapter

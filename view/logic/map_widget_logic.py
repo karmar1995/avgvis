@@ -6,13 +6,15 @@ Point = namedtuple('Point', 'x y')
 
 
 class VisualizationWidgetLogic:
-    def __init__(self, selection):
+    def __init__(self, selection, usecaseController):
+        self.__id = None
         self.__x = None
         self.__y = None
         self.__width = None
         self.__height = None
         self.__properties = None
         self.__selection = selection
+        self.__usecaseController = usecaseController
         self.__objectObservers = dict()
         self.__modelX = None
         self.__modelY = None
@@ -20,12 +22,14 @@ class VisualizationWidgetLogic:
         self.__alerts = None
         self.__heading = None
 
-    def initialize(self, x, y, width, height, properties):
+    def initialize(self, id, x, y, width, height, properties, name):
+        self.__id = id
         self.__x = x
         self.__y = y
         self.__width = width
         self.__height = height
         self.__properties = properties
+        self.__name = name
 
     def addObserver(self, observer):
         self.__objectObservers[id(observer)] = observer
@@ -114,6 +118,9 @@ class VisualizationWidgetLogic:
     def y(self):
         return self.__y
 
+    def id(self):
+        return self.__id
+
     def __rotatePoint(self, point):
         angle = self.__heading * -1
         sin = math.sin(math.radians(angle))
@@ -124,11 +131,15 @@ class VisualizationWidgetLogic:
         newY = int(y * cos - x * sin)
         return Point(x=newX, y=newY)
 
+    def disconnect(self):
+        self.__usecaseController.disconnectObject(self.__id)
+
 
 class MapWidgetLogic:
-    def __init__(self, selection, alerts):
+    def __init__(self, selection, alerts, usecaseController):
         self.modelMap = None
         self.viewAccess = None
+        self.usecaseController = usecaseController
         self.objectsDict = {}
         self.xScaling = 1.0
         self.yScaling = 1.0
@@ -182,13 +193,15 @@ class MapWidgetLogic:
 
     def registerObject(self, visobject):
         self.objectsDict[visobject.getObjectId()] = \
-            VisualizationWidgetLogic(self.selection)
+            VisualizationWidgetLogic(self.selection, self.usecaseController)
         self.objectsDict[visobject.getObjectId()].initialize(
+            id=visobject.getObjectId(),
             x=self.offsetX(visobject.getX()),
             y=self.offsetY(visobject.getY()),
             width=visobject.getWidth() * self.xScaling,
             height=visobject.getHeight() * self.yScaling,
-            properties=visobject.getProperties()
+            properties=visobject.getProperties(),
+            name = visobject.getName()
         )
         self.objectsDict[visobject.getObjectId()].addObserver(self.alerts)
         self.viewAccess.addObject(self.objectsDict[visobject.getObjectId()])

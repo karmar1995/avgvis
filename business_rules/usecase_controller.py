@@ -9,11 +9,13 @@ class UseCaseController:
         self.__view = None
         self.__persistency = persistency
         self.__errorSink = None
+        self.__model = None
 
     def setView(self, view):
         self.__view = view
 
     def driveInitialization(self, modelRoot, opcRoot):
+        self.__model = modelRoot
         self.__errorSink = modelRoot.errorSink()
         configPath = self.__view.askForConfigPath()
 
@@ -42,6 +44,10 @@ class UseCaseController:
     def addObjectFactory(self, typeName, factory):
         self.__objectFactoriesByType[typeName] = factory
 
+    def disconnectObject(self, visobjectId):
+        self.__model.disconnectObject(visobjectId)
+
+
     def __getMapData(self):
         return self.__persistency.mapData()
 
@@ -61,3 +67,4 @@ class UseCaseController:
                 visObject.registerObject()
             else:
                 self.__errorSink.logError("Object not created: " + registerData['name'])
+

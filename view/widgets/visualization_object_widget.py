@@ -20,13 +20,22 @@ class VisualizationObjectWidget(QWidget):
     def __onLeftMouseButtonReleased(self, e):
         self.__widgetLogic.updateSelection()
 
+    def __onRightMouseButtonReleased(self, e):
+        qmenu = QMenu(self.__widgetLogic.name(), self)
+        disconnectAction = qmenu.addAction("Disconnect")
+        disconnectAction.triggered.connect(self.__widgetLogic.disconnect)
+        reconnectAction = qmenu.addAction("Reconnect")
+        point = e.globalPosition().toPoint()
+        qmenu.popup(point)
+
     def mouseReleaseEvent(self, e):
         if e.button() == Qt.MouseButton.LeftButton:
             self.__onLeftMouseButtonReleased(e)
+        elif e.button() == Qt.MouseButton.RightButton:
+            self.__onRightMouseButtonReleased(e)
         return super().mousePressEvent(e)
 
     def paintObject(self, painter):
-#        self.__drawObjectBackground(painter)
         self.__drawObjectBorder(painter)
         self.__drawObjectShape(painter)
 
