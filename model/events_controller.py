@@ -94,3 +94,6 @@ class EventsController:
         self.visobjectsRegistry.unregisterObject(objectId)
         self.broadcastObjectsChanged([objectId])
 
+    def onRefreshObject(self, refreshObjectEvent):
+        objectId = refreshObjectEvent.objectId
+        self.broadcastObjectsChanged([objectId])

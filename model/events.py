@@ -6,4 +6,5 @@ UpdateObjectRotationEvent = namedtuple("UpdateObjectRotationEvent", 'objectId ro
 UpdateObjectPropertiesEvent = namedtuple("UpdateObjectPropertiesEvent", 'objectId properties')
 UpdateObjectAlertsEvent = namedtuple("UpdateObjectAlertsEvent", 'objectId alerts')
 UnregisterObjectEvent = namedtuple("UnregisterObjectEvent", 'objectId')
+RefreshObjectEvent = namedtuple("RefreshObjectEvent", 'objectId')
 ShutdownEvent = namedtuple("ShutdownEvent", "unused")

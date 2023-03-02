@@ -52,5 +52,9 @@ class CompositionRoot:
         event = UnregisterObjectEvent(visobjectId)
         self.__eventsHub.onEvent(event)
 
+    def refreshObject(self, visobjectId):
+        event = RefreshObjectEvent(visobjectId)
+        self.__eventsHub.onEvent(event)
+
     def errorSink(self):
         return self.__errorSink

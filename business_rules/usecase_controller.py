@@ -47,6 +47,8 @@ class UseCaseController:
     def disconnectObject(self, visobjectId):
         self.__model.disconnectObject(visobjectId)
 
+    def refreshObject(self, visobjectId):
+        self.__model.refreshObject(visobjectId)
 
     def __getMapData(self):
         return self.__persistency.mapData()

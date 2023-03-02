@@ -25,6 +25,7 @@ class VisualizationObjectWidget(QWidget):
         disconnectAction = qmenu.addAction("Disconnect")
         disconnectAction.triggered.connect(self.__widgetLogic.disconnect)
         reconnectAction = qmenu.addAction("Reconnect")
+        reconnectAction.triggered.connect(self.__widgetLogic.reconnect)
         point = e.globalPosition().toPoint()
         qmenu.popup(point)
 

@@ -46,6 +46,9 @@ class FakeEventsSource(AbstractEventSource):
     def unregisterObject(self, objectId):
         self.__enqueueEvent(UnregisterObjectEvent(objectId=objectId))
 
+    def refreshObject(self, objectId):
+        self.__enqueueEvent(RefreshObjectEvent(objectId=objectId))
+
     def processEventsQueue(self):
         self.threadWorker = threading.Thread(target=self.__sendEvents)
         self.threadWorker.start()

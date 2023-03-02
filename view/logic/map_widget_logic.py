@@ -134,6 +134,9 @@ class VisualizationWidgetLogic:
     def disconnect(self):
         self.__usecaseController.disconnectObject(self.__id)
 
+    def reconnect(self):
+        self.__usecaseController.refreshObject(self.__id)
+
 
 class MapWidgetLogic:
     def __init__(self, selection, alerts, usecaseController):

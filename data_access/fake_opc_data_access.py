@@ -211,8 +211,8 @@ class PointsMovingStrategy(StrategyBase):
 
 class FakeOpcClient:
     MovingStrategies = [
-#        HorizontalMovingStrategy,
-#        VerticalMovingStrategy,
+        HorizontalMovingStrategy,
+        VerticalMovingStrategy,
         PointsMovingStrategy,
     ]  # possible map traversing algorithms
 
@@ -224,10 +224,13 @@ class FakeOpcClient:
 
     def connect(self, connectionString):
         time.sleep(ConnectionTime)
-        if random.random() <= FailureProbability:
+        if random.random() <= (FailureProbability * 5):
             self.__throw()
         self.__connected = True
         self.__strategy.start()
+
+    def disconnect(self):
+        self.__connected = False
 
     def getSignalValue(self, signal):
         if random.random() <= FailureProbability:

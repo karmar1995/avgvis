@@ -17,6 +17,7 @@ class EventsHub(AbstractEventSource, AbstractEventHandler):
         self.handlersMap[UpdateObjectPropertiesEvent] = self.__onUpdateObjectPropertiesEvent
         self.handlersMap[UpdateObjectAlertsEvent] = self.__onUpdateObjectAlertsEvent
         self.handlersMap[UnregisterObjectEvent] = self.__onUnregisterObjectEvent
+        self.handlersMap[RefreshObjectEvent] = self.__onRefreshObjectEvent
         self.handlersMap[ShutdownEvent] = self.__onShutdownEvent
         self.eventsQueue = list()
         self.exit = False
@@ -83,6 +84,10 @@ class EventsHub(AbstractEventSource, AbstractEventHandler):
     def __onUnregisterObjectEvent(self, event):
         for handlerId in self.handlers:
             self.handlers[handlerId].onUnregisterObject(event)
+
+    def __onRefreshObjectEvent(self, event):
+        for handlerId in self.handlers:
+            self.handlers[handlerId].onRefreshObject(event)
 
     def __onShutdownEvent(self, event):
         self.exit = True
