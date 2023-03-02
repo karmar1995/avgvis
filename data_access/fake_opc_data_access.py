@@ -229,6 +229,9 @@ class FakeOpcClient:
         self.__connected = True
         self.__strategy.start()
 
+    def disconnect(self):
+        self.__connected = False
+
     def getSignalValue(self, signal):
         if random.random() <= FailureProbability:
             self.__throw()

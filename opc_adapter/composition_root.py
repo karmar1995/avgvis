@@ -2,9 +2,9 @@ from opc_adapter.opc_object import OpcObject
 
 
 class OpcFactory:
-    def __init__(self, opcClientFactory, eventsHandler, errorSink):
+    def __init__(self, opcClientFactory, eventsHub, errorSink):
         self.__opcClientFactory = opcClientFactory
-        self.__eventsHandler = eventsHandler
+        self.__eventsHub = eventsHub
         self.__errorSink = errorSink
 
     def createObject(self, objectId, registerData, errorSink):
@@ -21,7 +21,7 @@ class OpcFactory:
                               updateInterval=registerData['updateInterval'],
                               propertiesSignals=registerData['properties'],
                               alertsSignals=registerData['alerts'],
-                              eventHandler=self.__eventsHandler,
+                              eventsHub=self.__eventsHub,
                               errorSink=self.__errorSink)
         try:
             opcObject.initialize()
@@ -33,13 +33,12 @@ class OpcFactory:
 
 
 class CompositionRoot:
-    def __init__(self, eventsHandler, opcClientFactory, opcFakesFactory, errorSink):
-        self.__eventsHandler = eventsHandler
+    def __init__(self, eventsHub, opcClientFactory, opcFakesFactory, errorSink):
         self.__objectsFactory = OpcFactory(opcClientFactory=opcClientFactory,
-                                           eventsHandler=self.__eventsHandler,
+                                           eventsHub=eventsHub,
                                            errorSink=errorSink)
         self.__fakesFactory = OpcFactory(opcClientFactory=opcFakesFactory,
-                                         eventsHandler=self.__eventsHandler,
+                                         eventsHub=eventsHub,
                                          errorSink=errorSink)
 
     def objectsFactory(self):

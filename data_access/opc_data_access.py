@@ -30,6 +30,9 @@ class OpcClient:
         except OSError:
             self.__errorSink.logError("Cannot connect to OPC server: " + connectionString)
 
+    def disconnect(self):
+        self.__client.disconnect()
+
     def getSignalValue(self, signal):
         try:
             if self.__connected:

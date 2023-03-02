@@ -26,6 +26,7 @@ class PollingThread:
         self.__thread.start()
 
     def stop(self):
+        self.__client.disconnect()
         self.__stopped = True
         self.__thread.join()
         self.__thread = None
