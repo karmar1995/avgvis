@@ -52,27 +52,23 @@ class VisualizationObjectWidget(QWidget):
         return QtCore.QRect(*self.__widgetLogic.getBoundingRect())
 
     def __drawObjectBorder(self, painter):
-        backgroundBrush = QBrush()
+        frontEllipse = QtCore.QRect(*self.__widgetLogic.getFrontLidarEllipseRect())
+        rearEllipse = QtCore.QRect(*self.__widgetLogic.getRearLidarEllipseRect())
         color = QColor(0, 0, 0, 50)
-        if self.__widgetLogic.isSelected():
-            color = QColor(50, 150, 50, 50)
-        if self.__hovered:
-            color = QColor(0, 0, 0, 150)
 
+        backgroundBrush = QBrush()
         backgroundBrush.setColor(color)
         backgroundBrush.setStyle(Qt.BrushStyle.SolidPattern)
         borderBrush = QBrush()
         borderBrush.setColor(QColor(0, 0, 0))
         borderBrush.setStyle(Qt.BrushStyle.SolidPattern)
-        polygon = QPolygon(self.__pointsToQPoints(self.__widgetLogic.getBorderPoints()))
         pen = QPen()
         pen.setBrush(borderBrush)
         pen.setWidth(5)
+        painter.setBrush(backgroundBrush)
         painter.setPen(pen)
-        painter.drawPolygon(polygon)
-        painterPath = QPainterPath()
-        painterPath.addPolygon(polygon.toPolygonF())
-        painter.fillPath(painterPath, backgroundBrush)
+        painter.drawEllipse(frontEllipse)
+        painter.drawEllipse(rearEllipse)
 
     def __drawObjectShape(self, painter):
         borderBrush = QBrush()

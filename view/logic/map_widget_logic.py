@@ -21,8 +21,10 @@ class VisualizationWidgetLogic:
         self.__name = "Dummy"
         self.__alerts = None
         self.__heading = None
+        self.__frontLidarRadius = None
+        self.__rearLidarRadius = None
 
-    def initialize(self, id, x, y, width, height, properties, name):
+    def initialize(self, id, x, y, width, height, properties, name, frontLidarRadius, rearLidarRadius):
         self.__id = id
         self.__x = x
         self.__y = y
@@ -30,6 +32,8 @@ class VisualizationWidgetLogic:
         self.__height = height
         self.__properties = properties
         self.__name = name
+        self.__frontLidarRadius = frontLidarRadius
+        self.__rearLidarRadius = rearLidarRadius
 
     def addObserver(self, observer):
         self.__objectObservers[id(observer)] = observer
@@ -77,8 +81,8 @@ class VisualizationWidgetLogic:
 
     def getShapePoints(self):
         points = list()
-        shape_width = self.__width / 4
-        shape_height = self.__height / 4
+        shape_width = self.__width
+        shape_height = self.__height
         origin_x = self.__x
         origin_y = self.__y
         p1 = self.__rotatePoint(Point(0, int(-shape_height / 2)))
@@ -88,6 +92,22 @@ class VisualizationWidgetLogic:
         points.append(Point(x=int(p2.x + origin_x), y=int(p2.y + origin_y)))
         points.append(Point(x=int(p3.x + origin_x), y=int(p3.y + origin_y)))
         return points
+
+    def __getEllipseBoundingRectAtPoint(self, radius, point):
+        top_left_x = point.x - int(radius)
+        top_left_y = point.y - int(radius)
+        return int(top_left_x), int(top_left_y), int(radius*2), int(radius*2)
+
+    def getFrontLidarEllipseRect(self):
+        frontLidarPoint = self.getShapePoints()[0]
+        return self.__getEllipseBoundingRectAtPoint(self.__frontLidarRadius, frontLidarPoint)
+
+    def getRearLidarEllipseRect(self):
+        shapePoints = self.getShapePoints()
+        rearLidarPoint = Point(
+            x = (shapePoints[1].x + shapePoints[2].x) / 2,
+            y = (shapePoints[1].y + shapePoints[2].y) / 2)
+        return self.__getEllipseBoundingRectAtPoint(self.__rearLidarRadius, rearLidarPoint)
 
     def properties(self):
         properties_dict = dict()
@@ -204,7 +224,9 @@ class MapWidgetLogic:
             width=visobject.getWidth() * self.xScaling,
             height=visobject.getHeight() * self.yScaling,
             properties=visobject.getProperties(),
-            name = visobject.getName()
+            name = visobject.getName(),
+            frontLidarRadius = 3 * self.xScaling,
+            rearLidarRadius = 3 * self.xScaling
         )
         self.objectsDict[visobject.getObjectId()].addObserver(self.alerts)
         self.viewAccess.addObject(self.objectsDict[visobject.getObjectId()])
