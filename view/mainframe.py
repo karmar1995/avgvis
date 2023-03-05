@@ -44,6 +44,7 @@ class Mainframe(QMainWindow):
         return self.mainframeLogic.initialize()
 
     def __start(self):
+        self.mapDockWidget.mapPane.startVisualizationButton.setEnabled(False)
         self.mainframeLogic.start()
 
     def __stop(self):

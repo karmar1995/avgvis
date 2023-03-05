@@ -211,8 +211,8 @@ class PointsMovingStrategy(StrategyBase):
 
 class FakeOpcClient:
     MovingStrategies = [
-        HorizontalMovingStrategy,
-        VerticalMovingStrategy,
+#        HorizontalMovingStrategy,
+#        VerticalMovingStrategy,
         PointsMovingStrategy,
     ]  # possible map traversing algorithms
 

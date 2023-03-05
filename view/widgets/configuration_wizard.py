@@ -53,25 +53,34 @@ class LabeledSpinBox(QWidget):
         self.setLayout(layout)
 
 
-class MapDataPage(QWizardPage):
+class MapDataWidget(QWidget):
     def __init__(self, parent):
         super().__init__(parent=parent)
+        self.groupBox = QGroupBox(parent=self, title="Map data")
         self.xSpinBox = LabeledSpinBox(self, "X: ", -1000, 1000, 5, 1)
         self.ySpinBox = LabeledSpinBox(self, "Y: ", -1000, 1000, 5, 1)
         self.widthSpinBox = LabeledSpinBox(self, "Width: ", 0, 1000, 5, 1)
         self.heightSpinBox = LabeledSpinBox(self, "Height: ", 0, 1000, 5, 1)
         self.filePicker = FilePickerWidget(self, "Map file: ", "Browse")
+        groupboxLayout = QVBoxLayout()
+        groupboxLayout.addWidget(self.filePicker)
+        groupboxLayout.addWidget(self.xSpinBox)
+        groupboxLayout.addWidget(self.ySpinBox)
+        groupboxLayout.addWidget(self.widthSpinBox)
+        groupboxLayout.addWidget(self.heightSpinBox)
+        groupboxLayout.addStretch()
+        self.groupBox.setLayout(groupboxLayout)
         layout = QVBoxLayout()
-        layout.addWidget(self.filePicker)
-        layout.addWidget(self.xSpinBox)
-        layout.addWidget(self.ySpinBox)
-        layout.addWidget(self.widthSpinBox)
-        layout.addWidget(self.heightSpinBox)
-        layout.addStretch()
+        layout.addWidget(self.groupBox)
         self.setLayout(layout)
 
-    def initializePage(self):
-        super().initializePage()
+    def mapData(self):
+        mapUrl = self.filePicker.lineEdit.text()
+        x = self.xSpinBox.spinbox.value()
+        y = self.ySpinBox.spinbox.value()
+        width = self.widthSpinBox.spinbox.value()
+        height = self.heightSpinBox.spinbox.value()
+        return mapUrl, x, y, width, height
 
 
 class PickObjectTypeWidget(QWidget):
@@ -203,15 +212,19 @@ class ObjectsView(QWidget):
         return item
 
 
-class AddObjectsPage(QWizardPage):
+class AddObjectsWidget(QWidget):
     def __init__(self, parent):
         super().__init__(parent=parent)
         self.objects = list()
-        self.objectsView = ObjectsView(parent=parent)
-        self.pickObjectTypeWidget = PickObjectTypeWidget(parent=self)
+        self.groupBox = QGroupBox(parent=self, title="Visualization objects")
+        self.objectsView = ObjectsView(parent=self.groupBox)
+        self.pickObjectTypeWidget = PickObjectTypeWidget(parent=self.groupBox)
+        groupboxLayout = QVBoxLayout()
+        groupboxLayout.addWidget(self.objectsView)
+        groupboxLayout.addWidget(self.pickObjectTypeWidget)
+        self.groupBox.setLayout(groupboxLayout)
         layout = QVBoxLayout()
-        layout.addWidget(self.objectsView)
-        layout.addWidget(self.pickObjectTypeWidget)
+        layout.addWidget(self.groupBox)
         self.setLayout(layout)
         self.pickObjectTypeWidget.addObjectButton.clicked.connect(self.__showAddObjectDialog)
 
@@ -223,44 +236,33 @@ class AddObjectsPage(QWizardPage):
         dialog = AddObjectDialog(parent=self, sourceType=self.pickObjectTypeWidget.pickObjectTypeCombo.currentText(), listener=self)
         dialog.exec()
 
-    def initializePage(self):
-        super().initializePage()
 
-
-class ConfigurationWizard(QWizard):
+class ConfigurationWizard(QDialog):
     def __init__(self, parent):
         super().__init__(parent=parent)
         self.__configurationPersistency = None
-        self.mapDataPage = MapDataPage(self)
-        self.addObjectsPage = AddObjectsPage(self)
-        self.addPage(self.mapDataPage)
-        self.addPage(self.addObjectsPage)
-        self.__mapData = None
+        self.mapDataWidget = MapDataWidget(self)
+        self.addObjectsWidget = AddObjectsWidget(self)
+        self.submitButton = QPushButton(parent=self, text="Submit")
+        self.cancelButton = QPushButton(parent=self, text="Cancel")
+        buttonsLayout = QHBoxLayout()
+        buttonsLayout.addStretch()
+        buttonsLayout.addWidget(self.submitButton)
+        buttonsLayout.addWidget(self.cancelButton)
+        layout = QVBoxLayout()
+        layout.addWidget(self.mapDataWidget)
+        layout.addWidget(self.addObjectsWidget)
+        layout.addLayout(buttonsLayout)
+        self.setLayout(layout)
+        self.accepted.connect(self.__onDialogAccepted)
+        self.submitButton.clicked.connect(self.accept)
+        self.cancelButton.clicked.connect(self.reject)
 
     def driveConfiguration(self, persistency):
         self.__configurationPersistency = persistency
         self.exec()
 
-    def validateCurrentPage(self):
-        if self.currentPage() == self.mapDataPage:
-            return self.__onMapDataChanged()
-        if self.currentPage() == self.addObjectsPage:
-            return self.__onObjectsChanged()
-        return super().validateCurrentPage()
-
-    def __onMapDataChanged(self):
-        mapUrl = self.mapDataPage.filePicker.lineEdit.text()
-        x = self.mapDataPage.xSpinBox.spinbox.value()
-        y = self.mapDataPage.ySpinBox.spinbox.value()
-        width = self.mapDataPage.widthSpinBox.spinbox.value()
-        height = self.mapDataPage.heightSpinBox.spinbox.value()
-        if len(mapUrl) > 0 and width != 0 and height != 0:
-            self.__mapData = (mapUrl, x, y, width, height)
-            return True
-        return False
-
-    def __onObjectsChanged(self):
-        self.__configurationPersistency.saveMapData(self.__mapData)
-        self.__configurationPersistency.saveObjects(self.addObjectsPage.objects)
+    def __onDialogAccepted(self):
+        self.__configurationPersistency.saveMapData(self.mapDataWidget.mapData())
+        self.__configurationPersistency.saveObjects(self.addObjectsWidget.objects)
         self.__configurationPersistency.write()
-        return True
