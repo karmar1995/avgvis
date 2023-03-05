@@ -11,6 +11,9 @@ class QtViewToAbstractUserView(AbstractUserView):
     def driveConfigCreation(self, persistency):
         self.__configurationWizard.driveConfiguration(persistency)
 
+    def driveConfigEdit(self, persistency):
+        self.__configurationWizard.driveEditConfiguration(persistency)
+
     def askForConfigPath(self):
         return self.__configurationPicker.getConfigurationPath()
 

@@ -74,7 +74,7 @@ class ConfigurationInJson:
 
     def mapData(self):
         node = self.__data['mapData']
-        mapData = MapData(x=node['x'], y=node['y'], width=node['width'], height=node['height'])
+        mapData = MapData(x=node['x'], y=node['y'], width=node['width'], height=node['height'], url=node['url'])
         return mapData
 
     def objectsList(self):

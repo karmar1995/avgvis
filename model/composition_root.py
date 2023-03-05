@@ -7,7 +7,7 @@ from model.error_sink import ErrorSink
 from model.events import *
 from collections import namedtuple
 
-MapData = namedtuple("MapData", 'x y width height')
+MapData = namedtuple("MapData", 'url x y width height')
 
 
 class InitData:
@@ -30,7 +30,7 @@ class CompositionRoot:
 
     def initialize(self, initData):
         mapData = initData.mapData
-        self.__map.initialize(x=mapData.x, y=mapData.y, height=mapData.height, width=mapData.width, view=self.__view)
+        self.__map.initialize(x=mapData.x, y=mapData.y, height=mapData.height, width=mapData.width, view=self.__view, url=mapData.url)
         return True
 
     def objectsIdsGenerator(self):

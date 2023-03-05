@@ -17,17 +17,20 @@ class UseCaseController:
     def driveInitialization(self, modelRoot, opcRoot):
         self.__model = modelRoot
         self.__errorSink = modelRoot.errorSink()
-        configPath = self.__view.askForConfigPath()
+        res = self.__view.askForConfigPath()
+        configPath = res[0]
+        editRequested = res[1]
 
         if not self.__persistency.fileExists(configPath):
             self.__persistency.setFilename(configPath)
             self.__view.driveConfigCreation(self.__persistency)
-
         try:
             self.__persistency.read(configPath)
+            if editRequested:
+                self.__view.driveConfigEdit(self.__persistency)
             mapData = self.__getMapData()
             modelInitData = model_root.InitData(
-                model_root.MapData(x=mapData[0], y=mapData[1], width=mapData[2], height=mapData[3]))
+                model_root.MapData(url=mapData[0], x=mapData[1], y=mapData[2], width=mapData[3], height=mapData[4]))
 
             if not modelRoot.initialize(modelInitData):
                 return False
@@ -37,6 +40,8 @@ class UseCaseController:
             self.__registerObjectsFromPersistency()
             return True
 
+        except Exception as e:
+            print(str(e))
         except:
             self.__view.onIncorrectConfig(configPath)
             return False

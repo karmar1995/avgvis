@@ -4,18 +4,18 @@ class Map:
         self.__y = None
         self.__width = None
         self.__height = None
+        self.__url = None
         self.view = None
-        self.startPoint = None
         self.objectsRegistry = objectsRegistry
         self.collidedObjects = list()
 
-    def initialize(self, x, y, width, height, view, startPoint="TopLeft"):
+    def initialize(self, x, y, width, height, view, url):
         self.__x = x
         self.__y = y
         self.__width = width
         self.__height = height
+        self.__url = url
         self.view = view
-        self.startPoint = startPoint
         self.view.renderMap(self)
 
     def onChangedObjects(self, changedObjects):
@@ -51,6 +51,8 @@ class Map:
     def size(self):
         return self.width(), self.height()
 
+    def url(self):
+        return self.__url
 
     def isValidPosition(self, x, y):
         if x >= self.topLeft()[0] and y >= self.topLeft()[1]:

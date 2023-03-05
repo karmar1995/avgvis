@@ -30,6 +30,9 @@ class MapAccess(QObject):
     def updateGrid(self, columnWidth, rowHeight):
         self.mapWidget.updateGridSignal.emit(int(columnWidth), int(rowHeight))
 
+    def setPixmapUrl(self, url):
+        self.mapWidget.initializePixmap(url)
+
 
 class MapWidget(QWidget):
     showMapSignal = pyqtSignal(name='showMapSignal')
@@ -39,11 +42,10 @@ class MapWidget(QWidget):
 
     def __init__(self, parent, widgetLogic):
         super().__init__(parent=parent)
-        self.pixmap = QPixmap("/home/kmarszal/Documents/dev/avgvis/view/resources/map.jpg")
+        self.pixmap = None
         self.visualObjects = dict()
         self.setMouseTracking(True)
         self.hoveredObject = None
-        self.setFixedSize(self.pixmap.size())
         self.setVisible(False)
         self.__mapAccess = MapAccess(self, self)
         self.showMapSignal.connect(self.showMap)
@@ -63,6 +65,10 @@ class MapWidget(QWidget):
 
     def showMap(self):
         self.setVisible(True)
+
+    def initializePixmap(self, url):
+        self.pixmap = QPixmap(url)
+        self.setFixedSize(self.pixmap.size())
 
     def updateGrid(self, columnWidth, rowHeight):
         self.gridWidget.setColumnWidth(columnWidth)
@@ -122,4 +128,6 @@ class MapWidget(QWidget):
         return self.__mapAccess
 
     def sizeHint(self) -> QtCore.QSize:
-        return self.pixmap.size()
+        if self.pixmap is not None:
+            return self.pixmap.size()
+        return super().sizeHint()

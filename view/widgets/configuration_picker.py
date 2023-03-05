@@ -9,11 +9,13 @@ class ConfigurationPickerDialog(QDialog):
     def __init__(self, parent):
         super().__init__(parent=parent)
         self.__file = ""
+        self.__editRequested = False
         self.setWindowTitle("Select configuration file")
         self.lineEdit = QLineEdit()
         self.browseButton = QPushButton("Browse")
         self.newButton = QPushButton("New")
-        self.applyButton = QPushButton("Apply")
+        self.startButton = QPushButton("Start")
+        self.editButton = QPushButton("Edit")
         layout = QHBoxLayout()
         layout.addWidget(self.lineEdit)
         layout.addWidget(self.browseButton)
@@ -23,12 +25,14 @@ class ConfigurationPickerDialog(QDialog):
         mainLayout.addStretch()
         buttonLayout = QHBoxLayout()
         buttonLayout.addStretch()
-        buttonLayout.addWidget(self.applyButton)
+        buttonLayout.addWidget(self.editButton)
+        buttonLayout.addWidget(self.startButton)
         mainLayout.addLayout(buttonLayout)
         self.setLayout(mainLayout)
         self.browseButton.clicked.connect(self.__showBrowseDialog)
         self.newButton.clicked.connect(self.__showNewConfigDialog)
-        self.applyButton.clicked.connect(self.__onApply)
+        self.startButton.clicked.connect(self.__onApply)
+        self.editButton.clicked.connect(self.__onEditConfiguration)
 
     def getConfigurationPath(self):
         screenGeometry = QApplication.primaryScreen().geometry()
@@ -41,7 +45,7 @@ class ConfigurationPickerDialog(QDialog):
         windowGeometry.setHeight(height)
         self.setGeometry(windowGeometry)
         self.exec()
-        return self.__file
+        return self.__file, self.__editRequested
 
     def __showBrowseDialog(self):
         self.__file = QFileDialog.getOpenFileName(parent=self,
@@ -59,3 +63,7 @@ class ConfigurationPickerDialog(QDialog):
 
     def __onApply(self):
         self.close()
+
+    def __onEditConfiguration(self):
+        self.__editRequested = True
+        self.__onApply()

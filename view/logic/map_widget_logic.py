@@ -242,6 +242,7 @@ class MapWidgetLogic:
 
     def renderMap(self, modelMap):
         self.modelMap = modelMap
+        self.viewAccess.setPixmapUrl(self.url())
         self.updateScaling()
         self.updateOrigin()
         self.viewAccess.updateGrid(self.columnWidth * self.xScaling, self.rowHeight * self.yScaling)
@@ -264,6 +265,9 @@ class MapWidgetLogic:
         modelDistance = y - self.mapOrigin[1]
         scaledDistance = modelDistance * self.yScaling
         return self.viewAccess.size().height() - scaledDistance
+
+    def url(self):
+        return self.modelMap.url()
 
 
 class ModelViewToMapLogicAdapter(AbstractModelView):

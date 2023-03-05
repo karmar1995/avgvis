@@ -1,7 +1,7 @@
 from PyQt6.QtWidgets import *
 from collections import namedtuple
+from view.logic.configuration_widgets_builder import ConfigurationWidgetsBuilder, ObjectData
 
-ObjectData = namedtuple("ObjectData", "name sourceType connectionString width height xSignal ySignal headingSignal properties alerts updateInterval")
 
 
 class LabeledLineEdit(QWidget):
@@ -260,6 +260,12 @@ class ConfigurationWizard(QDialog):
 
     def driveConfiguration(self, persistency):
         self.__configurationPersistency = persistency
+        self.exec()
+
+    def driveEditConfiguration(self, persistency):
+        self.__configurationPersistency = persistency
+        widgetsBuilder = ConfigurationWidgetsBuilder(persistency, self.mapDataWidget, self.addObjectsWidget)
+        widgetsBuilder.build()
         self.exec()
 
     def __onDialogAccepted(self):
