@@ -221,13 +221,13 @@ class FakeOpcClient:
         self.__errorSink = errorSink
         self.__objectState = ObjectState()
         self.__strategy = random.choice(self.MovingStrategies)(self.__objectState)
+        self.__strategy.start()
 
     def connect(self, connectionString):
         time.sleep(ConnectionTime)
         if random.random() <= (FailureProbability * 5):
             self.__throw()
         self.__connected = True
-        self.__strategy.start()
 
     def disconnect(self):
         self.__connected = False

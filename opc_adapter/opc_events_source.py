@@ -58,11 +58,16 @@ class PollingThread:
                 self.__connected = True
             except Exception as e:
                 self.__errorSink.logInformation("Cannot connect to: {}, entering wait for: {} s".format(self.__connectionString, timeoutPeriod))
-                time.sleep(timeoutPeriod)
+                self.__enterTimoutPeriod(timeoutPeriod)
             except:
                 self.__errorSink.logDebug("Unhandled exception while connection, killing opc object")
                 self.stop()
 
+    def __enterTimoutPeriod(self, timeoutPeriod):
+        while not self.__connected and not self.__stopped and timeoutPeriod > 0:
+            __sleepTime = 1
+            time.sleep(__sleepTime)
+            timeoutPeriod -= __sleepTime
 
 class OpcEventSource(AbstractEventSource):
     def __init__(self, opcClient, objectId, xSignal, ySignal, rotationSignal, propertiesSignalsDict, updateInterval, errorSink, connectionString):
