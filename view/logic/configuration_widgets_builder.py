@@ -1,6 +1,7 @@
 from collections import namedtuple
 
-ObjectData = namedtuple("ObjectData", "name sourceType connectionString width height xSignal ySignal headingSignal properties alerts updateInterval")
+ObjectData = namedtuple("ObjectData", "name sourceType connectionString width height frontLidarRange rearLidarRange xSignal ySignal headingSignal properties alerts updateInterval")
+
 
 class ConfigurationWidgetsBuilder:
     def __init__(self, persistency, mapView, objectsView):
@@ -47,7 +48,9 @@ class ConfigurationWidgetsBuilder:
             headingSignal='/'.join(objectToShow['rotationSignal']),
             alerts=alerts,
             properties=properties,
-            updateInterval=objectToShow['updateInterval']
+            updateInterval=objectToShow['updateInterval'],
+            frontLidarRange=objectToShow['frontLidarRange'],
+            rearLidarRange=objectToShow['rearLidarRange']
         )
         self.__objectsView.onObjectAdded(objectData)
 

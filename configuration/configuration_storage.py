@@ -86,6 +86,8 @@ class ConfigurationInJson:
             registerData['sourceType'] = object['sourceType']
             registerData['width'] = float(object['width'])
             registerData['height'] = float(object['height'])
+            registerData['frontLidarRange'] = float(object['frontLidarRange'])
+            registerData['rearLidarRange'] = float(object['rearLidarRange'])
             registerData['type'] = "AGV"
             registerData['connectionString'] = object['connectionString']
             registerData['xSignal'] = object['xSignal'].split('/')

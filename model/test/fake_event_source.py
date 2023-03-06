@@ -24,7 +24,7 @@ class FakeEventsSource(AbstractEventSource):
             self.handlers.pop(id(handler))
 
     def registerAgvObject(self, objectId, name):
-        event = RegisterObjectEvent(objectId=objectId, type="AGV", properties={"battery": "10%"}, width=4, height=3, name=name)
+        event = RegisterObjectEvent(objectId=objectId, type="AGV", properties={"battery": "10%"}, width=4, height=3, name=name, frontLidarRange=1, rearLidarRange=1)
         self.__enqueueEvent(event)
 
     def updateObjectPosition(self, objectId, x, y):

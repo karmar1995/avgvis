@@ -24,27 +24,25 @@ class UseCaseController:
         if not self.__persistency.fileExists(configPath):
             self.__persistency.setFilename(configPath)
             self.__view.driveConfigCreation(self.__persistency)
-        try:
-            self.__persistency.read(configPath)
-            if editRequested:
-                self.__view.driveConfigEdit(self.__persistency)
-            mapData = self.__getMapData()
-            modelInitData = model_root.InitData(
-                model_root.MapData(url=mapData[0], x=mapData[1], y=mapData[2], width=mapData[3], height=mapData[4]))
+        # try:
+        self.__persistency.read(configPath)
+        if editRequested:
+            self.__view.driveConfigEdit(self.__persistency)
+        mapData = self.__getMapData()
+        modelInitData = model_root.InitData(
+            model_root.MapData(url=mapData[0], x=mapData[1], y=mapData[2], width=mapData[3], height=mapData[4]))
 
-            if not modelRoot.initialize(modelInitData):
-                return False
-            if not opcRoot.initialize():
-                return False
-
-            self.__registerObjectsFromPersistency()
-            return True
-
-        except Exception as e:
-            print(str(e))
-        except:
-            self.__view.onIncorrectConfig(configPath)
+        if not modelRoot.initialize(modelInitData):
             return False
+        if not opcRoot.initialize():
+            return False
+
+        self.__registerObjectsFromPersistency()
+        return True
+
+        # except:
+        #     self.__view.onIncorrectConfig(configPath)
+        #     return False
 
     def addObjectFactory(self, typeName, factory):
         self.__objectFactoriesByType[typeName] = factory

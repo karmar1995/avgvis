@@ -3,7 +3,24 @@ from opc_adapter.opc_events_source import OpcEventSource
 
 class OpcObject:
 
-    def __init__(self, opcClient, objectId, name, width, height, type, xSignal, ySignal, rotationSignal, propertiesSignals, alertsSignals, connectionString, updateInterval, eventsHub, errorSink):
+    def __init__(self,
+                 opcClient,
+                 objectId,
+                 name,
+                 width,
+                 height,
+                 type,
+                 xSignal,
+                 ySignal,
+                 rotationSignal,
+                 propertiesSignals,
+                 alertsSignals,
+                 connectionString,
+                 updateInterval,
+                 eventsHub,
+                 errorSink,
+                 frontLidarRange,
+                 rearLidarRange):
         self.__name = name
         self.__objectId = objectId
         self.__opcClient = opcClient
@@ -14,6 +31,8 @@ class OpcObject:
         self.__eventsHub = eventsHub
         self.__alertsSignalsRoots = alertsSignals
         self.__eventsHub.addHandler(self)
+        self.__frontLidarRange = frontLidarRange
+        self. __rearLidarRange = rearLidarRange
 
     def initialize(self):
         self.__initializeAlerts()
@@ -29,7 +48,10 @@ class OpcObject:
                                                       properties={},
                                                       height=self.__height,
                                                       width=self.__width,
-                                                      name=self.__name)
+                                                      name=self.__name,
+                                                      frontLidarRange=self.__frontLidarRange,
+                                                      rearLidarRange=self.__rearLidarRange
+                                                      )
 
     def __initializeAlerts(self):
         for alertRoot in self.__alertsSignalsRoots:

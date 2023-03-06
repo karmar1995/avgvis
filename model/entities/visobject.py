@@ -1,5 +1,5 @@
 class VisObjectData:
-    def __init__(self, name, objectId, x, y, rotation, width, height, properties):
+    def __init__(self, name, objectId, x, y, rotation, width, height, properties, frontLidarRange, rearLidarRange):
         self.name = name
         self.objectId = objectId
         self.x = x
@@ -8,6 +8,8 @@ class VisObjectData:
         self.width = width
         self.height = height
         self.properties = properties
+        self.frontLidarRange = frontLidarRange
+        self.rearLidarRange = rearLidarRange
 
 
 class VisObject:
@@ -21,6 +23,8 @@ class VisObject:
         self.__height = visObjectData.height
         self.__properties = visObjectData.properties
         self.__alerts = None
+        self.__frontLidarRange = visObjectData.frontLidarRange
+        self.__rearLidarRange = visObjectData.rearLidarRange
 
     def setX(self, x):
         self.__x = x
@@ -72,3 +76,11 @@ class VisObject:
 
     def getName(self):
         return self.__name
+
+    def getFrontLidarRange(self):
+        return self.__frontLidarRange
+
+    def getRearLidarRange(self):
+        return self.__rearLidarRange
+
+

@@ -1,6 +1,6 @@
 from collections import namedtuple
 
-RegisterObjectEvent = namedtuple("RegisterObjectEvent", 'objectId name type properties width height')
+RegisterObjectEvent = namedtuple("RegisterObjectEvent", 'objectId name type properties width height frontLidarRange rearLidarRange')
 UpdateObjectPositionEvent = namedtuple("UpdateObjectPositionEvent", 'objectId x y')
 UpdateObjectRotationEvent = namedtuple("UpdateObjectRotationEvent", 'objectId rotation')
 UpdateObjectPropertiesEvent = namedtuple("UpdateObjectPropertiesEvent", 'objectId properties')

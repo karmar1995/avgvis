@@ -34,7 +34,14 @@ class EventsController:
         newObjectName = registerObjectEvent.name
         if not self.visobjectsRegistry.object(newObjectId):
             if registerObjectEvent.type == 'AGV':
-                visObjectData = VisObjectData(newObjectName, newObjectId, 0, 0, 0, registerObjectEvent.width, registerObjectEvent.height, registerObjectEvent.properties)
+                visObjectData = VisObjectData(newObjectName,
+                                              newObjectId,
+                                              0, 0, 0,
+                                              registerObjectEvent.width,
+                                              registerObjectEvent.height,
+                                              registerObjectEvent.properties,
+                                              registerObjectEvent.frontLidarRange,
+                                              registerObjectEvent.rearLidarRange)
                 agvObjectData = AgvObjectData(visObjectData)
                 self.visobjectsRegistry.registerObject(AgvObject(agvObjectData))
                 self.broadcastObjectsChanged([newObjectId])
@@ -58,14 +65,18 @@ class EventsController:
 
     def onUpdateObjectRotation(self, updateObjectRotationEvent):
         objectId = updateObjectRotationEvent.objectId
-        rotation = updateObjectRotationEvent.rotation % 360
+        value = updateObjectRotationEvent.rotation
+        try:
+            rotation = float(value) % 360
 
-        visObject = self.visobjectsRegistry.object(objectId)
-        if visObject:
-            visObject.setRotation(rotation)
-            self.broadcastObjectsChanged([objectId])
-        else:
-            self.errorSink.logError("Object {} does not exists!".format(objectId))
+            visObject = self.visobjectsRegistry.object(objectId)
+            if visObject:
+                visObject.setRotation(rotation)
+                self.broadcastObjectsChanged([objectId])
+            else:
+                self.errorSink.logError("Object {} does not exists!".format(objectId))
+        except ValueError:
+            self.errorSink.logError("Rotation value: '{}' is not a number!".format(value))
 
     def onUpdateObjectProperties(self, updateObjectPropertiesEvent):
         objectId = updateObjectPropertiesEvent.objectId

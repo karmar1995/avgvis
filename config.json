@@ -13,6 +13,8 @@
 			"connectionString": "not_used",
 			"width": 2,
 			"height": 2,
+			"frontLidarRange": 1,
+			"rearLidarRange": 1,
 			"type": "AGV",
 			"xSignal": "x",
 			"ySignal": "y",

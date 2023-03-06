@@ -22,7 +22,10 @@ class OpcFactory:
                               propertiesSignals=registerData['properties'],
                               alertsSignals=registerData['alerts'],
                               eventsHub=self.__eventsHub,
-                              errorSink=self.__errorSink)
+                              errorSink=self.__errorSink,
+                              frontLidarRange=registerData['frontLidarRange'],
+                              rearLidarRange=registerData['rearLidarRange']
+                              )
         try:
             opcObject.initialize()
             return opcObject

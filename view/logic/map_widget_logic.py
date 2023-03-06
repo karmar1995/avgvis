@@ -225,8 +225,8 @@ class MapWidgetLogic:
             height=visobject.getHeight() * self.yScaling,
             properties=visobject.getProperties(),
             name = visobject.getName(),
-            frontLidarRadius = 3 * self.xScaling,
-            rearLidarRadius = 3 * self.xScaling
+            frontLidarRadius = visobject.getFrontLidarRange() * self.xScaling,
+            rearLidarRadius = visobject.getRearLidarRange() * self.xScaling
         )
         self.objectsDict[visobject.getObjectId()].addObserver(self.alerts)
         self.viewAccess.addObject(self.objectsDict[visobject.getObjectId()])

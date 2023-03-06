@@ -106,13 +106,16 @@ class OpcEventSource(AbstractEventSource):
     def stop(self):
         self.__pollingThread.stop()
 
-    def sendRegisterObjectEvent(self, type, properties, width, height, name):
+    def sendRegisterObjectEvent(self, type, properties, width, height, name, frontLidarRange, rearLidarRange):
         registerObjectEvent = RegisterObjectEvent(objectId=self.__id,
                                                   type=type,
                                                   properties=properties,
                                                   width=width,
                                                   height=height,
-                                                  name = name)
+                                                  name = name,
+                                                  frontLidarRange=frontLidarRange,
+                                                  rearLidarRange=rearLidarRange
+                                                  )
         self.__broadcastEvent(registerObjectEvent)
 
     def __broadcastEvent(self, event):

@@ -3,7 +3,6 @@ from collections import namedtuple
 from view.logic.configuration_widgets_builder import ConfigurationWidgetsBuilder, ObjectData
 
 
-
 class LabeledLineEdit(QWidget):
     def __init__(self, parent, label):
         super().__init__(parent=parent)
@@ -83,7 +82,7 @@ class MapDataWidget(QWidget):
         return mapUrl, x, y, width, height
 
 
-class PickObjectTypeWidget(QWidget):
+class ManageObjectWidget(QWidget):
     def __init__(self, parent):
         super().__init__(parent=parent)
         self.pickObjectTypeLabel = QLabel("Object type: ")
@@ -91,12 +90,21 @@ class PickObjectTypeWidget(QWidget):
         self.pickObjectTypeCombo.addItem("OPC")
         self.pickObjectTypeCombo.addItem("FAKE_OPC")
         self.addObjectButton = QPushButton("Add object")
+        self.editObjectButton = QPushButton("Edit object")
+        self.copyObjectButton = QPushButton("Copy object")
+        self.removeObjectButton = QPushButton("Remove object")
         layout = QHBoxLayout()
         layout.addWidget(self.pickObjectTypeLabel)
         layout.addWidget(self.pickObjectTypeCombo)
         layout.addWidget(self.addObjectButton)
+        layout.addWidget(self.editObjectButton)
+        layout.addWidget(self.copyObjectButton)
+        layout.addWidget(self.removeObjectButton)
         layout.addStretch()
         self.setLayout(layout)
+        self.editObjectButton.setEnabled(False)
+        self.copyObjectButton.setEnabled(False)
+        self.removeObjectButton.setEnabled(False)
 
 
 class TwoColumnsGrid(QWidget):
@@ -139,6 +147,8 @@ class AddObjectDialog(QDialog):
         self.connectionString = LabeledLineEdit(parent=self, label="Connection string: ")
         self.width = LabeledSpinBox(self, "Width: ", 0, 1000, 5, 1)
         self.height = LabeledSpinBox(self, "Height: ", 0, 1000, 5, 1)
+        self.frontLidarRange = LabeledSpinBox(self, "Front lidar range: ", 0, 1000, 5, 1)
+        self.rearLidarRange = LabeledSpinBox(self, "Rear lidar range: ", 0, 1000, 5, 1)
         self.xSignal = LabeledLineEdit(parent=self, label="X coordinate signal: ")
         self.ySignal = LabeledLineEdit(parent=self, label="Y coordinate signal: ")
         self.headingSignal = LabeledLineEdit(parent=self, label="Heading signal: ")
@@ -150,6 +160,8 @@ class AddObjectDialog(QDialog):
         layout.addWidget(self.connectionString)
         layout.addWidget(self.width)
         layout.addWidget(self.height)
+        layout.addWidget(self.frontLidarRange)
+        layout.addWidget(self.rearLidarRange)
         layout.addWidget(self.xSignal)
         layout.addWidget(self.ySignal)
         layout.addWidget(self.headingSignal)
@@ -171,7 +183,10 @@ class AddObjectDialog(QDialog):
                                 headingSignal=self.headingSignal.lineEdit.text(),
                                 properties=self.propertiesGrid.dumpGrid(),
                                 alerts=self.alertsGrid.dumpGrid(),
-                                updateInterval=0.1)
+                                updateInterval=0.1,
+                                frontLidarRange=self.frontLidarRange.spinbox.value(),
+                                rearLidarRange=self.rearLidarRange.spinbox.value()
+                                )
         self.__listener.onObjectAdded(objectData)
         self.close()
 
@@ -192,6 +207,8 @@ class ObjectsView(QWidget):
         self.__createItem(objectRoot, "Connection string", objectData.connectionString)
         self.__createItem(objectRoot, "Width", objectData.width)
         self.__createItem(objectRoot, "Height", objectData.height)
+        self.__createItem(objectRoot, "Front lidar range", objectData.frontLidarRange)
+        self.__createItem(objectRoot, "Rear lidar range", objectData.rearLidarRange)
         self.__createItem(objectRoot, "X coordinate signal", objectData.xSignal)
         self.__createItem(objectRoot, "Y coordinate signal", objectData.ySignal)
         self.__createItem(objectRoot, "Heading signal", objectData.headingSignal)
@@ -204,6 +221,33 @@ class ObjectsView(QWidget):
         self.__createItem(objectRoot, "Update interval", objectData.updateInterval).setHidden(True)
 
         self.objectsTreeView.insertTopLevelItem(self.objectsTreeView.topLevelItemCount(), objectRoot)
+
+    def objectDataFromItem(self, objectRootItem):
+        objectData = ObjectData(name=objectRootItem.text(1),
+                                sourceType=objectRootItem.child(0).text(1),
+                                connectionString=objectRootItem.child(1).text(1),
+                                width=objectRootItem.child(2).text(1),
+                                height=objectRootItem.child(3).text(1),
+                                xSignal=objectRootItem.child(6).text(1),
+                                ySignal=objectRootItem.child(7).text(1),
+                                headingSignal=objectRootItem.child(8).text(1),
+                                properties=[],#
+                                alerts=[], #
+                                updateInterval=objectRootItem.child(11).text(1),
+                                frontLidarRange=objectRootItem.child(4).text(1),
+                                rearLidarRange=objectRootItem.child(5).text(1)
+                                )
+        propertiesRoot = objectRootItem.child(9)
+        for i in range(0, propertiesRoot.childCount()):
+            property = propertiesRoot.child(i).text(0), propertiesRoot.child(i).text(1)
+            objectData.properties.append(property)
+
+        alertsRoot = objectRootItem.child(10)
+        for i in range(0, alertsRoot.childCount()):
+            alert = alertsRoot.child(i).text(0), alertsRoot.child(i).text(1)
+            objectData.alerts.append(alert)
+
+        return objectData
 
     def __createItem(self, parent, firstColumn, secondColumn):
         item = QTreeWidgetItem(parent)
@@ -218,23 +262,44 @@ class AddObjectsWidget(QWidget):
         self.objects = list()
         self.groupBox = QGroupBox(parent=self, title="Visualization objects")
         self.objectsView = ObjectsView(parent=self.groupBox)
-        self.pickObjectTypeWidget = PickObjectTypeWidget(parent=self.groupBox)
+        self.manageObjectWidget = ManageObjectWidget(parent=self.groupBox)
         groupboxLayout = QVBoxLayout()
         groupboxLayout.addWidget(self.objectsView)
-        groupboxLayout.addWidget(self.pickObjectTypeWidget)
+        groupboxLayout.addWidget(self.manageObjectWidget)
         self.groupBox.setLayout(groupboxLayout)
         layout = QVBoxLayout()
         layout.addWidget(self.groupBox)
         self.setLayout(layout)
-        self.pickObjectTypeWidget.addObjectButton.clicked.connect(self.__showAddObjectDialog)
+        self.manageObjectWidget.addObjectButton.clicked.connect(self.__addObject)
+        self.manageObjectWidget.editObjectButton.clicked.connect(self.__editObject)
+        self.manageObjectWidget.copyObjectButton.clicked.connect(self.__copyObject)
+        self.manageObjectWidget.removeObjectButton.clicked.connect(self.__removeObject)
+        self.objectsView.objectsTreeView.itemSelectionChanged.connect(self.__onObjectSelectionChanged)
 
     def onObjectAdded(self, objectData):
         self.objectsView.addObject(objectData)
         self.objects.append(objectData)
 
-    def __showAddObjectDialog(self):
-        dialog = AddObjectDialog(parent=self, sourceType=self.pickObjectTypeWidget.pickObjectTypeCombo.currentText(), listener=self)
+    def __addObject(self):
+        dialog = AddObjectDialog(parent=self, sourceType=self.manageObjectWidget.pickObjectTypeCombo.currentText(), listener=self)
         dialog.exec()
+
+    def __editObject(self):
+        pass
+
+    def __copyObject(self):
+        self.onObjectAdded(self.objectsView.objectDataFromItem(self.objectsView.objectsTreeView.selectedItems()[0]))
+
+    def __removeObject(self):
+        pass
+
+    def __onObjectSelectionChanged(self):
+        items = self.objectsView.objectsTreeView.selectedItems()
+        selectedItem = items[0]
+        parent = selectedItem.parent()
+        self.manageObjectWidget.copyObjectButton.setEnabled(parent is None)
+        self.manageObjectWidget.editObjectButton.setEnabled(parent is None)
+        self.manageObjectWidget.removeObjectButton.setEnabled(parent is None)
 
 
 class ConfigurationWizard(QDialog):
