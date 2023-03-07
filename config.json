@@ -9,7 +9,7 @@
   "objects": [
     {
       "name": "AGV 1",
-      "sourceType": "OPC",
+      "sourceType": "FAKE_OPC",
       "connectionString": "not_used",
       "width": "2.0",
       "height": "2.0",

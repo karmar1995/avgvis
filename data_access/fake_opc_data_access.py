@@ -8,14 +8,22 @@ ySignal = ['y']
 headingSignal = ['heading']
 batterySignal = ['battery']
 warningSignal1 = ['warning1']
+warningSignal2 = ['warning2']
 informationSignal1 = ['information1']
+informationSignal2 = ['information2']
+childSignals = {
+    "['warnings_root']" : { "/".join(warningSignal1): warningSignal1, "/".join(warningSignal2): warningSignal2 },
+    "['information_root']" : { "/".join(informationSignal1): informationSignal1, "/".join(informationSignal2): informationSignal2 },
+}
 KnownSignals = [
     str(xSignal),
     str(ySignal),
     str(headingSignal),
     str(batterySignal),
     str(warningSignal1),
-    str(informationSignal1)]
+    str(warningSignal2),
+    str(informationSignal1),
+    str(informationSignal2)]
 FailureProbability = 0.1  # how often communication with serve will fail
 MinX = -5  # outside the map origin
 MinY = -5  # outside the map origin
@@ -44,7 +52,9 @@ class ObjectState:
         self.__signals[str(headingSignal)] = 0
         self.__signals[str(batterySignal)] = 0
         self.__signals[str(warningSignal1)] = False
+        self.__signals[str(warningSignal2)] = True
         self.__signals[str(informationSignal1)] = False
+        self.__signals[str(informationSignal2)] = True
 
     def getSignalValue(self, signal):
         if str(signal) in KnownSignals:
@@ -238,7 +248,7 @@ class FakeOpcClient:
         return self.__objectState.getSignalValue(signal)
 
     def getChildSignals(self, root):
-        return {}
+        return childSignals[str(root)]
 
     def __throw(self):
         raise Exception("Server failure")

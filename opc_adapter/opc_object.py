@@ -57,7 +57,7 @@ class OpcObject:
         for alertRoot in self.__alertsSignalsRoots:
             signals = self.__getAlertsSignalsForRoot(alertRoot)
             for signalName in signals:
-                self.__opcEventSource.addAlertSignal(signalName, signals[signalName])
+                self.__opcEventSource.addAlertSignal(signalName, signals[signalName], alertRoot)
 
     def __getAlertsSignalsForRoot(self, alertRoot):
         return self.__opcClient.getChildSignals(self.__alertsSignalsRoots[alertRoot])

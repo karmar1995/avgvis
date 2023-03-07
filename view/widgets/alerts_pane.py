@@ -77,7 +77,7 @@ class AlertsWidget(QWidget):
             entryItem = QTreeWidgetItem()
             entryItem.setText(0, alertSignalName)
             sectionRoot.addChild(entryItem)
-        entryItem.setText(1, alertSignalValue)
+        entryItem.setText(1, str(alertSignalValue))
 
 
 

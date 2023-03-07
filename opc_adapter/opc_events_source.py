@@ -69,6 +69,7 @@ class PollingThread:
             time.sleep(__sleepTime)
             timeoutPeriod -= __sleepTime
 
+
 class OpcEventSource(AbstractEventSource):
     def __init__(self, opcClient, objectId, xSignal, ySignal, rotationSignal, propertiesSignalsDict, updateInterval, errorSink, connectionString):
         super().__init__()
@@ -82,6 +83,7 @@ class OpcEventSource(AbstractEventSource):
         self.__currentSignalsState = {self.__xSignalStr: 0, self.__ySignalStr: 0, self.__rotationSignalStr: 0}
         self.__propertiesSignalsStrings = dict()
         self.__alertsSignalsStrings = dict()
+        self.__alertsParents = dict()
         for propertyName in propertiesSignalsDict:
             signal = propertiesSignalsDict[propertyName]
             self.__propertiesSignalsStrings[propertyName] = str(signal)
@@ -95,10 +97,11 @@ class OpcEventSource(AbstractEventSource):
     def removeHandler(self, handler):
         del self.__handlers[id(handler)]
 
-    def addAlertSignal(self, alertSignalName, alertSignal):
+    def addAlertSignal(self, alertSignalName, alertSignal, alertParent):
         self.__pollingThread.addSignal(alertSignal)
         self.__alertsSignalsStrings[alertSignalName] = str(alertSignal)
-        self.__currentSignalsState[str(alertSignal)] = 0
+        self.__alertsParents[alertSignalName] = alertParent
+        self.__currentSignalsState[str(alertSignal)] = None
 
     def start(self):
         self.__pollingThread.start()
@@ -112,7 +115,7 @@ class OpcEventSource(AbstractEventSource):
                                                   properties=properties,
                                                   width=width,
                                                   height=height,
-                                                  name = name,
+                                                  name=name,
                                                   frontLidarRange=frontLidarRange,
                                                   rearLidarRange=rearLidarRange
                                                   )
@@ -129,6 +132,7 @@ class OpcEventSource(AbstractEventSource):
         self.__processPositionSignals(signalsDict)
         self.__processRotationSignal(signalsDict)
         self.__processPropertiesSignals(signalsDict)
+        self.__processAlertsSignals(signalsDict)
 
     def __processPositionSignals(self, signalsDict):
         newX = None
@@ -168,6 +172,27 @@ class OpcEventSource(AbstractEventSource):
             signalStr = self.__propertiesSignalsStrings[propertyName]
             signalValue = self.__currentSignalsState[signalStr]
             res[propertyName] = signalValue
+        return res
+
+    def __processAlertsSignals(self, signalsDict):
+        changedAlerts = list()
+        for alertName in self.__alertsSignalsStrings:
+            signalStr = self.__alertsSignalsStrings[alertName]
+            if signalsDict[signalStr] != self.__currentSignalsState[signalStr]:
+                self.__currentSignalsState[signalStr] = signalsDict[signalStr]
+                changedAlerts.append(alertName)
+        if len(changedAlerts) > 0:
+            self.__onAlertsChanged(changedAlerts)
+
+    def __onAlertsChanged(self, changedAlerts):
+        self.__broadcastEvent(UpdateObjectAlertsEvent(objectId=self.__id, alerts=self.__getChangedAlertsDict(changedAlerts)))
+
+    def __getChangedAlertsDict(self, changedAlerts):
+        res = dict()
+        for alertName in changedAlerts:
+            signalStr = self.__alertsSignalsStrings[alertName]
+            signalValue = self.__currentSignalsState[signalStr]
+            res[self.__alertsParents[alertName]] = {alertName: signalValue}
         return res
 
     def __processRotationSignal(self, signalsDict):
