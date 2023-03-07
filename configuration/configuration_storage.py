@@ -31,6 +31,7 @@ class ConfigurationInJson:
         self.__filename = filename
 
     def read(self, filename):
+        self.__filename = filename
         with open(filename, 'r') as f:
             self.__data = json.load(f)
 
