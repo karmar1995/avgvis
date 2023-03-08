@@ -71,11 +71,14 @@ class VisualizationObjectWidget(QWidget):
         painter.drawEllipse(rearEllipse)
 
     def __drawObjectShape(self, painter):
+        color = QColor(120, 120, 120, 100)
+        if self.__widgetLogic.isSelected():
+            color = QColor(20, 120, 20)
         borderBrush = QBrush()
         borderBrush.setColor(QColor(0, 0, 0))
         borderBrush.setStyle(Qt.BrushStyle.SolidPattern)
         backgroundBrush = QBrush()
-        backgroundBrush.setColor(QColor(50, 150, 50))
+        backgroundBrush.setColor(color)
         backgroundBrush.setStyle(Qt.BrushStyle.SolidPattern)
         polygon = QPolygon(self.__pointsToQPoints(self.__widgetLogic.getShapePoints()))
         pen = QPen()

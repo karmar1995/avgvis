@@ -1,10 +1,10 @@
 {
   "mapData": {
     "url": "/home/kmarszal/Documents/dev/avgvis/view/resources/map_bkp.png",
-    "x": 26.5,
-    "y": 12.0,
-    "width": 28.25,
-    "height": 14.8
+    "x": 26,
+    "y": 11.8,
+    "width": 29.50,
+    "height": 15.45
   },
   "objects": [
     {
@@ -13,8 +13,8 @@
       "connectionString": "opc.tcp://157.158.57.220:48040",
       "width": "0.5",
       "height": "0.5",
-      "frontLidarRange": "1.0",
-      "rearLidarRange": "1.0",
+      "frontLidarRange": "0.5",
+      "rearLidarRange": "0.5",
       "xSignal": "4:Forbot_History/4:FH_ID_6000/4:[NNS] - Natural Navigation Signals/2:X-coordinate",
       "ySignal": "4:Forbot_History/4:FH_ID_6000/4:[NNS] - Natural Navigation Signals/2:Y-coordinate",
       "headingSignal": "4:Forbot_History/4:FH_ID_6000/4:[NNS] - Natural Navigation Signals/2:Heading",

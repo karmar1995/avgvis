@@ -8,7 +8,6 @@ CONFIG_EXTENSION = "json"
 class ConfigurationPickerDialog(QDialog):
     def __init__(self, parent):
         super().__init__(parent=parent)
-        self.__file = ""
         self.__editRequested = False
         self.setWindowTitle("Select configuration file")
         self.lineEdit = QLineEdit()
@@ -45,21 +44,21 @@ class ConfigurationPickerDialog(QDialog):
         windowGeometry.setHeight(height)
         self.setGeometry(windowGeometry)
         self.exec()
-        return self.__file, self.__editRequested
+        return self.lineEdit.text(), self.__editRequested
 
     def __showBrowseDialog(self):
-        self.__file = QFileDialog.getOpenFileName(parent=self,
+        __file = QFileDialog.getOpenFileName(parent=self,
                                                   caption="Open file",
                                                   directory="",
                                                   filter="Configuration files (*.{})".format(CONFIG_EXTENSION))[0]
-        self.lineEdit.setText(self.__file)
+        self.lineEdit.setText(__file)
 
     def __showNewConfigDialog(self):
-        self.__file = QFileDialog.getSaveFileName(parent=self,
+        __file = QFileDialog.getSaveFileName(parent=self,
                                                   caption="Create file",
                                                   directory="",
                                                   filter="Configuration files (*.{})".format(CONFIG_EXTENSION))[0]
-        self.lineEdit.setText(self.__file)
+        self.lineEdit.setText(__file)
 
     def __onApply(self):
         self.close()
