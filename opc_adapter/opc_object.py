@@ -24,18 +24,16 @@ class OpcObject:
         self.__name = name
         self.__objectId = objectId
         self.__opcClient = opcClient
-        self.__opcEventSource = OpcEventSource(opcClient, objectId, xSignal, ySignal, rotationSignal, propertiesSignals, updateInterval, errorSink, connectionString)
+        self.__opcEventSource = OpcEventSource(opcClient, objectId, xSignal, ySignal, rotationSignal, propertiesSignals, updateInterval, errorSink, connectionString, alertsSignals)
         self.__width = width
         self.__height = height
         self.__type = type
         self.__eventsHub = eventsHub
-        self.__alertsSignalsRoots = alertsSignals
         self.__eventsHub.addHandler(self)
         self.__frontLidarRange = frontLidarRange
         self. __rearLidarRange = rearLidarRange
 
     def initialize(self):
-        self.__initializeAlerts()
         self.__opcEventSource.addHandler(self.__eventsHub)
         self.__opcEventSource.start()
 
@@ -51,16 +49,7 @@ class OpcObject:
                                                       name=self.__name,
                                                       frontLidarRange=self.__frontLidarRange,
                                                       rearLidarRange=self.__rearLidarRange
-                                                      )
-
-    def __initializeAlerts(self):
-        for alertRoot in self.__alertsSignalsRoots:
-            signals = self.__getAlertsSignalsForRoot(alertRoot)
-            for signalName in signals:
-                self.__opcEventSource.addAlertSignal(signalName, signals[signalName], alertRoot)
-
-    def __getAlertsSignalsForRoot(self, alertRoot):
-        return self.__opcClient.getChildSignals(self.__alertsSignalsRoots[alertRoot])
+                                                          )
 
     def onRegisterObject(self, event):
         pass

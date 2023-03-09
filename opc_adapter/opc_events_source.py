@@ -4,9 +4,11 @@ import time
 from model.abstract_event_source import AbstractEventSource
 from model.events import *
 
+CHILD_SIGNALS_REFRESH_COUNT=1000
+
 
 class PollingThread:
-    def __init__(self, client, signalsList, callback, pollingInterval, errorSink, connectionString):
+    def __init__(self, client, signalsList, callback, pollingInterval, errorSink, connectionString, alertsSignalsRoots, eventsSource):
         self.__thread = None
         self.__client = client
         self.__signalsList = signalsList
@@ -16,6 +18,9 @@ class PollingThread:
         self.__errorSink = errorSink
         self.__connectionString = connectionString
         self.__connected = False
+        self.__alertsSignalsRoots = alertsSignalsRoots
+        self.__eventsSource = eventsSource
+        self.__childSignalsRefreshCountdown = 0
 
     def addSignal(self, signal):
         self.__signalsList.append(signal)
@@ -34,16 +39,20 @@ class PollingThread:
         self.__thread = None
 
     def __pollingMethod(self):
-        self.__ensureConnection()
-
         while not self.__stopped:
             try:
+                self.__childSignalsRefreshCountdown -= 1
+                self.__ensureConnection()
                 signalsDict = {}
                 for signal in self.__signalsList:
                     if len(signal) > 0:
                         signalsDict[str(signal)] = self.__client.getSignalValue(signal)
                 self.__callback(signalsDict)
-                time.sleep(self.__pollingInterval)
+                if self.__childSignalsRefreshCountdown <= 0:
+                    self.__childSignalsRefreshCountdown = CHILD_SIGNALS_REFRESH_COUNT
+                    self.__refreshAlerts()
+                else:
+                    time.sleep(self.__pollingInterval)
             except Exception as e:
                 self.__errorSink.logDebug("Exception during polling: " + str(e))
             except:
@@ -51,8 +60,8 @@ class PollingThread:
                 pass
 
     def __ensureConnection(self):
-        timeoutPeriod = 5*60
         if not self.__connected:
+            timeoutPeriod = 5 * 60
             try:
                 self.__client.connect(self.__connectionString)
                 self.__connected = True
@@ -69,9 +78,18 @@ class PollingThread:
             time.sleep(__sleepTime)
             timeoutPeriod -= __sleepTime
 
+    def __refreshAlerts(self):
+        for alertRoot in self.__alertsSignalsRoots:
+            signals = self.__getAlertsSignalsForRoot(alertRoot)
+            for signalName in signals:
+                self.__eventsSource.addAlertSignal(signalName, signals[signalName], alertRoot)
+
+    def __getAlertsSignalsForRoot(self, alertRoot):
+        return self.__client.getChildSignals(self.__alertsSignalsRoots[alertRoot])
+
 
 class OpcEventSource(AbstractEventSource):
-    def __init__(self, opcClient, objectId, xSignal, ySignal, rotationSignal, propertiesSignalsDict, updateInterval, errorSink, connectionString):
+    def __init__(self, opcClient, objectId, xSignal, ySignal, rotationSignal, propertiesSignalsDict, updateInterval, errorSink, connectionString, alertsSignals):
         super().__init__()
         signalsList = [xSignal, ySignal, rotationSignal]
         self.__handlers = dict()
@@ -89,7 +107,7 @@ class OpcEventSource(AbstractEventSource):
             self.__propertiesSignalsStrings[propertyName] = str(signal)
             self.__currentSignalsState[str(signal)] = 0
             signalsList.append(signal)
-        self.__pollingThread = PollingThread(opcClient, signalsList, self.__dataPolledCallback, updateInterval, errorSink, connectionString)
+        self.__pollingThread = PollingThread(opcClient, signalsList, self.__dataPolledCallback, updateInterval, errorSink, connectionString, alertsSignals, self)
 
     def addHandler(self, handler):
         self.__handlers[id(handler)] = handler
@@ -98,10 +116,11 @@ class OpcEventSource(AbstractEventSource):
         del self.__handlers[id(handler)]
 
     def addAlertSignal(self, alertSignalName, alertSignal, alertParent):
-        self.__pollingThread.addSignal(alertSignal)
-        self.__alertsSignalsStrings[alertSignalName] = str(alertSignal)
-        self.__alertsParents[alertSignalName] = alertParent
-        self.__currentSignalsState[str(alertSignal)] = None
+        if alertSignalName not in self.__alertsSignalsStrings:
+            self.__pollingThread.addSignal(alertSignal)
+            self.__alertsSignalsStrings[alertSignalName] = str(alertSignal)
+            self.__alertsParents[alertSignalName] = alertParent
+            self.__currentSignalsState[str(alertSignal)] = None
 
     def start(self):
         self.__pollingThread.start()
