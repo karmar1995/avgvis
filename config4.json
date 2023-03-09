@@ -22,8 +22,8 @@
         "battery": "battery"
       },
       "alerts": {
-        "information": "information",
-        "warnings": "warnings"
+        "information": "information_root",
+        "warnings": "warnings_root"
       },
       "updateInterval": "0.1"
     },
@@ -42,8 +42,8 @@
         "battery": "battery"
       },
       "alerts": {
-        "information": "information",
-        "warnings": "warnings"
+        "information": "information_root",
+        "warnings": "warnings_root"
       },
       "updateInterval": "0.1"
     },
@@ -62,8 +62,8 @@
         "battery": "battery"
       },
       "alerts": {
-        "information": "information",
-        "warnings": "warnings"
+        "information": "information_root",
+        "warnings": "warnings_root"
       },
       "updateInterval": "0.1"
     },
@@ -82,8 +82,8 @@
         "battery": "battery"
       },
       "alerts": {
-        "information": "information",
-        "warnings": "warnings"
+        "information": "information_root",
+        "warnings": "warnings_root"
       },
       "updateInterval": "0.1"
     },
@@ -102,8 +102,8 @@
         "battery": "battery"
       },
       "alerts": {
-        "information": "information",
-        "warnings": "warnings"
+        "information": "information_root",
+        "warnings": "warnings_root"
       },
       "updateInterval": "0.1"
     },
@@ -122,8 +122,8 @@
         "battery": "battery"
       },
       "alerts": {
-        "information": "information",
-        "warnings": "warnings"
+        "information": "information_root",
+        "warnings": "warnings_root"
       },
       "updateInterval": "0.1"
     },
@@ -142,8 +142,8 @@
         "battery": "battery"
       },
       "alerts": {
-        "information": "information",
-        "warnings": "warnings"
+        "information": "information_root",
+        "warnings": "warnings_root"
       },
       "updateInterval": "0.1"
     }

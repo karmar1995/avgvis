@@ -55,6 +55,8 @@ class MapWidget(QWidget):
         self.gridWidget = GridWidget(parent=self, columnWidth=100, rowHeight=100)
         self.__logic = widgetLogic
         self.__logic.setViewAccess(self.__mapAccess)
+        self.__refresher = QTimer()
+        self.__refresher.timeout.connect(self.__onRefresherTimeout)
 
     def addObject(self, widgetLogic : VisualizationWidgetLogic):
         self.visualObjects[widgetLogic.id()] = VisualizationObjectWidget(self, widgetLogic)
@@ -65,6 +67,7 @@ class MapWidget(QWidget):
 
     def showMap(self):
         self.setVisible(True)
+        self.__refresher.start(100)
 
     def initializePixmap(self, url):
         self.pixmap = QPixmap(url)
@@ -131,3 +134,7 @@ class MapWidget(QWidget):
         if self.pixmap is not None:
             return self.pixmap.size()
         return super().sizeHint()
+
+    def __onRefresherTimeout(self):
+        self.repaint()
+        self.__refresher.start(100)

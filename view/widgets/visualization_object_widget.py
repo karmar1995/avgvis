@@ -71,9 +71,9 @@ class VisualizationObjectWidget(QWidget):
         painter.drawEllipse(rearEllipse)
 
     def __drawObjectShape(self, painter):
-        color = QColor(120, 120, 120, 100)
+        color = QColor(20, 20, 120)
         if self.__widgetLogic.isSelected():
-            color = QColor(20, 120, 20)
+            color = QColor(20, 120, 0)
         borderBrush = QBrush()
         borderBrush.setColor(QColor(0, 0, 0))
         borderBrush.setStyle(Qt.BrushStyle.SolidPattern)

@@ -120,7 +120,7 @@ class OpcEventSource(AbstractEventSource):
             self.__pollingThread.addSignal(alertSignal)
             self.__alertsSignalsStrings[alertSignalName] = str(alertSignal)
             self.__alertsParents[alertSignalName] = alertParent
-            self.__currentSignalsState[str(alertSignal)] = None
+        self.__currentSignalsState[str(alertSignal)] = None
 
     def start(self):
         self.__pollingThread.start()

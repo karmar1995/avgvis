@@ -73,6 +73,7 @@ class StrategyBase:
         self.__thread = threading.Thread(target=self.__updateMethod)
         self.__thread.daemon = True
         self._objectState = objectState
+        self.__updateFailureProbability = FailureProbability * (0.5 + random.random())
 
     def start(self):
         self.__thread.start()
@@ -87,6 +88,8 @@ class StrategyBase:
             self._objectState.setSignalValue(warningSignal1, random.randint(0, 1) == 1)
             self._objectState.setSignalValue(informationSignal1, random.randint(0, 1) == 1)
             time.sleep((1+random.random()) * UpdateInterval)
+            if random.random() <= self.__updateFailureProbability:
+                time.sleep((1+random.random()) * UpdateInterval * 10)
 
     def _updateX(self):
         raise Exception("Not Implemented")
