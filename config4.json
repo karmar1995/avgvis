@@ -10,7 +10,7 @@
     {
       "name": "AGV 1",
       "sourceType": "FAKE_OPC",
-      "connectionString": "not_used",
+      "connectionString": "opc.tcp://157.158.57.220:48040",
       "width": "2.0",
       "height": "2.0",
       "frontLidarRange": "1.0",
@@ -30,7 +30,7 @@
     {
       "name": "AGV 6",
       "sourceType": "FAKE_OPC",
-      "connectionString": "not_used",
+      "connectionString": "opc.tcp://157.158.57.220:48041",
       "width": "2.0",
       "height": "2.0",
       "frontLidarRange": "1.0",
@@ -50,7 +50,7 @@
     {
       "name": "AGV 7",
       "sourceType": "FAKE_OPC",
-      "connectionString": "not_used",
+      "connectionString": "opc.tcp://157.158.57.220:48042",
       "width": "2.0",
       "height": "2.0",
       "frontLidarRange": "1.0",
@@ -70,7 +70,7 @@
     {
       "name": "AGV 8",
       "sourceType": "FAKE_OPC",
-      "connectionString": "not_used",
+      "connectionString": "opc.tcp://157.158.57.220:48043",
       "width": "2.0",
       "height": "2.0",
       "frontLidarRange": "1.0",
@@ -90,7 +90,7 @@
     {
       "name": "AGV 9",
       "sourceType": "FAKE_OPC",
-      "connectionString": "not_used",
+      "connectionString": "opc.tcp://157.158.57.220:48044",
       "width": "2.0",
       "height": "2.0",
       "frontLidarRange": "1.0",
@@ -110,7 +110,7 @@
     {
       "name": "AGV 10",
       "sourceType": "FAKE_OPC",
-      "connectionString": "not_used",
+      "connectionString": "opc.tcp://157.158.57.220:48045",
       "width": "2.0",
       "height": "2.0",
       "frontLidarRange": "1.0",
@@ -130,7 +130,7 @@
     {
       "name": "AGV 11",
       "sourceType": "FAKE_OPC",
-      "connectionString": "not_used",
+      "connectionString": "opc.tcp://157.158.57.220:48046",
       "width": "2.0",
       "height": "2.0",
       "frontLidarRange": "1.0",

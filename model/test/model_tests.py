@@ -14,7 +14,7 @@ class ModelTest(unittest.TestCase):
         self.compositionRoot = CompositionRoot()
         self.compositionRoot.setView(self.view)
         self.compositionRoot.addErrorListener(self.errorSink)
-        mapData = MapData(10, 20, 1000, 2000)
+        mapData = MapData("url", 10, 20, 1000, 2000)
         initData = InitData(mapData)
         self.compositionRoot.initialize(initData)
         self.compositionRoot.eventsHub().addEventsSource(self.eventsSource)
