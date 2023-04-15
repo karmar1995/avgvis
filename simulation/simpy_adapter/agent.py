@@ -9,6 +9,7 @@ class Agent:
 
     def run(self):
         startTime = self.env.now
+
         path = self.traverser.path()
         i = 1
         while i < len(path):
@@ -22,5 +23,9 @@ class Agent:
         with self.nextNode.executor.request() as request:
             yield request
             yield self.env.process(self.currentNode.process())
+
+        self.currentNode = None
+        self.nextNode = None
+
         endTime = self.env.now
         print("Agent: {} run time: {}".format(self.number, endTime - startTime))
