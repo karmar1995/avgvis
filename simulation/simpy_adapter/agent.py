@@ -7,7 +7,10 @@ class Agent:
         self.currentNode = None
         self.nextNode = None
 
-    def run(self):
+    def start(self):
+        self.env.process(self.__run())
+
+    def __run(self):
         startTime = self.env.now
 
         path = self.traverser.path()
@@ -28,4 +31,4 @@ class Agent:
         self.nextNode = None
 
         endTime = self.env.now
-        print("Agent: {} run time: {}".format(self.number, endTime - startTime))
+        self.traverser.feedback(path, endTime - startTime)

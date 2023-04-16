@@ -1,44 +1,34 @@
 import simpy
 from simulation.simpy_adapter.node import Node
-from simulation.simpy_adapter.agent import Agent
 from simulation.core.system_builder import *
+from simulation.core.controller import Controller
+from simulation.simpy_adapter.simpy_agents_factory import SimpyAgentsFactory
 
 
-class SimpleTraverser:
-    def __init__(self, system):
-        self.system = system
-        self.__path = None
+def buildTestGraph(builder):
+    for i in range(0, 10):
+        builder.addVertex(Vertex(node=Node(env=env, serviceTime=1)))
 
-    def setPath(self, path):
-        self.__path = path
+    for i in range(0, 10):
+        for j in range(0, 10):
+            builder.addEdge(Edge(source=i, target=j, weight=10 * i + j))
 
-    def path(self):
-        return self.__path
 
-    def node(self, index):
-        return self.system.node(index)
+class EnvironmentWrapper:
+    def __init__(self, environment, timeout):
+        self.__env = environment
+        self.__timeout = timeout
 
-    def transitionTime(self, nodeIndex1, nodeIndex2):
-        time = self.system.graph[nodeIndex1, nodeIndex2]
-        return time
+    def run(self):
+        self.__env.run(until=self.__timeout)
 
 
 env = simpy.Environment()
+simulation = EnvironmentWrapper(environment=env, timeout=10000)
+simpyAgentsFactory = SimpyAgentsFactory(env=env)
 
-builder = SystemBuilder()
-builder.addVertex(Vertex(node=Node(env=env, serviceTime=1)))
-builder.addVertex(Vertex(node=Node(env=env, serviceTime=1)))
-builder.addVertex(Vertex(node=Node(env=env, serviceTime=1)))
+systemBuilder = SystemBuilder()
+buildTestGraph(systemBuilder)
 
-builder.addEdge(Edge(source=0, target=1, weight=1))
-builder.addEdge(Edge(source=1, target=2, weight=1))
-
-traverser = SimpleTraverser(system=builder.system())
-traverser.setPath([0, 1, 2])
-
-agent = Agent(env, 1, traverser)
-
-env.process(agent.run())
-
-
-env.run(until=40)
+controller = Controller(system=systemBuilder.system(), agentsFactory=simpyAgentsFactory, simulation=simulation)
+controller.findPath(0, 3)
