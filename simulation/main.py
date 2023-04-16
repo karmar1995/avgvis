@@ -18,17 +18,20 @@ class EnvironmentWrapper:
     def __init__(self, environment, timeout):
         self.__env = environment
         self.__timeout = timeout
+        self.__curTime = 0
 
     def run(self):
-        self.__env.run(until=self.__timeout)
+        self.__curTime += self.__timeout
+        self.__env.run(until=self.__curTime)
 
 
 env = simpy.Environment()
-simulation = EnvironmentWrapper(environment=env, timeout=10000)
+simulation = EnvironmentWrapper(environment=env, timeout=1000)
 simpyAgentsFactory = SimpyAgentsFactory(env=env)
 
 systemBuilder = SystemBuilder()
 buildTestGraph(systemBuilder)
 
 controller = Controller(system=systemBuilder.system(), agentsFactory=simpyAgentsFactory, simulation=simulation)
-controller.findPath(0, 3)
+path = controller.findPath(0, 7)
+print("Best path: {} cost {}".format(path.path, path.cost))
