@@ -1,3 +1,6 @@
+import copy
+import random
+import time
 import simpy
 from simulation.simpy_adapter.node import Node
 from simulation.core.system_builder import *
@@ -7,7 +10,7 @@ from simulation.simpy_adapter.simpy_agents_factory import SimpyAgentsFactory
 
 def buildTestGraph(builder):
     for i in range(0, 10):
-        builder.addVertex(Vertex(node=Node(env=env, serviceTime=1)))
+        builder.addVertex(Vertex(node=Node(env=env, serviceTime=i*100)))
 
     for i in range(0, 10):
         for j in range(0, 10):
@@ -26,12 +29,32 @@ class EnvironmentWrapper:
 
 
 env = simpy.Environment()
-simulation = EnvironmentWrapper(environment=env, timeout=1000)
+simulation = EnvironmentWrapper(environment=env, timeout=10000000)
 simpyAgentsFactory = SimpyAgentsFactory(env=env)
 
 systemBuilder = SystemBuilder()
 buildTestGraph(systemBuilder)
 
-controller = Controller(system=systemBuilder.system(), agentsFactory=simpyAgentsFactory, simulation=simulation)
-path = controller.findPath(0, 7)
-print("Best path: {} cost {}".format(path.path, path.cost))
+permutations = list()
+for i in range(0, 10):
+    permutations.append(i)
+
+jobsNumber = 50
+testJobs = dict()
+
+for i in range(0, jobsNumber):
+    random.shuffle(permutations)
+    testJobs[str(i)] = copy.deepcopy(permutations)
+
+for i in range(0, 50):
+    controller = Controller(system=systemBuilder.system(), agentsFactory=simpyAgentsFactory, simulation=simulation)
+    res = controller.coordinatePaths(testJobs)
+
+    avgCost = 0
+
+    for jobId in res:
+        avgCost += res[jobId].cost
+
+    avgCost /= len(res)
+
+    print("Average cost: {}".format(avgCost))

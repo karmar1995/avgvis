@@ -1,4 +1,5 @@
 import simpy
+from simulation.simpy_adapter.timeout_utils import *
 
 
 class Node:
@@ -8,4 +9,4 @@ class Node:
         self.serviceTime = serviceTime
 
     def process(self):
-        yield self.env.timeout(self.serviceTime)
+        yield self.env.timeout(timeoutFor(self.serviceTime))
