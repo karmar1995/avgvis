@@ -24,7 +24,7 @@ class SimulatedAnnealingTraverser:
         self.__bestPath = None
         self.__nodesToVisit = nodesToVisit
         self.__generateInitialPath()
-        self.__temperature = 1.0
+        self.__temperature = 0.0
 
     def __generateInitialPath(self):
         path = [self.__nodesToVisit[0]]
@@ -79,9 +79,8 @@ class Controller:
         self.__system = system
         self.__agentsFactory = agentsFactory
         self.__simulation = simulation
-        self.__iterations = 200
 
-    def coordinatePaths(self, jobsDict):
+    def coordinatePaths(self, jobsDict, iterations):
         def assignTraversersToResult(__res, __traversers):
             for __jobId in __traversers:
                 __res[__jobId] = __traversers[__jobId].bestPath()
@@ -92,7 +91,7 @@ class Controller:
         for jobId in jobsDict:
             traversers[jobId] = SimulatedAnnealingTraverser(system=self.__system, controller=self, nodesToVisit=jobsDict[jobId])
 
-        for i in range(0, self.__iterations):
+        for i in range(0, iterations):
             for jobId in jobsDict:
                 self.__startAgent(traversers[jobId])
 

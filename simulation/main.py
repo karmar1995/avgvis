@@ -1,60 +1,53 @@
-import copy
-import random
-import time
-import simpy
-from simulation.simpy_adapter.node import Node
-from simulation.core.system_builder import *
 from simulation.core.controller import Controller
-from simulation.simpy_adapter.simpy_agents_factory import SimpyAgentsFactory
+from simulation.simpy_adapter.composition_root import CompositionRoot
+from experiments_utils.jobs_generator import *
+from experiments_utils.runner import Runner
+from simulation.simpy_adapter.graphs_builders import *
+from experiments_utils.plotters.boxplot import boxplot
 
 
-def buildTestGraph(builder):
-    for i in range(0, 10):
-        builder.addVertex(Vertex(node=Node(env=env, serviceTime=i*100)))
+class AverageJobCostExperiment:
 
-    for i in range(0, 10):
-        for j in range(0, 10):
-            builder.addEdge(Edge(source=i, target=j, weight=10 * i + j))
-
-
-class EnvironmentWrapper:
-    def __init__(self, environment, timeout):
-        self.__env = environment
-        self.__timeout = timeout
-        self.__curTime = 0
+    def __init__(self, jobsNumber, nodesNumber, iterations, topologyBuilder):
+        self.__systemBuilder = SystemBuilder()
+        self.__simpyRoot = CompositionRoot(100000)
+        self.__jobsNumber = jobsNumber
+        self.__nodesNumber = nodesNumber
+        self.__iterations = iterations
+        topologyBuilder.setNodesNumber(nodesNumber).build(self.__systemBuilder, self.__simpyRoot.simulation.env)
 
     def run(self):
-        self.__curTime += self.__timeout
-        self.__env.run(until=self.__curTime)
+        controller = Controller(system=self.__systemBuilder.system(), agentsFactory=self.__simpyRoot.simpyAgentsFactory,
+                                simulation=self.__simpyRoot.simulation)
+        testJobs = generateRandomJobs(jobsNumber=self.__jobsNumber, nodesNumber=self.__nodesNumber)
+        pathsPerJobId = controller.coordinatePaths(jobsDict=testJobs, iterations=self.__iterations)
+
+        costSum = 0
+        for jobId in pathsPerJobId:
+            costSum += pathsPerJobId[jobId].cost
+        return costSum / len(pathsPerJobId)
 
 
-env = simpy.Environment()
-simulation = EnvironmentWrapper(environment=env, timeout=10000000)
-simpyAgentsFactory = SimpyAgentsFactory(env=env)
+class Log2StdOutObserver:
+    def __init__(self):
+        pass
 
-systemBuilder = SystemBuilder()
-buildTestGraph(systemBuilder)
+    def onPartialResult(self, result):
+        print("Partial result: {} ".format(result))
 
-permutations = list()
-for i in range(0, 10):
-    permutations.append(i)
 
-jobsNumber = 50
-testJobs = dict()
+observer = Log2StdOutObserver()
+testGraphBuilder = FullGraphBuilder()
 
-for i in range(0, jobsNumber):
-    random.shuffle(permutations)
-    testJobs[str(i)] = copy.deepcopy(permutations)
+resultsDict = dict()
 
-for i in range(0, 50):
-    controller = Controller(system=systemBuilder.system(), agentsFactory=simpyAgentsFactory, simulation=simulation)
-    res = controller.coordinatePaths(testJobs)
+JOBS_NUMBER = 50
+NODES_NUMBER = 10
 
-    avgCost = 0
+for iterations in range(300, 400, 50):
+    experiment = AverageJobCostExperiment(JOBS_NUMBER, NODES_NUMBER, iterations, testGraphBuilder)
+    experimentRunner = Runner(experiment, observer)
+    resultsDict[iterations] = experimentRunner.run(times=50)
 
-    for jobId in res:
-        avgCost += res[jobId].cost
 
-    avgCost /= len(res)
-
-    print("Average cost: {}".format(avgCost))
+boxplot(resultsDict, 'Average scheduling cost', 'cost', 'iterations')
