@@ -21,12 +21,15 @@ class Agent:
         while i < len(path):
             self.currentNode = self.traverser.node(path[i-1])
             self.nextNode = self.traverser.node(path[i])
-            if self.traverser.nodeNeedsVisitation(self.currentNode):
-                with self.currentNode.executor.request() as request:
-                    yield request
-                    yield self.env.process(self.currentNode.process())
+
+            with self.currentNode.executor.request() as request:
+                yield request
+                yield self.env.process(self.currentNode.process())
+
             yield self.env.timeout(timeoutFor(self.traverser.transitionTime(path[i-1], path[i])))
+
             i += 1
+        self.currentNode = self.traverser.node(path[i - 1])
         with self.nextNode.executor.request() as request:
             yield request
             yield self.env.process(self.currentNode.process())
@@ -35,4 +38,5 @@ class Agent:
         self.nextNode = None
 
         endTime = self.env.now
-        self.traverser.feedback(path, endTime - startTime)
+        pathCost = endTime - startTime
+        self.traverser.feedback(path, pathCost)

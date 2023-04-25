@@ -10,7 +10,7 @@ class AverageJobCostExperiment:
 
     def __init__(self, jobsNumber, nodesNumber, iterations, topologyBuilder):
         self.__systemBuilder = SystemBuilder()
-        self.__simpyRoot = CompositionRoot(100000)
+        self.__simpyRoot = CompositionRoot(1000000)
         self.__jobsNumber = jobsNumber
         self.__nodesNumber = nodesNumber
         self.__iterations = iterations
@@ -41,13 +41,13 @@ testGraphBuilder = FullGraphBuilder()
 
 resultsDict = dict()
 
-JOBS_NUMBER = 50
-NODES_NUMBER = 10
+JOBS_NUMBER = 20
+NODES_NUMBER = 50
 
-for iterations in range(300, 400, 50):
+for iterations in range(100, 1500, 200):
     experiment = AverageJobCostExperiment(JOBS_NUMBER, NODES_NUMBER, iterations, testGraphBuilder)
     experimentRunner = Runner(experiment, observer)
-    resultsDict[iterations] = experimentRunner.run(times=50)
+    resultsDict[iterations] = experimentRunner.run(times=5)
 
 
 boxplot(resultsDict, 'Average scheduling cost', 'cost', 'iterations')

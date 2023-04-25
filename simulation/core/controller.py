@@ -1,4 +1,4 @@
-import random, copy
+import random, copy, math
 from simulation.core.agents_factory import AgentsFactory
 
 
@@ -18,13 +18,14 @@ class Path:
 
 
 class SimulatedAnnealingTraverser:
-    def __init__(self, system, controller, nodesToVisit):
+    def __init__(self, system, controller, nodesToVisit, maxIterations):
         self.system = system
         self.controller = controller
         self.__bestPath = None
         self.__nodesToVisit = nodesToVisit
         self.__generateInitialPath()
-        self.__temperature = 0.0
+        self.__temperaturePoint = 0
+        self.__temperatureStep = 10 / maxIterations
 
     def __generateInitialPath(self):
         path = [self.__nodesToVisit[0]]
@@ -37,7 +38,12 @@ class SimulatedAnnealingTraverser:
     def __generatePath(self):
         if self.__bestPath is not None:
             self.__path = copy.deepcopy(self.__bestPath.path)
-            random.shuffle(self.__path)
+            pos1 = random.randint(0, len(self.__path)-1)
+            pos2 = random.randint(0, len(self.__path)-1)
+            self.__path[pos1], self.__path[pos2] = self.__path[pos2], self.__path[pos1]
+
+    def nextIteration(self):
+        self.__temperaturePoint += self.__temperatureStep
 
     def path(self):
         self.__generatePath()
@@ -45,9 +51,6 @@ class SimulatedAnnealingTraverser:
 
     def node(self, index):
         return self.system.node(index)
-
-    def nodeNeedsVisitation(self, index):
-        return index in self.__nodesToVisit
 
     def transitionTime(self, nodeIndex1, nodeIndex2):
         time = self.system.graph[nodeIndex1, nodeIndex2]
@@ -64,11 +67,18 @@ class SimulatedAnnealingTraverser:
                 self.__bestPath = newPath
 
     def __transitionProbability(self, currentEnergy, newEnergy):
-        minimalUpwardTransitionProbability = 0.01
-        upwardsTransitionProbability = (0.1 * self.__temperature) + minimalUpwardTransitionProbability
+        upwardsTransitionProbability = self.__temperature()
         if newEnergy > currentEnergy:
             return upwardsTransitionProbability
         return 1 - upwardsTransitionProbability
+
+    def __temperatureFunction(self, x):
+        f1 = math.exp(-x)
+        f2 = math.cos(x*x)**2
+        return f1*f2 * 0.1
+
+    def __temperature(self):
+        return self.__temperatureFunction(self.__temperaturePoint)
 
     def bestPath(self):
         return self.__bestPath
@@ -89,11 +99,13 @@ class Controller:
         res = dict()
 
         for jobId in jobsDict:
-            traversers[jobId] = SimulatedAnnealingTraverser(system=self.__system, controller=self, nodesToVisit=jobsDict[jobId])
+            traversers[jobId] = SimulatedAnnealingTraverser(system=self.__system, controller=self, nodesToVisit=jobsDict[jobId], maxIterations=iterations)
 
         for i in range(0, iterations):
             for jobId in jobsDict:
-                self.__startAgent(traversers[jobId])
+                traverser = traversers[jobId]
+                self.__startAgent(traverser)
+                traverser.nextIteration()
 
             self.__simulation.run()
 
