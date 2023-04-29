@@ -3,7 +3,9 @@ from simulation.simpy_adapter.composition_root import CompositionRoot
 from experiments_utils.jobs_generator import *
 from experiments_utils.runner import Runner
 from simulation.simpy_adapter.graphs_builders import *
-from experiments_utils.plotters.boxplot import boxplot
+from experiments_utils.plotters.boxplot import plotSeries
+from simulation.experiments_utils.logger import Logger
+from simulation.experiments_utils.analytics.experiment_analyzer import *
 
 
 class AverageJobCostExperiment:
@@ -28,66 +30,17 @@ class AverageJobCostExperiment:
             statisticsCollector.collect('collisions', path.collisions)
 
 
-class Log2StdOutObserver:
-    def __init__(self):
-        pass
-
-    def onPartialResult(self, result):
-        print("Partial result: {} ".format(result))
-
-
-class StatisticsCollector:
-    def __init__(self):
-        self.__statistics = dict()
-
-    def collect(self, statistic, value):
-        if statistic not in self.__statistics:
-            self.__statistics[statistic] = list()
-        self.__statistics[statistic].append(value)
-
-    def avg(self, statistic):
-        return sum(self.__statistics[statistic]) / len(self.__statistics[statistic])
-
-    def statistic(self, statistic):
-        return self.__statistics[statistic][-1]
-
-
-class RetriesCollector:
-    def __init__(self, partialResultsObserver):
-        self.__statisticsCollectors = list()
-        self.__partialResultsObserver = partialResultsObserver
-
-    def statisticsCollector(self):
-        self.__statisticsCollectors.append(StatisticsCollector())
-        return self.__statisticsCollectors[-1]
-
-    def statistics(self, statistic):
-        res = list()
-        for statisticsCollector in self.__statisticsCollectors:
-            res.append(statisticsCollector.statistic(statistic))
-        return res
-
-    def onRetryFinished(self):
-        self.__partialResultsObserver.onPartialResult(self.__statisticsCollectors[-1].statistic('cost'))
-
-
-observer = Log2StdOutObserver()
 testGraphBuilder = FullGraphBuilder()
+experimentCollector = ExperimentCollector(Logger())
+analyzer = ExperimentAnalyzer(experimentCollector)
 
-costsDict = dict()
-collisionsDict = dict()
+JOBS_NUMBER = 10
+NODES_NUMBER = 15
 
-JOBS_NUMBER = 40
-NODES_NUMBER = 10
-
-for iterations in range(100, 200, 50):
-    retriesCollector = RetriesCollector(observer)
+for iterations in range(100, 1600, 100):
     experiment = AverageJobCostExperiment(JOBS_NUMBER, NODES_NUMBER, iterations, testGraphBuilder)
-    experimentRunner = Runner(experiment, retriesCollector)
-    experimentRunner.run(times=4)
-    costsDict[iterations] = retriesCollector.statistics('cost')
-    collisionsDict[iterations] = retriesCollector.statistics('collisions')
+    Runner(experiment, experimentCollector.getRetriesCollector(iterations)).run(times=20)
 
 
-boxplot(costsDict, 'Average scheduling cost', 'cost', 'iterations')
-boxplot(collisionsDict, 'Average collisions', 'collisions', 'iterations')
+plotSeries(analyzer.analyze('cost', ['mean']), 'Average scheduling cost', 'cost', 'iterations')
+plotSeries(analyzer.analyze('collisions', ['mean']), 'Average collisions', 'collisions', 'iterations')

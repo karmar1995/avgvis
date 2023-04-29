@@ -30,7 +30,7 @@ class Agent:
             self.currentNode.addAgentLeavingNode(self)
             agents = self.nextNode.getAgentsLeavingNode()
             transitionTime = self.traverser.transitionTime(path[i-1], path[i])
-            penaltyTime = transitionTime * 0.1
+            penaltyTime = transitionTime * 0.25
 
             for agentId in agents:
                 if agents[agentId].nextNode.index == self.currentNode.index:
