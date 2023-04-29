@@ -14,7 +14,7 @@ class FullGraphBuilder:
     def build(self, systemBuilder, env):
         n = self.__nodesNumber
         for i in range(0, n):
-            systemBuilder.addVertex(Vertex(node=Node(env=env, serviceTime=i * 100)))
+            systemBuilder.addVertex(Vertex(node=Node(env=env, serviceTime=i * 1, index=i)))
 
         for i in range(0, n ):
             for j in range(0, n ):

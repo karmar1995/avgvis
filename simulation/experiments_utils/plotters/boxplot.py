@@ -4,21 +4,16 @@ import matplotlib.pyplot as plt
 def boxplot(res, title, ylabel, xlabel):
     fig, ax = plt.subplots()
 
-    counts = list()
-    xticks = list()
+    y_values = list()
+    x_values = list()
     for x in res:
-        counts.append(res[x])
-        xticks.append(x)
+        y_values.append(sum(res[x])/len(res[x]))
+        x_values.append(x)
 
-    step = xticks[1] - xticks[0]
-    minx = xticks[0] - step
-    maxx = xticks[len(xticks)-1] + step
 
-    ax.boxplot(counts, positions=xticks, widths=8.5)
+    ax.plot(x_values, y_values, linewidth=1, markersize=4, marker='o')
     ax.set_xlabel(xlabel)
     ax.set_ylabel(ylabel)
     ax.set_title(title)
-
-    ax.set(xlim=(minx, maxx), xticks=range(minx, maxx, step))
 
     plt.show()

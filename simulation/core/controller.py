@@ -3,9 +3,10 @@ from simulation.core.agents_factory import AgentsFactory
 
 
 class Path:
-    def __init__(self, path, cost):
+    def __init__(self, path, cost, collisions):
         self.path = path
         self.cost = cost
+        self.collisions = collisions
 
     def __gt__(self, other):
         return self.cost > other.cost
@@ -56,8 +57,8 @@ class SimulatedAnnealingTraverser:
         time = self.system.graph[nodeIndex1, nodeIndex2]
         return time
 
-    def feedback(self, path, pathCost):
-        self.__performStateTransition(Path(path, pathCost))
+    def feedback(self, path, pathCost, collisions):
+        self.__performStateTransition(Path(path, pathCost, collisions))
 
     def __performStateTransition(self, newPath):
         if self.__bestPath is None:

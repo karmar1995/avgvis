@@ -1,13 +1,10 @@
 class Runner:
-    def __init__(self, experiment, observer):
+    def __init__(self, experiment, retriesCollector):
         self.__experiment = experiment
-        self.__observer = observer
+        self.__retriesCollector = retriesCollector
 
     def run(self, times):
-        res = list()
         for i in range(0, times):
-            singleResult = self.__experiment.run()
-            self.__observer.onPartialResult(singleResult)
-            res.append(singleResult)
-        return res
+            self.__experiment.run(self.__retriesCollector.statisticsCollector())
+            self.__retriesCollector.onRetryFinished()
 
