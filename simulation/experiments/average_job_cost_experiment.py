@@ -19,9 +19,11 @@ class AverageJobCostExperiment:
         self.__testGraphBuilder = FullGraphBuilder(self.__simpyRoot.simulation.env).setNodesNumber(nodesNumber)
 
     def run(self, statisticsCollector):
-        self.__coreRoot.initialize({'agentsFactory': self.__simpyRoot.simpyAgentsFactory, 'simulation': self.__simpyRoot.simulation}, self.__testGraphBuilder)
+        dependencies = {'agentsFactory': self.__simpyRoot.simpyAgentsFactory, 'simulation': self.__simpyRoot.simulation}
+        initInfo = {'executorsNumber': self.__jobsNumber}
+        self.__coreRoot.initialize(dependencies, self.__testGraphBuilder, initInfo)
         testJobs = generateRandomJobs(jobsNumber=self.__jobsNumber, nodesNumber=self.__nodesNumber)
-        pathsPerJobId = self.__coreRoot.controller().coordinatePaths(jobsDict=testJobs, iterations=self.__iterations)
+        pathsPerJobId = self.__coreRoot.pathsController().coordinatePaths(jobsDict=testJobs, iterations=self.__iterations)
 
         for jobId in pathsPerJobId:
             path = pathsPerJobId[jobId]
@@ -35,7 +37,7 @@ analyzer = ExperimentAnalyzer(experimentCollector)
 JOBS_NUMBER = 10
 NODES_NUMBER = 15
 
-for iterations in range(100, 1600, 100):
+for iterations in range(100, 600, 100):
     experiment = AverageJobCostExperiment(JOBS_NUMBER, NODES_NUMBER, iterations)
     Runner(experiment, experimentCollector.getRetriesCollector(iterations)).run(times=10)
 

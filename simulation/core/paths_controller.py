@@ -2,7 +2,7 @@ from simulation.core.agents_factory import AgentsFactory
 from simulation.core.simulated_annealing_traverser import SimulatedAnnealingTraverser
 
 
-class Controller:
+class PathsController:
     def __init__(self, system, agentsFactory : AgentsFactory, simulation):
         self.__system = system
         self.__agentsFactory = agentsFactory
