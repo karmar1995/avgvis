@@ -6,16 +6,18 @@ from simulation.experiments_utils.logger import Logger
 from simulation.experiments_utils.analytics.experiment_analyzer import *
 from simulation.experiments_utils.tasks_generator import generateTasksQueue
 from simulation.experiments_utils.csv_writer import CsvWriter
+from simulation.experiments_utils.test_graphs_builders import FullGraphBuilder
 
 
-def run(tasksNumber, agvsNumber, stationsNumber, graphBuilderName):
+def run(tasksNumber, agvsNumber, stationsNumber, graphBuilderClass):
     experimentCollector = ExperimentCollector(Logger())
     analyzer = ExperimentAnalyzer(experimentCollector)
 
     tasksQueue = generateTasksQueue(tasksNumber, stationsNumber)
+    graphBuilder = graphBuilderClass(stationsNumber)
 
-    for iterations in range(100, 1600, 100):
-        experiment = RandomTasksScheduling(tasksQueue, agvsNumber, stationsNumber, iterations, graphBuilderName)
+    for iterations in range(100, 2100, 100):
+        experiment = RandomTasksScheduling(tasksQueue, agvsNumber, iterations, graphBuilder)
         Runner(experiment, experimentCollector.getRetriesCollector(iterations)).run(times=20)
 
     legend = {
@@ -32,4 +34,4 @@ def run(tasksNumber, agvsNumber, stationsNumber, graphBuilderName):
     plotSeries(analyzer.analyze('collisions', ['mean']), 'Average collisions', 'collisions', 'iterations', os.path.join(resultsDir, "collisions.png"))
 
 
-run(tasksNumber=100, agvsNumber=20, stationsNumber=15, graphBuilderName='FullGraphBuilder')
+run(tasksNumber=100, agvsNumber=20, stationsNumber=15, graphBuilderClass=FullGraphBuilder)

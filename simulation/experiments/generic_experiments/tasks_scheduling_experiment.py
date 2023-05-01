@@ -1,19 +1,17 @@
 import copy
 from simulation.core.composition_root import CompositionRoot as CoreRoot
 from simulation.simpy_adapter.composition_root import CompositionRoot as SimpyRoot
-from simulation.experiments_utils.test_graph_builders_factory_method import createBuilder
 
 
 class RandomTasksScheduling:
 
-    def __init__(self, tasksQueue, executorsNumber, nodesNumber, iterations, builderName):
+    def __init__(self, tasksQueue, executorsNumber, iterations, builder):
         self.__coreRoot = CoreRoot()
         self.__simpyRoot = SimpyRoot(1000000)
         self.__executorsNumber = executorsNumber
         self.__tasksQueue = tasksQueue
-        self.__nodesNumber = nodesNumber
         self.__iterations = iterations
-        self.__testGraphBuilder = createBuilder(builderName, self.__simpyRoot.simulation.env).setNodesNumber(nodesNumber)
+        self.__testGraphBuilder = builder.setEnvironment(self.__simpyRoot.simulation.env)
 
     def run(self, statisticsCollector):
         dependencies = {'agentsFactory': self.__simpyRoot.simpyAgentsFactory, 'simulation': self.__simpyRoot.simulation}

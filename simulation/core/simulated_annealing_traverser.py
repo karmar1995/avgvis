@@ -15,13 +15,14 @@ class SimulatedAnnealingTraverser:
 
     def __generatePathFromTasks(self):
         path = []
+        k = 1
         for i in range(0, len(self.__tasksSequence)):
-            partialPath = random.choice(self.system.graph.get_k_shortest_paths(self.__tasksSequence[i].source(), self.__tasksSequence[i].destination(), 1))
+            partialPath = random.choice(self.system.graph.get_k_shortest_paths(self.__tasksSequence[i].source(), self.__tasksSequence[i].destination(), k))
             if i > 0 and self.__tasksSequence[i-1].destination() == self.__tasksSequence[i].source():
                 partialPath.pop(0)
             path.extend(partialPath)
             if (i < len(self.__tasksSequence) - 1) and self.__tasksSequence[i].destination() != self.__tasksSequence[i+1].source():
-                partialPath = random.choice(self.system.graph.get_k_shortest_paths(self.__tasksSequence[i].destination(), self.__tasksSequence[i+1].source(), 1))
+                partialPath = random.choice(self.system.graph.get_k_shortest_paths(self.__tasksSequence[i].destination(), self.__tasksSequence[i+1].source(), k))
                 partialPath.pop(0)
                 partialPath.pop()
                 path.extend(partialPath)

@@ -4,12 +4,12 @@ from simulation.core.system_builder import *
 
 class FullGraphBuilder:
 
-    def __init__(self, env):
-        self.__nodesNumber = 0
-        self.__env = env
+    def __init__(self, nodesNumber):
+        self.__nodesNumber = nodesNumber
+        self.__env = None
 
-    def setNodesNumber(self, number):
-        self.__nodesNumber = number
+    def setEnvironment(self, env):
+        self.__env = env
         return self
 
     def build(self, systemBuilder):
@@ -22,21 +22,35 @@ class FullGraphBuilder:
                 systemBuilder.addEdge(Edge(source=i, target=j, weight=10 * i + j))
 
 
-class FullGraphBuilderLowServiceTime:
+class TreeGraphBuilder:
 
-    def __init__(self, env):
-        self.__nodesNumber = 0
+    def __init__(self, switches, hostsPerSwitch):
+        self.__switchesNumber = switches
+        self.__hostsNumberPerSwitch = hostsPerSwitch
+        self.__env = None
+        self.__switches = list()
+        self.__hosts = list()
+
+    def setEnvironment(self, env):
         self.__env = env
-
-    def setNodesNumber(self, number):
-        self.__nodesNumber = number
         return self
 
     def build(self, systemBuilder):
-        n = self.__nodesNumber
+        index = 0
+        n = self.__switchesNumber
         for i in range(0, n):
-            systemBuilder.addVertex(Vertex(node=Node(env=self.__env, serviceTime=i * 10, index=i)))
+            self.__switches.append(index)
+            systemBuilder.addVertex(Vertex(node=Node(env=self.__env, serviceTime=10, index=index)))
+            index += 1
 
         for i in range(0, n ):
             for j in range(0, n ):
-                systemBuilder.addEdge(Edge(source=i, target=j, weight=10 * i + j))
+                systemBuilder.addEdge(Edge(source=i, target=j, weight=10))
+
+        n = self.__hostsNumberPerSwitch
+        for switch in self.__switches:
+            for i in range(0, n):
+                systemBuilder.addVertex(Vertex(node=Node(env=self.__env, serviceTime=0, index=index)))
+                self.__hosts.append(index)
+                systemBuilder.addEdge(Edge(source=index, target=switch, weight=1))
+                index += 1

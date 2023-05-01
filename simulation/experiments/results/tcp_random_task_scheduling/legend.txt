@@ -1,0 +1,2 @@
+TCP connections number: 100
+Switches Number: 15
