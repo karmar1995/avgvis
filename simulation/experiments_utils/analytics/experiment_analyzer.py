@@ -20,12 +20,17 @@ class ExperimentAnalyzer:
             'max': max
         }
 
-    def analyze(self, statistic, seriesNames):
+    def analyze(self, statistic, seriesNames=None):
         res = dict()
         retriesByParameterValue = self.__dataSource.getStatisticsPerParameter(statistic)
+        if seriesNames is None:
+            seriesNames = self.getSupportedMeasures()
         for seriesName in seriesNames:
             res[seriesName] = self.__generateDataSeries(retriesByParameterValue, seriesName)
         return res
+
+    def getSupportedMeasures(self):
+        return self.__seriesFunctors.keys()
 
     def __generateDataSeries(self, retriesByParameterValue, seriesName):
         x_values = list()
