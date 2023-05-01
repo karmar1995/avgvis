@@ -1,7 +1,7 @@
 import matplotlib.pyplot as plt
 
 
-def plotSeries(seriesDict, title, ylabel, xlabel):
+def plotSeries(seriesDict, title, ylabel, xlabel, filename):
     fig, ax = plt.subplots()
 
     for seriesName in seriesDict:
@@ -11,4 +11,7 @@ def plotSeries(seriesDict, title, ylabel, xlabel):
     ax.set_ylabel(ylabel)
     ax.set_title(title)
     plt.legend()
-    plt.show()
+    if filename != "":
+        plt.savefig(filename)
+    else:
+        plt.show()
