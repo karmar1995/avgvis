@@ -1,4 +1,4 @@
-import copy
+import copy, time
 from simulation.core.composition_root import CompositionRoot as CoreRoot
 from simulation.simpy_adapter.composition_root import CompositionRoot as SimpyRoot
 
@@ -18,8 +18,11 @@ class RandomTasksScheduling:
         initInfo = {'executorsNumber': self.__executorsNumber}
         self.__coreRoot.initialize(dependencies, self.__testGraphBuilder, initInfo)
         self.__coreRoot.tasksQueue().batchEnqueue(copy.deepcopy(self.__tasksQueue))
+        t1 = time.time()
         pathsPerJobId = self.__coreRoot.tasksScheduler().coordinateJobs(self.__iterations)
-
+        t2 = time.time()
+        elapsedTime = t2-t1
+        statisticsCollector.collect('time', elapsedTime)
         for jobId in pathsPerJobId:
             path = pathsPerJobId[jobId]
             statisticsCollector.collect('cost', path.cost)

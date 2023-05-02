@@ -23,6 +23,7 @@ class AverageJobCostExperiment:
         initInfo = {'executorsNumber': self.__jobsNumber}
         self.__coreRoot.initialize(dependencies, self.__testGraphBuilder, initInfo)
         testJobs = generateRandomJobs(jobsNumber=self.__jobsNumber, nodesNumber=self.__nodesNumber)
+
         pathsPerJobId = self.__coreRoot.pathsController().coordinatePaths(jobsDict=testJobs, iterations=self.__iterations)
 
         for jobId in pathsPerJobId:

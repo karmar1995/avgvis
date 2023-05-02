@@ -13,7 +13,8 @@ class TasksScheduler:
             for i in range(0, self.__executorsNumber):
                 if i not in jobsDict:
                     jobsDict[i] = list()
-                jobsDict[i].append(tasks.pop(0))
+                if len(tasks) > 0:
+                    jobsDict[i].append(tasks.pop(0))
         self.__jobsDict = jobsDict
 
     def coordinateJobs(self, iterations):
