@@ -6,16 +6,17 @@ from simulation.core.tasks_scheduler import TasksScheduler
 
 class CompositionRoot:
     def __init__(self):
-        self.__systemBuilder = None
+        self.__system = None
         self.__pathsController = None
         self.__tasksQueue = None
         self.__tasksScheduler = None
 
     def initialize(self, dependencies, topologyBuilder, initInfo):
-        self.__systemBuilder = SystemBuilder()
+        systemBuilder = SystemBuilder()
         self.__tasksQueue = TasksQueue()
-        topologyBuilder.build(self.__systemBuilder)
-        self.__pathsController = PathsController(system=self.__systemBuilder.system(),
+        topologyBuilder.build(systemBuilder)
+        self.__system = systemBuilder.system()
+        self.__pathsController = PathsController(system=self.__system,
                                                  agentsFactory=dependencies['agentsFactory'],
                                                  simulation=dependencies['simulation'])
         self.__tasksScheduler = TasksScheduler(tasksQueue=self.__tasksQueue,
@@ -30,3 +31,7 @@ class CompositionRoot:
 
     def tasksScheduler(self):
         return self.__tasksScheduler
+
+    def system(self):
+        return self.__system
+

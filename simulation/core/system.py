@@ -7,3 +7,9 @@ class System:
 
     def node(self, index):
         return self.graph.vs[index]['node']
+
+    def edgeWeight(self, source, destination):
+        return self.graph[source, destination]
+
+    def nodesCount(self):
+        return len(self.graph.vs)

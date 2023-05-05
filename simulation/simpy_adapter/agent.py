@@ -23,10 +23,12 @@ class Agent:
             self.currentNode = self.traverser.node(path[i-1])
             self.nextNode = self.traverser.node(path[i])
 
+            self.currentNode.onEnqueue()
             with self.currentNode.executor.request() as request:
                 yield request
                 yield self.env.process(self.currentNode.process())
 
+            self.currentNode.onDeque()
             self.currentNode.addAgentLeavingNode(self)
             agents = self.nextNode.getAgentsLeavingNode()
             transitionTime = self.traverser.transitionTime(path[i-1], path[i])

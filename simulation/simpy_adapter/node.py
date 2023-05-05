@@ -9,6 +9,8 @@ class Node:
         self.serviceTime = serviceTime
         self.index = index
         self.__agentsLeaving = dict()
+        self.__queueLengths = list()
+        self.__currentQueueLength = 0
 
     def process(self):
         yield self.env.timeout(timeoutFor(self.serviceTime))
@@ -22,3 +24,12 @@ class Node:
     def getAgentsLeavingNode(self):
         return self.__agentsLeaving.copy()
 
+    def onEnqueue(self):
+        self.__currentQueueLength += 1
+
+    def onDeque(self):
+        self.__currentQueueLength -= 1
+        self.__queueLengths.append(self.__currentQueueLength)
+
+    def queueLengthHistory(self):
+        return self.__queueLengths

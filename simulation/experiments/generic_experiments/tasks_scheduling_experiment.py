@@ -7,7 +7,7 @@ class RandomTasksScheduling:
 
     def __init__(self, tasksQueue, executorsNumber, iterations, builder):
         self.__coreRoot = CoreRoot()
-        self.__simpyRoot = SimpyRoot(1000000)
+        self.__simpyRoot = SimpyRoot(10000000)
         self.__executorsNumber = executorsNumber
         self.__tasksQueue = tasksQueue
         self.__iterations = iterations
@@ -28,3 +28,6 @@ class RandomTasksScheduling:
             statisticsCollector.collect('cost', path.cost)
             statisticsCollector.collect('collisions', path.collisions)
 
+        for i in range(0, self.__coreRoot.system().nodesCount()):
+            tmp = self.__coreRoot.system().node(i).queueLengthHistory()
+            statisticsCollector.collect('queueLength', sum(tmp) / len(tmp))
