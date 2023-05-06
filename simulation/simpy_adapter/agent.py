@@ -37,10 +37,10 @@ class Agent:
             for agentId in agents:
                 if agents[agentId].nextNode.index == self.currentNode.index:
                     collisions += 1
-                    yield self.env.timeout(timeoutFor(penaltyTime))
+                    yield self.env.timeout(transitionTimeout(penaltyTime))
                     break
 
-            yield self.env.timeout(timeoutFor(transitionTime))
+            yield self.env.timeout(transitionTimeout(transitionTime))
             self.currentNode.removeAgentLeavingNode(self)
 
             i += 1
