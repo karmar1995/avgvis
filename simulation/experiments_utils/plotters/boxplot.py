@@ -5,12 +5,11 @@ def plotSeries(seriesDict, title, ylabel, xlabel, filename):
     fig, ax = plt.subplots()
 
     for seriesName in seriesDict:
-        ax.plot(seriesDict[seriesName].x_values, seriesDict[seriesName].y_values, linewidth=1, markersize=4, marker='o', label=seriesName)
+        ax.plot(seriesDict[seriesName].x_values, seriesDict[seriesName].y_values, linewidth=1, markersize=4, marker='o')
 
     ax.set_xlabel(xlabel)
     ax.set_ylabel(ylabel)
     ax.set_title(title)
-    plt.legend()
     if filename != "":
         plt.savefig(filename)
     else:

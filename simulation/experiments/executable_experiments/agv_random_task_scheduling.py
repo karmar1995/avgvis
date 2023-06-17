@@ -26,7 +26,7 @@ def run(tasksNumber, agvsNumber, stationsNumber, graphBuilderClass, subdirectory
         'Stations Number': stationsNumber
     }
 
-    resultsDir = '/home/kmarszal/Documents/dev/avgvis/simulation/experiments/results/agv_random_task_scheduling/{}'.format(subdirectory)
+    resultsDir = '/home/kmarszal/Documents/dev/avgvis/simulation/experiments/results/agv_random_task_scheduling_2/{}'.format(subdirectory)
     csvWriter = CsvWriter(resultsDir, analyzer)
     csvWriter.write('cost', 'iterations', legend)
     csvWriter.write('time', 'iterations', legend)
@@ -34,12 +34,12 @@ def run(tasksNumber, agvsNumber, stationsNumber, graphBuilderClass, subdirectory
     csvWriter.write('queueLength', 'iterations', legend)
 
     x_label = 'Calculation time [iterations]'
-    plotSeries(analyzer.analyze('cost', ['mean']), 'Average path cost', 'Cost', x_label, os.path.join(resultsDir, "cost.png"))
-    plotSeries(analyzer.analyze('collisions', ['mean']), 'Average collisions on path', 'Collisions', x_label, os.path.join(resultsDir, "collisions.png"))
+    plotSeries(analyzer.analyze('cost', ['mean']), 'Average job cost', 'Cost', x_label, os.path.join(resultsDir, "cost.png"))
+    plotSeries(analyzer.analyze('collisions', ['mean']), 'Average collisions during job execution', 'Collisions', x_label, os.path.join(resultsDir, "collisions.png"))
     plotSeries(analyzer.analyze('time', ['mean']), 'Calculation time', 'Time [s]', x_label, os.path.join(resultsDir, "time.png"))
     plotSeries(analyzer.analyze('queueLength', ['mean']), 'Average queue length', 'Queue length', x_label, os.path.join(resultsDir, "queueLength.png"))
 
 
-run(tasksNumber=1000, agvsNumber=100, stationsNumber=30, graphBuilderClass=VeryLongServiceTimeFullGraphBuilder, subdirectory='long_service_many_agvs')
+run(tasksNumber=1000, agvsNumber=100, stationsNumber=40, graphBuilderClass=VeryLongServiceTimeFullGraphBuilder, subdirectory='long_service_many_agvs')
 run(tasksNumber=1000, agvsNumber=25, stationsNumber=40, graphBuilderClass=LongServiceTimeFullGraphBuilder, subdirectory='long_service_few_agvs')
 run(tasksNumber=1000, agvsNumber=60, stationsNumber=10, graphBuilderClass=ShortServiceTimeFullGraphBuilder, subdirectory='short_service_many_agvs')

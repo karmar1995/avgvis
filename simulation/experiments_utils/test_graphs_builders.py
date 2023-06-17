@@ -1,5 +1,29 @@
 from simulation.simpy_adapter.node import Node
 from simulation.core.system_builder import *
+import random
+
+
+class GraphNodesWeightsManager:
+    def __init__(self, nodesNumber, min, max):
+        self.__nodesNumber = nodesNumber
+        self.__weights = None
+        self.__min = min
+        self.__max = max
+
+    def getWeight(self, index):
+        if self.__weights is None:
+            self.__generateWeights()
+        return self.__weights[index]
+
+    def __generateWeights(self):
+        self.__weights = dict()
+        for i in range(0, self.__nodesNumber):
+            self.__weights[i] = random.uniform(self.__min, self.__max)
+
+
+veryLongServiceTimeWeightsManager = GraphNodesWeightsManager(1000, 100, 5000)
+longServiceTimeWeightsManager = GraphNodesWeightsManager(1000, 500, 1000)
+shortServiceTimeWeightsManager = GraphNodesWeightsManager(1000, 1, 10)
 
 
 class VeryLongServiceTimeFullGraphBuilder:
@@ -15,11 +39,11 @@ class VeryLongServiceTimeFullGraphBuilder:
     def build(self, systemBuilder):
         n = self.__nodesNumber
         for i in range(0, n):
-            systemBuilder.addVertex(Vertex(node=Node(env=self.__env, serviceTime=i * 500, index=i)))
+            systemBuilder.addVertex(Vertex(node=Node(env=self.__env, serviceTime=veryLongServiceTimeWeightsManager.getWeight(i), index=i)))
 
-        for i in range(0, n ):
-            for j in range(0, n ):
-                systemBuilder.addEdge(Edge(source=i, target=j, weight=10 * i + j))
+        for i in range(0, n):
+            for j in range(0, n):
+                systemBuilder.addEdge(Edge(source=i, target=j, weight=random.uniform(10, 100)))
 
 
 class LongServiceTimeFullGraphBuilder:
@@ -35,11 +59,11 @@ class LongServiceTimeFullGraphBuilder:
     def build(self, systemBuilder):
         n = self.__nodesNumber
         for i in range(0, n):
-            systemBuilder.addVertex(Vertex(node=Node(env=self.__env, serviceTime=i * 100, index=i)))
+            systemBuilder.addVertex(Vertex(node=Node(env=self.__env, serviceTime=longServiceTimeWeightsManager.getWeight(i), index=i)))
 
         for i in range(0, n ):
             for j in range(0, n ):
-                systemBuilder.addEdge(Edge(source=i, target=j, weight=10 * i + j))
+                systemBuilder.addEdge(Edge(source=i, target=j, weight=random.uniform(10, 100)))
 
 
 class ShortServiceTimeFullGraphBuilder:
@@ -55,11 +79,11 @@ class ShortServiceTimeFullGraphBuilder:
     def build(self, systemBuilder):
         n = self.__nodesNumber
         for i in range(0, n):
-            systemBuilder.addVertex(Vertex(node=Node(env=self.__env, serviceTime=i * 1, index=i)))
+            systemBuilder.addVertex(Vertex(node=Node(env=self.__env, serviceTime=shortServiceTimeWeightsManager.getWeight(i), index=i)))
 
         for i in range(0, n ):
             for j in range(0, n ):
-                systemBuilder.addEdge(Edge(source=i, target=j, weight=10 * i + j))
+                systemBuilder.addEdge(Edge(source=i, target=j, weight=random.uniform(10, 100)))
 
 
 class TreeGraphBuilder:
