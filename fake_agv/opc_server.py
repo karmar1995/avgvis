@@ -1,7 +1,6 @@
 import opcua
 from agv_type_definitions import *
-from agv_manipulator import AgvManipulator
-import threading, time
+from agv_opc import AgvOpc
 
 
 class OpcServer:
@@ -12,11 +11,8 @@ class OpcServer:
         self.__createAgvType()
         self.__agvsFolder = self.__server.get_objects_node().add_folder(self.__index, "AGVs")
         self.__objects = dict()
-        self.__addObject("AGV1")
-        self.__addObject("AGV2")
-        self.__addObject("AGV3")
 
-    def __addObject(self, name):
+    def addAgvObject(self, name):
         self.__objects[name] = self.__agvsFolder.add_object(self.__index, name, self.__agvType)
 
     def __createAgvType(self):
@@ -32,28 +28,10 @@ class OpcServer:
     def start(self):
         self.__server.start()
 
-    def getAgvManipulator(self, objectName):
-        return AgvManipulator(self.__objects[objectName], self.__index)
-
-
-class AgvTest:
-    def __init__(self, agvManipulator):
-        self.__stopped = False
-        self.__agv = agvManipulator
-        self.__thread = threading.Thread(target=self.__run)
-        self.__x = 2.0
-        self.__thread.daemon = True
-        self.__thread.start()
-
-    def __run(self):
-        while not self.__stopped:
-            time.sleep(1)
-            self.__x += 0.5
-            print("***********************************: Setting X to: {}".format(self.__x))
-            self.__agv.setX(self.__x)
+    def getAgvOpc(self, objectName):
+        return AgvOpc(self.__objects[objectName], self.__index)
 
 
 server = OpcServer()
-agvtest = AgvTest(server.getAgvManipulator("AGV1"))
 server.start()
 
