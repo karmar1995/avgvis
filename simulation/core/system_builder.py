@@ -2,8 +2,8 @@ from simulation.core.system import System
 from collections import namedtuple
 
 
-Vertex = namedtuple('Node', 'node')
-Edge = namedtuple('Edge', 'source target weight')
+Vertex = namedtuple('Vertex', 'name node')
+Edge = namedtuple('Edge', 'name source target weight')
 
 
 class SystemBuilder:

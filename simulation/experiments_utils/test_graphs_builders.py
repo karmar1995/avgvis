@@ -39,11 +39,11 @@ class VeryLongServiceTimeFullGraphBuilder:
     def build(self, systemBuilder):
         n = self.__nodesNumber
         for i in range(0, n):
-            systemBuilder.addVertex(Vertex(node=Node(env=self.__env, serviceTime=veryLongServiceTimeWeightsManager.getWeight(i), index=i)))
+            systemBuilder.addVertex(Vertex(name="unused", node=Node(env=self.__env, serviceTime=veryLongServiceTimeWeightsManager.getWeight(i), index=i)))
 
         for i in range(0, n):
             for j in range(0, n):
-                systemBuilder.addEdge(Edge(source=i, target=j, weight=random.uniform(10, 100)))
+                systemBuilder.addEdge(Edge(name="unused", source=i, target=j, weight=random.uniform(10, 100)))
 
 
 class LongServiceTimeFullGraphBuilder:

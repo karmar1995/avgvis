@@ -1,0 +1,42 @@
+{
+  "nodes": [
+    {
+      "name": "n1",
+      "x": "0",
+      "y": "10",
+      "serviceTime": "10"
+    },
+    {
+      "name": "n2",
+      "x": "10",
+      "y": "10",
+      "serviceTime": "10"
+    },
+    {
+      "name": "n3",
+      "x": "20",
+      "y": "20",
+      "serviceTime": "20"
+    }
+  ],
+  "edges": [
+    {
+      "name": "e1",
+      "source": "n1",
+      "target": "n2",
+      "transitionTime": "10"
+    },
+    {
+      "name": "e1",
+      "source": "n1",
+      "target": "n3",
+      "transitionTime": "10"
+    },
+    {
+      "name": "e1",
+      "source": "n2",
+      "target": "n3",
+      "transitionTime": "10"
+    }
+  ]
+}
