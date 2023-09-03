@@ -23,3 +23,5 @@ class TasksQueue:
         for observer in self.__queueObservers:
             observer.onEnqueue()
 
+    def size(self):
+        return len(self.__queue)

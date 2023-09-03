@@ -2,6 +2,7 @@ from simulation.core.system_builder import SystemBuilder
 from simulation.core.paths_controller import PathsController
 from simulation.core.tasks_queue import TasksQueue
 from simulation.core.tasks_scheduler import TasksScheduler
+from simulation.core.job_executors_manager import JobExecutorsManager
 
 
 class CompositionRoot:
@@ -10,18 +11,26 @@ class CompositionRoot:
         self.__pathsController = None
         self.__tasksQueue = None
         self.__tasksScheduler = None
+        self.__executorsManager = None
 
     def initialize(self, dependencies, topologyBuilder, initInfo):
         systemBuilder = SystemBuilder()
         self.__tasksQueue = TasksQueue()
         topologyBuilder.build(systemBuilder)
         self.__system = systemBuilder.system()
+        self.__executorsManager = JobExecutorsManager(executorsNumber=initInfo['executorsNumber'],
+                                                      taskExecutorsFactory=dependencies['tasksExecutorsFactory'])
         self.__pathsController = PathsController(system=self.__system,
                                                  agentsFactory=dependencies['agentsFactory'],
                                                  simulation=dependencies['simulation'])
         self.__tasksScheduler = TasksScheduler(tasksQueue=self.__tasksQueue,
                                                pathsController=self.__pathsController,
-                                               executorsNumber=initInfo['executorsNumber'])
+                                               executorsManager=self.__executorsManager)
+        self.__executorsManager.setTasksScheduler(self.__tasksScheduler)
+        self.__executorsManager.createExecutors()
+
+    def shutdown(self):
+        self.__tasksScheduler.shutdown()
 
     def pathsController(self):
         return self.__pathsController
@@ -34,4 +43,3 @@ class CompositionRoot:
 
     def system(self):
         return self.__system
-

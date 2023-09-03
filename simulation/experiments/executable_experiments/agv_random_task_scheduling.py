@@ -4,7 +4,7 @@ from simulation.experiments_utils.runner import Runner
 from simulation.experiments_utils.plotters.boxplot import plotSeries
 from simulation.experiments_utils.logger import Logger
 from simulation.experiments_utils.analytics.experiment_analyzer import *
-from simulation.experiments_utils.tasks_generator import generateTasksQueue
+from simulation.test_utils.tasks_generator import generateTasksQueue
 from simulation.experiments_utils.csv_writer import CsvWriter
 from simulation.experiments_utils.test_graphs_builders import *
 
