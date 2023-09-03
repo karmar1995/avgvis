@@ -4,6 +4,7 @@ from simulation.simpy_adapter.composition_root import CompositionRoot as SimpyRo
 from simulation.test_utils.graph_builder import GraphBuilder
 from simulation.core.tests.fake_tasks_executor import FakeTasksExecutor, fakeExecutors
 from simulation.test_utils.tasks_generator import generateTasksQueue
+from simulation.core.tests.fake_tasks_source import FakeTasksSource
 
 
 class TasksSchedulingTests(unittest.TestCase):
@@ -43,12 +44,17 @@ class TasksSchedulingTests(unittest.TestCase):
 
     def test_distributesTasksToExecutorsInRealTime(self):
         nodesNumber = 10
+        tasksSource = FakeTasksSource()
+        tasks = generateTasksQueue(100, nodesNumber)
+        for task in tasks:
+            tasksSource.addTask(task)
+
         self.initialize(2, nodesNumber, 10, 1)
+        self.__coreRoot.tasksScheduler().addTasksSource(tasksSource)
         self.__coreRoot.tasksQueue().batchEnqueue(generateTasksQueue(10, nodesNumber))
         self.assertEqual(len(fakeExecutors), 2)
 
-        for i in range(0, 10):
-            self.__coreRoot.tasksQueue().batchEnqueue(generateTasksQueue(10, nodesNumber))
+        tasksSource.startProcessing(0)
 
         self.__coreRoot.tasksScheduler().waitForQueueProcessed()
 
