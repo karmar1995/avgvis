@@ -1,5 +1,5 @@
 import socketserver
-from mes_adapter.test_data import getTestFrame
+from mes_adapter.test_utils.test_data import getTestFrame
 
 
 class TestTcpHandler(socketserver.BaseRequestHandler):

@@ -9,3 +9,6 @@ class Task:
     def destination(self):
         return self.__destination
 
+    def __str__(self):
+        return "[{}, {}]".format(self.__source, self.__destination)
+
