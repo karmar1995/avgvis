@@ -1,13 +1,12 @@
-import socket, threading, time
+import threading, time
 from mes_adapter.frame_parser import FrameParser
 from mes_adapter.tasks_source import MesTasksSource
 
 
-class MesTcpClient:
+class MesClient:
 
-    def __init__(self, host, port, tasksSource: MesTasksSource):
-        self.__host = host
-        self.__port = port
+    def __init__(self, mesDataSource, tasksSource: MesTasksSource):
+        self.__mesDataSource = mesDataSource
         self.__frameParser = FrameParser()
         self.__pollingThread = None
         self.__running = True
@@ -21,11 +20,8 @@ class MesTcpClient:
     def __pollMes(self):
         while self.__running:
             try:
-                with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
-                    s.connect((self.__host, self.__port))
-                    data = s.recv(1024)
-                    self.__tasksSource.handleRequest(self.__frameParser.onFrameReceived(data).id)
-                    time.sleep(0.5)
+                self.__tasksSource.handleRequest(self.__frameParser.onFrameReceived(self.__mesDataSource.readDataFromServer()).id)
+                time.sleep(0.5)
             except ConnectionRefusedError as e:
                 pass
 

@@ -62,7 +62,6 @@ class MesFrame:
     data: bytes
 
 
-
 class FrameParser:
     def __init__(self):
         self.__data = None
@@ -88,7 +87,7 @@ class FrameParser:
             ending = self.__parseField(currentFrameEndingField)
             self.__validate(length)
             return MesFrame(id, status, timestamp, number, version, length, data)
-        except KeyError as e:
+        except Exception as e:
             print(str(e))
             return MesFrame(-1, -1, DtlDateTime(0, 0, 0, 0, 0, 0, 0, 0), -1, -1,- 1, bytes())
 
