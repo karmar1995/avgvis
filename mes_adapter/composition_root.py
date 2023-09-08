@@ -20,7 +20,7 @@ class CompositionRoot:
         self.__requestMapper = RequestToTaskMapper(initInfo.tasksMapperConfigPath)
         self.__tasksSource = MesTasksSource(self.__requestMapper)
         self.__mesClient = MesClient(initInfo.dependencies['mesDataSource'], self.__tasksSource)
-        self.__tasksSource.setTasksQueue(initInfo.dependencies['tasksScheduler'])
+        self.__tasksSource.setTasksQueue(initInfo.dependencies['tasksQueue'])
 
     def start(self):
         self.__mesClient.start()

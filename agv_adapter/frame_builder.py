@@ -15,6 +15,7 @@ class FrameBuilder:
         return self
 
     def consumeFrame(self):
+        frame = copy.deepcopy(self.__frame)
         self.__frame = None
         self.__nodeToVisit = None
-        return copy.deepcopy(self.__frame)
+        return frame

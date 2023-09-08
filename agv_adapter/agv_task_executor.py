@@ -10,4 +10,4 @@ class AgvTaskExecutor(TaskExecutor):
 
     def execute(self, task):
         frame = self.__frameBuilder.startFrame().withNodeToVisit(task).consumeFrame()
-        self.__agvSender.send(frame)
+        self.__agvSender.sendDataToServer(frame)

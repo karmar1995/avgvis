@@ -4,17 +4,14 @@ import json
 
 @dataclass
 class NodeInfo:
-    name: str
-    x: float
-    y: float
+    index: int
     serviceTime: float
 
 
 @dataclass
 class EdgeInfo:
-    name: str
-    source: str
-    target: str
+    firstNode: int
+    secondNode: int
     transitionTime: float
 
 
@@ -28,15 +25,18 @@ class GraphStorage:
         with open(filename, 'r') as f:
             self.__data = json.load(f)
 
-    def nodes(self):
+    def nodesDescriptions(self):
         nodes = list()
         for node in self.__data['nodes']:
-            nodes.append(NodeInfo(node['name'], float(node['x']), float(node['y']), float(node['serviceTime'])))
+            nodes.append(NodeInfo(int(node['index']), float(node['serviceTime'])))
         return nodes
 
-    def edges(self):
+    def edgesDescriptions(self):
         edges = list()
         for edge in self.__data['edges']:
-            edges.append(EdgeInfo(edge['name'], edge['source'], edge['target'], float(edge['transitionTime'])))
+            nodes = edge['nodes']
+            if len(nodes) != 2:
+                raise Exception("Invalid graph description!")
+            edges.append(EdgeInfo(int(nodes[0]), int(nodes[1]), float(edge['transitionTime'])))
         return edges
 

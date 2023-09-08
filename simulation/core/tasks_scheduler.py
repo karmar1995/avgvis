@@ -28,6 +28,8 @@ class TasksScheduler:
                 jobsDict = dict()
                 while len(self.__tasks) > 0:
                     for i in range(0, self.__executorsManager.freeExecutorsNumber()):
+                        if len(self.__tasks) == 0:
+                            break
                         if i not in jobsDict:
                             jobsDict[i] = list()
                         if len(self.__tasks) > 0:

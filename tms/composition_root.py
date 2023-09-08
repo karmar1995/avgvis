@@ -5,6 +5,7 @@ from mes_adapter.composition_root import CompositionRoot as MesRoot, MesComposit
 from agv_adapter.composition_root import CompositionRoot as AgvRoot
 from tms.topology_builder import TopologyBuilder
 from tcp_utils.client_utils import TcpClient
+from storage.graph_storage import GraphStorage
 
 
 @dataclass
@@ -25,11 +26,15 @@ class CompositionRoot:
         self.__networkSenderFactory = networkSenderFactory
 
     def initialize(self, tmsInitInfo: TmsInitInfo):
-        topologyBuilder = TopologyBuilder()
+        graphStorage = GraphStorage()
+        graphStorage.read(tmsInitInfo.topologyDescriptionPath)
+        topologyBuilder = TopologyBuilder(self.__simpyRoot.simulation.env, graphStorage)
         agvsSenders = list()
         for agvConnectionData in tmsInitInfo.agvConnectionsData:
             agvsSenders.append(self.__networkSenderFactory(agvConnectionData[0], agvConnectionData[1]))
         executorsNumber = len(agvsSenders)
+        self.__agvRoot.initialize(agvsSenders)
+
         dependencies = {
             'agentsFactory': self.__simpyRoot.simpyAgentsFactory,
             'simulation': self.__simpyRoot.simulation,
@@ -39,10 +44,10 @@ class CompositionRoot:
         self.__simulationRoot.initialize(dependencies, topologyBuilder, simulationInitInfo)
         mesInitInfo = MesCompositionRootInitInfo(tasksMapperConfigPath=tmsInitInfo.mesTasksMappingPath, dependencies={
             'mesDataSource': self.__networkSenderFactory(host=tmsInitInfo.mesIp, port=tmsInitInfo.mesPort),
-            'tasksScheduler': self.__simulationRoot.tasksScheduler()
+            'tasksQueue': self.__simulationRoot.tasksQueue()
         })
         self.__mesRoot.initialize(mesInitInfo)
-        self.__agvRoot.initialize(agvsSenders)
+
 
     def start(self):
         self.__mesRoot.start()
