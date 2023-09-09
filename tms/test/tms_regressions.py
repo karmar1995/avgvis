@@ -31,12 +31,41 @@ class TasksSchedulingTests(unittest.TestCase):
         self.assertEqual(4, len(self.fakeTcpClientsManager.hosts))
 
         self.fakeTcpClientsManager.hosts[mesIp].setPacketsToRead(1)
+        self.fakeTcpClientsManager.hosts['10.0.0.3'].setReadMode('agv')
+        self.fakeTcpClientsManager.hosts['10.0.0.3'].setPacketsToRead(5)
         self.__tmsRoot.start()
-        time.sleep(1)
+        time.sleep(3)
         self.__tmsRoot.shutdown()
 
         self.assertEqual(0, len(self.fakeTcpClientsManager.hosts['10.0.0.1'].sentData))
         self.assertEqual(0, len(self.fakeTcpClientsManager.hosts['10.0.0.2'].sentData))
+        self.assertEqual(2, len(self.fakeTcpClientsManager.hosts['10.0.0.3'].sentData))
+        self.assertEqual('0', self.fakeTcpClientsManager.hosts['10.0.0.3'].sentData[0])
+        self.assertEqual('1', self.fakeTcpClientsManager.hosts['10.0.0.3'].sentData[1])
+
+    def test_whenMesSendsMultipleFramesTheTasksAreDistributedToManyAgvs(self):
+
+        def setupAgvHost(hostIp, packetsToRead):
+            self.fakeTcpClientsManager.hosts[hostIp].setReadMode('agv')
+            self.fakeTcpClientsManager.hosts[hostIp].setPacketsToRead(packetsToRead)
+
+        self.__tmsRoot.initialize(self.initInfo)
+        self.assertEqual(4, len(self.fakeTcpClientsManager.hosts))
+
+        self.fakeTcpClientsManager.hosts[mesIp].setPacketsToRead(3)
+        setupAgvHost('10.0.0.1', 10)
+        setupAgvHost('10.0.0.2', 10)
+        setupAgvHost('10.0.0.3', 10)
+        self.__tmsRoot.start()
+        time.sleep(5)
+        self.__tmsRoot.shutdown()
+
+        self.assertEqual(2, len(self.fakeTcpClientsManager.hosts['10.0.0.1'].sentData))
+        self.assertEqual('0', self.fakeTcpClientsManager.hosts['10.0.0.1'].sentData[0])
+        self.assertEqual('1', self.fakeTcpClientsManager.hosts['10.0.0.1'].sentData[1])
+        self.assertEqual(2, len(self.fakeTcpClientsManager.hosts['10.0.0.2'].sentData))
+        self.assertEqual('0', self.fakeTcpClientsManager.hosts['10.0.0.2'].sentData[0])
+        self.assertEqual('1', self.fakeTcpClientsManager.hosts['10.0.0.2'].sentData[1])
         self.assertEqual(2, len(self.fakeTcpClientsManager.hosts['10.0.0.3'].sentData))
         self.assertEqual('0', self.fakeTcpClientsManager.hosts['10.0.0.3'].sentData[0])
         self.assertEqual('1', self.fakeTcpClientsManager.hosts['10.0.0.3'].sentData[1])

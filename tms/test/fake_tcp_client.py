@@ -22,14 +22,24 @@ class FakeTcpClient:
         self.port = port
         self.sentData = list()
         self.__packetsToRead = 0
+        self.__readMode = 'mes'
 
     def setPacketsToRead(self, number):
         self.__packetsToRead = number
 
+    def setReadMode(self, mode):
+        self.__readMode = mode
+
     def readDataFromServer(self):
-        if self.__packetsToRead > 0:
-            self.__packetsToRead -= 1
-            return getTestFrame()
+        if self.__readMode == 'mes':
+            if self.__packetsToRead > 0:
+                self.__packetsToRead -= 1
+                return getTestFrame()
+        elif self.__readMode == 'agv':
+            if self.__packetsToRead > 0:
+                self.__packetsToRead -= 1
+                return 0
+            return 1
         return None
 
     def sendDataToServer(self, data):
