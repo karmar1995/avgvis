@@ -1,4 +1,4 @@
-import socket
+import socket, select
 
 
 class TcpClient:
@@ -9,7 +9,13 @@ class TcpClient:
     def readDataFromServer(self):
         with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
             s.connect((self.__host, self.__port))
-            return s.recv(1024)
+            s.setblocking(False)
+            ready = select.select([s], [], [], 0.25)
+            if ready[0]:
+                return s.recv(1024)
+            return bytes()
 
     def sendDataToServer(self, data):
-        raise Exception("Not implemented!")
+        with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
+            s.connect((self.__host, self.__port))
+            return s.sendall(data)

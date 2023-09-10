@@ -11,6 +11,15 @@ class AgvTaskExecutor(TaskExecutor):
 
     def execute(self, task):
         frame = self.__frameBuilder.startFrame().withNodeToVisit(task).consumeFrame()
-        self.__agvSender.sendDataToServer(frame)
-        while self.__agvSender.readDataFromServer() != 1:
+        try:
+            print("Sending task to AGV: {}".format(task))
+            self.__agvSender.sendDataToServer(frame)
+            self.__waitForAgvResponse(0)
+        except ConnectionRefusedError as e:
+            print("Cannot connect to AGV")
+
+    def __waitForAgvResponse(self, value):
+        agvResponse = int.from_bytes(self.__agvSender.readDataFromServer(), 'big')
+        while agvResponse != value:
+            agvResponse = int.from_bytes(self.__agvSender.readDataFromServer(), 'big')
             time.sleep(0.25)

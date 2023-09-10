@@ -7,11 +7,11 @@ class FrameBuilder:
         self.__nodeToVisit = None
 
     def startFrame(self):
-        self.__frame = str()
+        self.__frame = bytes()
         return self
 
     def withNodeToVisit(self, nodeNumber):
-        self.__frame += str(nodeNumber)
+        self.__frame += nodeNumber.to_bytes(2, 'big')
         return self
 
     def consumeFrame(self):
