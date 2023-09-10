@@ -1,0 +1,82 @@
+import sys, signal
+from tms.test_utils.test_mes.utils import MES_PROMPT
+from tms.test_utils.test_mes.tcp_server import TcpServer
+
+
+class ServerListener:
+    def __init__(self):
+        self.__active = False
+
+    def onMsg(self, msg):
+        if self.__active:
+            print(msg)
+
+    def activate(self):
+        self.__active = True
+
+    def deactivate(self):
+        self.__active = False
+
+    def isActive(self):
+        return  self.__active
+
+
+class TestMes:
+    def __init__(self):
+        self.__serverListener = ServerListener()
+        self.__server = TcpServer(self.__serverListener)
+        self.__signal = signal.signal(signal.SIGINT, self.__onSigInt)
+
+    def run(self):
+        while True:
+            if not self.__serverListener.isActive():
+                response = input(MES_PROMPT)
+                splittedResponse = response.split(' ')
+                cmd = splittedResponse[0]
+                args = splittedResponse[1:]
+                if cmd == 'set_port':
+                    self.__setPort(args)
+                if cmd == 'start':
+                    self.__startServer(args)
+                if cmd == 'show_tasks':
+                    self.__showTasks(args)
+                if cmd == 'add_tasks':
+                    self.__addTask(args)
+                if cmd == 'exit':
+                    self.__exit(args)
+                if cmd == 'set_interval':
+                    self.__setInterval(args)
+                if cmd == 'monitor':
+                    self.__serverListener.activate()
+
+    def __exit(self, args):
+        self.__server.kill()
+        sys.exit(0)
+
+    def __setPort(self, args):
+        self.__server.setPort(int(args[0]))
+
+    def __startServer(self, args):
+        print("Starting server on port: {}".format(self.__server.port()))
+        self.__server.start()
+
+    def __showTasks(self, args):
+        print("Tasks: {}".format(self.__server.tasks()))
+
+    def __addTask(self, args):
+        self.__server.addTasks(args)
+        self.__showTasks(args)
+
+    def __setInterval(self, args):
+        self.__server.setInterval(float(args[0]))
+        print("Interval: {}".format(self.__server.interval()))
+
+    def __onSigInt(self, signum, frame):
+        if self.__serverListener.isActive():
+            print("Exiting monitor mode")
+            self.__serverListener.deactivate()
+        else:
+            print("Monitor inactive")
+
+mes = TestMes()
+mes.run()
