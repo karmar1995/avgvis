@@ -36,14 +36,17 @@ class TestTcpHandler(socketserver.BaseRequestHandler):
         global working, workNumber
         working = True
         print("Starting work {}...".format(workNumber))
-        for i in range(0, random.randint(5, 15)):
+        for i in range(0, random.randint(5, 30)):
             time.sleep(1)
             sys.stdout.write('.')
+            sys.stdout.flush()
         print("\nDone")
         working = False
 
 
 host, port = 'localhost', int(sys.argv[1])
+
+print("Starting test agv on: {}:{}".format(host, port))
 
 with socketserver.TCPServer((host, port), TestTcpHandler) as server:
     server.serve_forever()

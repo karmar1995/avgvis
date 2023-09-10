@@ -9,5 +9,5 @@ initInfo = TmsInitInfo(topologyDescriptionPath=sys.argv[3], mesIp='localhost', m
 tmsRoot = CompositionRoot()
 tmsRoot.initialize(tmsInitInfo=initInfo)
 tmsRoot.start()
-input("Press any key to exit...")
+input("Press any key to exit...\n")
 tmsRoot.shutdown()
