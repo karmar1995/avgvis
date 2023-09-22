@@ -1,5 +1,5 @@
 import threading, time
-from mes_adapter.frame_parser import FrameParser
+from mes_adapter.frame_parser import MesFrameParser
 from mes_adapter.tasks_source import MesTasksSource
 
 
@@ -7,7 +7,7 @@ class MesClient:
 
     def __init__(self, mesDataSource, tasksSource: MesTasksSource):
         self.__mesDataSource = mesDataSource
-        self.__frameParser = FrameParser()
+        self.__frameParser = MesFrameParser()
         self.__pollingThread = None
         self.__running = True
         self.__tasksSource = tasksSource

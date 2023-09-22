@@ -40,8 +40,8 @@ class TasksSchedulingTests(unittest.TestCase):
         self.assertEqual(0, len(self.fakeTcpClientsManager.hosts['10.0.0.1'].sentData))
         self.assertEqual(0, len(self.fakeTcpClientsManager.hosts['10.0.0.2'].sentData))
         self.assertEqual(2, len(self.fakeTcpClientsManager.hosts['10.0.0.3'].sentData))
-        self.assertEqual('0', self.fakeTcpClientsManager.hosts['10.0.0.3'].sentData[0])
-        self.assertEqual('1', self.fakeTcpClientsManager.hosts['10.0.0.3'].sentData[1])
+        self.assertEqual('0', str(int.from_bytes(self.fakeTcpClientsManager.hosts['10.0.0.3'].sentData[0], 'big')))
+        self.assertEqual('1', str(int.from_bytes(self.fakeTcpClientsManager.hosts['10.0.0.3'].sentData[1], 'big')))
 
     def test_whenMesSendsMultipleFramesTheTasksAreDistributedToManyAgvs(self):
 

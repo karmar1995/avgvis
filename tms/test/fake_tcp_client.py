@@ -38,8 +38,8 @@ class FakeTcpClient:
         elif self.__readMode == 'agv':
             if self.__packetsToRead > 0:
                 self.__packetsToRead -= 1
-                return 0
-            return 1
+                return int(0).to_bytes(1, 'big')
+            return int(1).to_bytes(1, 'big')
         return None
 
     def sendDataToServer(self, data):
