@@ -28,6 +28,7 @@ class TcpServer():
         super().__init__()
         self.__tasksLists = []
         self.__port = 0
+        self.__host = 'localhost'
         self.__interval = 1.0
         self.__killed = False
         self.__workerThread = threading.Thread(target=self.__threadMain)
@@ -46,6 +47,9 @@ class TcpServer():
 
     def setPort(self, port):
         self.__port = port
+
+    def setHost(self, host):
+        self.__host = host
 
     def port(self):
         return self.__port
@@ -82,7 +86,7 @@ class TcpServer():
                 sleeping = False
 
     def __serverMain(self):
-        host, port = 'localhost', self.__port
+        host, port = self.__host, self.__port
 
         with socketserver.TCPServer((host, port), TestTcpHandler) as server:
             server.serve_forever()

@@ -50,12 +50,15 @@ class TestMes:
                 if cmd == 'monitor':
                     self.__serverListener.activate()
 
-    def runBatchMode(self, port, interval, tasksNumber):
+    def runBatchMode(self, connectionString, interval, tasksNumber):
         print("Running batch mode on port: {} with interval: {} and tasksNumber: {}".format(port, interval, tasksNumber))
         self.__batchMode = True
         self.__serverListener.activate()
         self.__server.setSleepFunction(random.expovariate)
-        self.__server.setPort(int(port))
+        tmp = connectionString.split(':')
+        host = tmp[0]
+        self.__server.setHost(host)
+        self.__server.setPort(int(tmp[1]))
         self.__server.setInterval(float(interval))
         self.__server.addTasks(list(range(0, int(tasksNumber))))
         self.__startServer(None)

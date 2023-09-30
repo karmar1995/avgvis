@@ -50,8 +50,8 @@ def onSigInt(signum, frame):
         f.write("Executed tasks: {}".format(executedTasks))
     sys.exit(0)
 
-
-host, port, interval = 'localhost', int(sys.argv[1]), float(sys.argv[2])
+tmp = sys.argv[1].split(':')
+host, port, interval = tmp[0], int(tmp[1]), float(sys.argv[2])
 s = signal.signal(signal.SIGINT, onSigInt)
 
 print("Starting test agv on: {}:{}".format(host, port))
