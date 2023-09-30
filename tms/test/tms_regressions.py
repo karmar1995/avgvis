@@ -60,13 +60,13 @@ class TasksSchedulingTests(unittest.TestCase):
         time.sleep(5)
         self.__tmsRoot.shutdown()
 
+        self.assertEqual(2, len(self.fakeTcpClientsManager.hosts['10.0.0.3'].sentData))
+        self.assertEqual('0', self.fakeTcpClientsManager.hosts['10.0.0.3'].sentData[0])
+        self.assertEqual('1', self.fakeTcpClientsManager.hosts['10.0.0.3'].sentData[1])
         self.assertEqual(2, len(self.fakeTcpClientsManager.hosts['10.0.0.1'].sentData))
         self.assertEqual('0', self.fakeTcpClientsManager.hosts['10.0.0.1'].sentData[0])
         self.assertEqual('1', self.fakeTcpClientsManager.hosts['10.0.0.1'].sentData[1])
         self.assertEqual(2, len(self.fakeTcpClientsManager.hosts['10.0.0.2'].sentData))
         self.assertEqual('0', self.fakeTcpClientsManager.hosts['10.0.0.2'].sentData[0])
         self.assertEqual('1', self.fakeTcpClientsManager.hosts['10.0.0.2'].sentData[1])
-        self.assertEqual(2, len(self.fakeTcpClientsManager.hosts['10.0.0.3'].sentData))
-        self.assertEqual('0', self.fakeTcpClientsManager.hosts['10.0.0.3'].sentData[0])
-        self.assertEqual('1', self.fakeTcpClientsManager.hosts['10.0.0.3'].sentData[1])
 

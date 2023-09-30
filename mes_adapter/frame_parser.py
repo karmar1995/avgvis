@@ -19,7 +19,6 @@ class MesFrameParser:
         try:
             return FrameParser(self.__mesFrameDescription).parse(self.__data)
         except Exception as e:
-            print("MesFrameParser, frame parsing error: {}".format(str(e)))
             return Frame().addField('id', -1)
 
     def __validate(self, totalLength):

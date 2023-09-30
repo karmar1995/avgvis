@@ -1,3 +1,4 @@
+import threading, time
 from dataclasses import dataclass
 from simulation.core.composition_root import CompositionRoot as SimulationRoot
 from simulation.simpy_adapter.composition_root import CompositionRoot as SimpyRoot
@@ -8,6 +9,11 @@ from tcp_utils.client_utils import TcpClient
 from storage.graph_storage import GraphStorage
 
 
+class QueueObserver:
+    def probeQueueState(self, queue, timePoint):
+        pass
+
+
 @dataclass
 class TmsInitInfo:
     topologyDescriptionPath: str
@@ -15,6 +21,34 @@ class TmsInitInfo:
     mesPort: int
     mesTasksMappingPath: str
     agvConnectionsData: list
+    queueObserver: QueueObserver
+
+
+class QueueObservingThread:
+    def __init__(self, queue, queueObserver):
+        self.__working = False
+        self.__thread = None
+        self.__queue = queue
+        self.__queueObserver = queueObserver
+
+    def start(self):
+        self.__working = True
+        self.__thread = threading.Thread(target=self.__observeQueue)
+        self.__thread.daemon = True
+        self.__thread.start()
+
+    def shutdown(self):
+        self.__working = False
+        self.__thread.join()
+        self.__thread = None
+
+    def __observeQueue(self):
+        timePoint = 0
+        interval = 0.2
+        while self.__working:
+            self.__queueObserver.probeQueueState(self.__queue, timePoint)
+            time.sleep(interval)
+            timePoint += interval
 
 
 class CompositionRoot:
@@ -24,6 +58,7 @@ class CompositionRoot:
         self.__mesRoot = MesRoot()
         self.__agvRoot = AgvRoot()
         self.__networkSenderFactory = networkSenderFactory
+        self.__queueObservingThread = None
 
     def initialize(self, tmsInitInfo: TmsInitInfo):
         graphStorage = GraphStorage()
@@ -47,11 +82,13 @@ class CompositionRoot:
             'tasksQueue': self.__simulationRoot.tasksQueue()
         })
         self.__mesRoot.initialize(mesInitInfo)
-
+        self.__queueObservingThread = QueueObservingThread(self.__simulationRoot.tasksScheduler().tasks(), tmsInitInfo.queueObserver)
 
     def start(self):
         self.__mesRoot.start()
+        self.__queueObservingThread.start()
 
     def shutdown(self):
         self.__mesRoot.shutdown()
         self.__simulationRoot.shutdown()
+        self.__queueObservingThread.shutdown()

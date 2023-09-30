@@ -1,4 +1,4 @@
-import sys, signal
+import sys, signal, random
 from tms.test_utils.test_mes.utils import MES_PROMPT
 from tms.test_utils.test_mes.tcp_server import TcpServer
 
@@ -26,6 +26,7 @@ class TestMes:
         self.__serverListener = ServerListener()
         self.__server = TcpServer(self.__serverListener)
         self.__signal = signal.signal(signal.SIGINT, self.__onSigInt)
+        self.__batchMode = False
 
     def run(self):
         while True:
@@ -48,6 +49,19 @@ class TestMes:
                     self.__setInterval(args)
                 if cmd == 'monitor':
                     self.__serverListener.activate()
+
+    def runBatchMode(self, port, interval, tasksNumber):
+        print("Running batch mode on port: {} with interval: {} and tasksNumber: {}".format(port, interval, tasksNumber))
+        self.__batchMode = True
+        self.__serverListener.activate()
+        self.__server.setSleepFunction(random.expovariate)
+        self.__server.setPort(int(port))
+        self.__server.setInterval(float(interval))
+        self.__server.addTasks(list(range(0, int(tasksNumber))))
+        self.__startServer(None)
+        while len(self.__server.tasks()) > 0:
+            pass
+
 
     def __exit(self, args):
         self.__server.kill()
@@ -72,6 +86,8 @@ class TestMes:
         print("Interval: {}".format(self.__server.interval()))
 
     def __onSigInt(self, signum, frame):
+        if self.__batchMode:
+            sys.exit(2)
         if self.__serverListener.isActive():
             print("Exiting monitor mode")
             self.__serverListener.deactivate()
@@ -79,4 +95,7 @@ class TestMes:
             print("Monitor inactive")
 
 mes = TestMes()
-mes.run()
+if len(sys.argv) == 1:
+    mes.run()
+else:
+    mes.runBatchMode(sys.argv[1], sys.argv[2], sys.argv[3])

@@ -1,4 +1,4 @@
-import socketserver, sys, time, threading, random
+import socketserver, sys, time, threading, random, signal
 
 
 def getAcknowledgementFrame(working):
@@ -10,7 +10,8 @@ def getAcknowledgementFrame(working):
 
 working = False
 workNumber = -1
-
+interval = 1.0
+executedTasks = 0
 
 class TestTcpHandler(socketserver.BaseRequestHandler):
 
@@ -33,18 +34,25 @@ class TestTcpHandler(socketserver.BaseRequestHandler):
         self.__workingThread.start()
 
     def __processingThread(self):
-        global working, workNumber
+        global working, workNumber, interval, executedTasks
         working = True
-        print("Starting work {}...".format(workNumber))
-        for i in range(0, random.randint(5, 30)):
-            time.sleep(1)
-            sys.stdout.write('.')
-            sys.stdout.flush()
+        workTime = random.expovariate(interval)
+        print("Starting work {}, number: {} for: {}...".format(workNumber, executedTasks, workTime))
+        time.sleep(workTime)
+        executedTasks += 1
         print("\nDone")
         working = False
 
 
-host, port = 'localhost', int(sys.argv[1])
+def onSigInt(signum, frame):
+    global executedTasks
+    with open("agv_log.txt", 'w') as f:
+        f.write("Executed tasks: {}".format(executedTasks))
+    sys.exit(0)
+
+
+host, port, interval = 'localhost', int(sys.argv[1]), float(sys.argv[2])
+s = signal.signal(signal.SIGINT, onSigInt)
 
 print("Starting test agv on: {}:{}".format(host, port))
 

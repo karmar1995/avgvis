@@ -21,6 +21,9 @@ class TasksScheduler:
     def onEnqueue(self):
         self.__tasks.extend(self.__queue.consume())
 
+    def tasks(self):
+        return self.__tasks
+
     def __processQueue(self):
         self.__started = True
         while not self.__killed:

@@ -2,21 +2,25 @@ import threading, time, socketserver, sys
 from mes_adapter.test_utils.test_data import getTestFrame
 
 
-currentTask = -1
+currentTask = -2
+sleeping = False
 
 
 class TestTcpHandler(socketserver.BaseRequestHandler):
 
     def handle(self):
-        global currentTask
+        global currentTask, sleeping
         oldStdOut = sys.stdout
         sys.stdout = None
         try:
-            self.request.sendall(getTestFrame())
+            if not sleeping:
+                self.request.sendall(getTestFrame())
+                currentTask = -1
+            else:
+                self.request.sendall(bytes())
             sys.stdout = oldStdOut
         except Exception:
             sys.stdout = oldStdOut
-        currentTask = -1
 
 
 class TcpServer():
@@ -32,6 +36,7 @@ class TcpServer():
         self.__serverThread.daemon = True
         self.__listener = listener
         self.__server = None
+        self.__sleepFunction = None
 
     def tasks(self):
         return self.__tasksLists
@@ -60,13 +65,21 @@ class TcpServer():
         if self.__server is not None:
             self.__server.shutdown()
 
+    def setSleepFunction(self, function):
+        self.__sleepFunction = function
+
     def __threadMain(self):
         while not self.__killed:
-            global currentTask
+            global currentTask, sleeping
             if len(self.__tasksLists) > 0 and currentTask == -1:
                 currentTask = self.__tasksLists.pop(0)
                 self.__listener.onMsg("Sending task: {}".format(currentTask))
-                time.sleep(self.__interval)
+                sleeping = True
+                if self.__sleepFunction is None:
+                    time.sleep(self.__interval)
+                else:
+                    time.sleep(self.__sleepFunction(self.__interval))
+                sleeping = False
 
     def __serverMain(self):
         host, port = 'localhost', self.__port
