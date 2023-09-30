@@ -1,4 +1,8 @@
-from igraph import Graph
+try:
+    from igraph import Graph
+except ModuleNotFoundError:
+    print("Using graph mock")
+    from graph.graph import Graph
 
 
 class System:
