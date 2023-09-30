@@ -51,7 +51,7 @@ class TestMes:
                     self.__serverListener.activate()
 
     def runBatchMode(self, connectionString, interval, tasksNumber):
-        print("Running batch mode on port: {} with interval: {} and tasksNumber: {}".format(port, interval, tasksNumber))
+        print("Running batch mode on : {} with interval: {} and tasksNumber: {}".format(connectionString, interval, tasksNumber))
         self.__batchMode = True
         self.__serverListener.activate()
         self.__server.setSleepFunction(random.expovariate)
