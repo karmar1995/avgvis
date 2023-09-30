@@ -18,7 +18,6 @@ class SimulatedAnnealingTraverser:
         k = 1
         for i in range(0, len(self.__tasksSequence)):
             partialPath = random.choice(self.system.graph.get_k_shortest_paths(self.__tasksSequence[i].source(), self.__tasksSequence[i].destination(), k))
-            print(partialPath)
             if i > 0 and self.__tasksSequence[i-1].destination() == self.__tasksSequence[i].source():
                 partialPath.pop(0)
             path.extend(partialPath)

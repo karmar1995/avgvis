@@ -26,7 +26,7 @@ class Graph:
         pass
 
     def get_k_shortest_paths(self, s, d, k):
-        return [s,d]
+        return [[s,d]]
 
 
 
