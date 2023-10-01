@@ -1,3 +1,4 @@
+import random
 from simulation.core.job_executor import JobExecutor
 
 
@@ -24,9 +25,10 @@ class JobExecutorsManager:
         return res
 
     def freeExecutor(self):
-        for executorId in self.__executors:
-            if not self.__executors[executorId].busy():
-                return self.__executors[executorId]
+        for i in range(0, len(self.__executors)):
+            e = random.choice(self.__executors)
+            if not e.busy():
+                return e
         return None
 
     def onExecutorFinished(self):
