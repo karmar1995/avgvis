@@ -60,6 +60,7 @@ s2 = signal.signal(signal.SIGTERM, onSigInt)
 logger = Logger("test_agv_log.txt")
 logger.logLine("Starting test agv on: {}:{}".format(host, port))
 tasksCountLogger = Logger("agv_{}_tasks_count.txt".format(host).replace('.', '_'))
+tasksCountLogger.logLine("Executed tasks: {}".format(executedTasks))
 
 with socketserver.TCPServer((host, port), TestTcpHandler) as server:
     server.serve_forever()
