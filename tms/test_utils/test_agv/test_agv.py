@@ -1,3 +1,4 @@
+from tms.test_utils.logger import Logger
 import socketserver, sys, time, threading, random, signal
 
 
@@ -13,16 +14,17 @@ workNumber = -1
 interval = 1.0
 executedTasks = 0
 
+
 class TestTcpHandler(socketserver.BaseRequestHandler):
 
     def setup(self):
         self.__workingThread = None
 
     def handle(self):
-        global working
+        global working, logger
         if not working:
             received = self.request.recv(4096)
-            print("Received: {}".format(received))
+            logger.logLine("Received: {}".format(received))
             if len(received) > 0:
                 global workNumber
                 workNumber = int.from_bytes(received, 'big')
@@ -34,18 +36,19 @@ class TestTcpHandler(socketserver.BaseRequestHandler):
         self.__workingThread.start()
 
     def __processingThread(self):
-        global working, workNumber, interval, executedTasks
+        global working, workNumber, interval, executedTasks, logger
         working = True
         workTime = random.expovariate(interval)
-        print("Starting work {}, number: {} for: {}...".format(workNumber, executedTasks, workTime))
+        logger.logLine("Starting work {}, number: {} for: {}...".format(workNumber, executedTasks, workTime))
         time.sleep(workTime)
         executedTasks += 1
-        print("\nDone")
+        logger.logLine("\nDone")
         working = False
 
 
 def onSigInt(signum, frame):
-    global executedTasks
+    global executedTasks, logger
+    logger.logLine("SIGINT handled")
     with open("agv_log.txt", 'w') as f:
         f.write("Executed tasks: {}".format(executedTasks))
     sys.exit(0)
@@ -54,7 +57,8 @@ tmp = sys.argv[1].split(':')
 host, port, interval = tmp[0], int(tmp[1]), float(sys.argv[2])
 s = signal.signal(signal.SIGINT, onSigInt)
 
-print("Starting test agv on: {}:{}".format(host, port))
+logger = Logger("test_agv_log.txt")
+logger.logLine("Starting test agv on: {}:{}".format(host, port))
 
 with socketserver.TCPServer((host, port), TestTcpHandler) as server:
     server.serve_forever()

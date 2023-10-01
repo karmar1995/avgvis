@@ -1,15 +1,17 @@
 import sys, signal, random
 from tms.test_utils.test_mes.utils import MES_PROMPT
 from tms.test_utils.test_mes.tcp_server import TcpServer
+from tms.test_utils.logger import Logger
 
 
 class ServerListener:
     def __init__(self):
         self.__active = False
+        self.logger = Logger('mes_log.txt')
 
     def onMsg(self, msg):
         if self.__active:
-            print(msg)
+            self.logger.logLine(msg)
 
     def activate(self):
         self.__active = True
@@ -51,7 +53,7 @@ class TestMes:
                     self.__serverListener.activate()
 
     def runBatchMode(self, connectionString, interval, tasksNumber):
-        print("Running batch mode on : {} with interval: {} and tasksNumber: {}".format(connectionString, interval, tasksNumber))
+        self.__serverListener.logger.logLine("Running batch mode on : {} with interval: {} and tasksNumber: {}".format(connectionString, interval, tasksNumber))
         self.__batchMode = True
         self.__serverListener.activate()
         self.__server.setSleepFunction(random.expovariate)
