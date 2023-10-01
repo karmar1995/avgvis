@@ -36,12 +36,13 @@ class TestTcpHandler(socketserver.BaseRequestHandler):
         self.__workingThread.start()
 
     def __processingThread(self):
-        global working, workNumber, interval, executedTasks, logger
+        global working, workNumber, interval, executedTasks, logger, tasksCountLogger
         working = True
         workTime = random.expovariate(interval)
         logger.logLine("Starting work {}, number: {} for: {}...".format(workNumber, executedTasks, workTime))
         time.sleep(workTime)
         executedTasks += 1
+        tasksCountLogger.logLine("Executed tasks: {}".format(executedTasks))
         logger.logLine("\nDone")
         working = False
 
@@ -49,17 +50,17 @@ class TestTcpHandler(socketserver.BaseRequestHandler):
 def onSigInt(signum, frame):
     global executedTasks, logger
     logger.logLine("SIGINT or SIGTERM handled")
-    with open("agv_log.txt", 'w') as f:
-        f.write("Executed tasks: {}".format(executedTasks))
     sys.exit(0)
 
 tmp = sys.argv[1].split(':')
 host, port, interval = tmp[0], int(tmp[1]), float(sys.argv[2])
 s1 = signal.signal(signal.SIGINT, onSigInt)
 s2 = signal.signal(signal.SIGTERM, onSigInt)
+s3 = signal.signal(signal.SIGKILL, onSigInt)
 
 logger = Logger("test_agv_log.txt")
 logger.logLine("Starting test agv on: {}:{}".format(host, port))
+tasksCountLogger = Logger("agv_{}_tasks_count.txt".format(host).replace('.', '_'))
 
 with socketserver.TCPServer((host, port), TestTcpHandler) as server:
     server.serve_forever()

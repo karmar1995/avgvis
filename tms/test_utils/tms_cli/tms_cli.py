@@ -1,4 +1,4 @@
-import sys, signal, csv
+import sys, signal, csv, time
 from tms.composition_root import CompositionRoot, TmsInitInfo, QueueObserver
 from tms.test_utils.logger import Logger
 
@@ -19,16 +19,16 @@ class CliQueueObserver(QueueObserver):
             writer.writerows(self.__qlens)
 
 
-class SigIntHandler:
-    def __init__(self, queueObeserver, logger):
-        self.__observer = queueObeserver
-        self.logger = logger
+class SignalHandler:
+    def __init__(self):
+        self.s1 = signal.signal(signal.SIGINT, self.handleExit)
+        self.s2 = signal.signal(signal.SIGTERM, self.handleExit)
+        self.s3 = signal.signal(signal.SIGKILL, self.handleExit)
 
-    def __call__(self, *args, **kwargs):
-        tmsRoot.shutdown()
-        self.logger.logLine("SIGINT or SIGTERM handled")
-        self.__observer.save()
-        sys.exit(0)
+        self.killed = False
+
+    def handleExit(self, *args):
+        self.killed = True
 
 
 logger = Logger("tms_log.txt")
@@ -42,13 +42,16 @@ for agvConnectionString in agvsConnectionsStrings:
     agvsConnections.append((splitted[0], int(splitted[1])))
 
 qlensObserver = CliQueueObserver('qlens.csv')
-sigIntHandler = SigIntHandler(qlensObserver, logger)
-s1 = signal.signal(signal.SIGINT, sigIntHandler)
-s2 = signal.signal(signal.SIGTERM, sigIntHandler)
+sigIntHandler = SignalHandler()
 logger.logLine("Starting TMS with MES: {}:{} and AGVs: {}".format(mesIp, mesPort, agvsConnections))
 initInfo = TmsInitInfo(topologyDescriptionPath=sys.argv[3], mesIp=mesIp, mesPort=mesPort, mesTasksMappingPath='unused', agvConnectionsData=agvsConnections, queueObserver=qlensObserver)
 tmsRoot = CompositionRoot()
 tmsRoot.initialize(tmsInitInfo=initInfo)
 tmsRoot.start()
-while True:
-    pass
+while not sigIntHandler.killed:
+    time.sleep(1)
+    qlensObserver.save()
+
+tmsRoot.shutdown()
+logger.logLine("SIGINT or SIGTERM handled")
+sys.exit(0)
