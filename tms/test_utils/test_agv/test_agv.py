@@ -56,7 +56,6 @@ tmp = sys.argv[1].split(':')
 host, port, interval = tmp[0], int(tmp[1]), float(sys.argv[2])
 s1 = signal.signal(signal.SIGINT, onSigInt)
 s2 = signal.signal(signal.SIGTERM, onSigInt)
-s3 = signal.signal(signal.SIGKILL, onSigInt)
 
 logger = Logger("test_agv_log.txt")
 logger.logLine("Starting test agv on: {}:{}".format(host, port))

@@ -23,7 +23,6 @@ class SignalHandler:
     def __init__(self):
         self.s1 = signal.signal(signal.SIGINT, self.handleExit)
         self.s2 = signal.signal(signal.SIGTERM, self.handleExit)
-        self.s3 = signal.signal(signal.SIGKILL, self.handleExit)
 
         self.killed = False
 
