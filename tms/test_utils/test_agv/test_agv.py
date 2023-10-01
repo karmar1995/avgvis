@@ -48,14 +48,15 @@ class TestTcpHandler(socketserver.BaseRequestHandler):
 
 def onSigInt(signum, frame):
     global executedTasks, logger
-    logger.logLine("SIGINT handled")
+    logger.logLine("SIGINT or SIGTERM handled")
     with open("agv_log.txt", 'w') as f:
         f.write("Executed tasks: {}".format(executedTasks))
     sys.exit(0)
 
 tmp = sys.argv[1].split(':')
 host, port, interval = tmp[0], int(tmp[1]), float(sys.argv[2])
-s = signal.signal(signal.SIGINT, onSigInt)
+s1 = signal.signal(signal.SIGINT, onSigInt)
+s2 = signal.signal(signal.SIGTERM, onSigInt)
 
 logger = Logger("test_agv_log.txt")
 logger.logLine("Starting test agv on: {}:{}".format(host, port))

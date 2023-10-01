@@ -26,7 +26,7 @@ class SigIntHandler:
 
     def __call__(self, *args, **kwargs):
         tmsRoot.shutdown()
-        self.logger.logLine("SIGINT handled")
+        self.logger.logLine("SIGINT or SIGTERM handled")
         self.__observer.save()
         sys.exit(0)
 
@@ -43,7 +43,8 @@ for agvConnectionString in agvsConnectionsStrings:
 
 qlensObserver = CliQueueObserver('qlens.csv')
 sigIntHandler = SigIntHandler(qlensObserver, logger)
-s = signal.signal(signal.SIGINT, sigIntHandler)
+s1 = signal.signal(signal.SIGINT, sigIntHandler)
+s2 = signal.signal(signal.SIGTERM, sigIntHandler)
 logger.logLine("Starting TMS with MES: {}:{} and AGVs: {}".format(mesIp, mesPort, agvsConnections))
 initInfo = TmsInitInfo(topologyDescriptionPath=sys.argv[3], mesIp=mesIp, mesPort=mesPort, mesTasksMappingPath='unused', agvConnectionsData=agvsConnections, queueObserver=qlensObserver)
 tmsRoot = CompositionRoot()
