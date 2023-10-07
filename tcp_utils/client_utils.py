@@ -9,7 +9,7 @@ class TcpClient:
         self.__socket.connect((self.__host, self.__port))
 
     def readDataFromServer(self):
-        ready = select.select([self.__socket], [], [], 0.25)
+        ready = select.select([self.__socket], [], [], 0)
         if ready[0]:
             return self.__socket.recv(1024)
 

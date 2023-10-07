@@ -51,7 +51,7 @@ class AgvServer:
     def __processingThread(self):
         global working, workNumber, interval, executedTasks, logger, tasksCountLogger
         working = True
-        workTime = interval #random.expovariate(interval)
+        workTime = (interval/2) + random.expovariate(interval/2)
         logger.logLine("Starting work {}, number: {} for: {}...".format(workNumber, executedTasks, workTime))
         time.sleep(workTime)
         executedTasks += 1

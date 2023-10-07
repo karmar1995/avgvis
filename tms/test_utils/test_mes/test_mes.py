@@ -4,6 +4,10 @@ from tms.test_utils.test_mes.tcp_server import TcpServer
 from tms.test_utils.logger import Logger
 
 
+def sleepFunction(interval):
+    return interval/2 + random.expovariate(interval)
+
+
 class ServerListener:
     def __init__(self):
         self.__active = False
@@ -56,7 +60,7 @@ class TestMes:
         self.__serverListener.logger.logLine("Running batch mode on : {} with interval: {} and tasksNumber: {}".format(connectionString, interval, tasksNumber))
         self.__batchMode = True
         self.__serverListener.activate()
-        self.__server.setSleepFunction(None)
+        self.__server.setSleepFunction(sleepFunction)
         tmp = connectionString.split(':')
         host = tmp[0]
         self.__server.setHost(host)
