@@ -85,6 +85,7 @@ class TcpServer():
                 else:
                     self.__connection.sendall(bytes())
                 sys.stdout = oldStdOut
+                time.sleep(0.1)
             except Exception:
                 sys.stdout = oldStdOut
 

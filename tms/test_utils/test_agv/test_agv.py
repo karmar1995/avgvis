@@ -42,7 +42,7 @@ class AgvServer:
             frame = getAcknowledgementFrame(working)
             print("Sending working: {}".format(frame))
             self.connection.sendall(frame)
-            time.sleep(0.5)
+            time.sleep(0.1)
 
     def __createProcessingThread(self):
         self.__workingThread = threading.Thread(target=self.__processingThread)
