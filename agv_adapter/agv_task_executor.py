@@ -3,7 +3,6 @@ from simulation.core.task_executor import TaskExecutor
 from agv_adapter.frame_builder import FrameBuilder
 
 
-globalTasksCount = 0
 
 
 class AgvTaskExecutor(TaskExecutor):
@@ -13,10 +12,7 @@ class AgvTaskExecutor(TaskExecutor):
         self.__frameBuilder = FrameBuilder()
 
     def execute(self, task):
-        global  globalTasksCount
-        print("Executing task number: {}".format(globalTasksCount))
         frame = self.__frameBuilder.startFrame().withNodeToVisit(task).consumeFrame()
-        globalTasksCount += 1
         try:
             print("Sending task to AGV: {}".format(task))
             self.__waitForAgvResponse(0)
