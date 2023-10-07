@@ -41,5 +41,8 @@ class CompositionRoot:
     def tasksScheduler(self):
         return self.__tasksScheduler
 
+    def executorsManager(self):
+        return self.__executorsManager
+
     def system(self):
         return self.__system

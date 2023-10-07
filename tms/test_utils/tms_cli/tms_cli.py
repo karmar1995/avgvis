@@ -9,13 +9,19 @@ class CliQueueObserver(QueueObserver):
         self.__fields = ['time', 'qlen']
         self.__filename = logFilename
 
-    def probeQueueState(self, queue, timePoint):
-        self.__qlens.append({'time': round(timePoint, 2), 'qlen': len(queue)})
+    def probeQueueState(self, queue, executorsViews, timePoint):
+        tasksInProgress = 0
+        for executorView in executorsViews:
+            tasksInProgress += executorView.tasksCount()
+        qlen = len(queue) + tasksInProgress
+        self.__qlens.append({'time': round(timePoint, 2), 'qlen': qlen})
+        if len(self.__qlens) > 100:
+            self.save()
+            self.__qlens.clear()
 
     def save(self):
-        with open(self.__filename, 'w') as csvfile:
+        with open(self.__filename, 'a') as csvfile:
             writer = csv.DictWriter(csvfile, fieldnames=self.__fields)
-            writer.writeheader()
             writer.writerows(self.__qlens)
 
 

@@ -1,5 +1,5 @@
 import random
-from simulation.core.job_executor import JobExecutor
+from simulation.core.job_executor import JobExecutor, JobExecutorView
 
 
 class JobExecutorsManager:
@@ -36,3 +36,9 @@ class JobExecutorsManager:
 
     def executorsNumber(self):
         return len(self.__executors)
+
+    def executorsViews(self):
+        res = list()
+        for executorId in self.__executors:
+            res.append(JobExecutorView(self.__executors[executorId]))
+        return res

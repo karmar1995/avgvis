@@ -2,6 +2,9 @@ import time, threading
 from simulation.core.tasks_source import TasksSource
 
 
+MAX_JOB_LENGTH = 10
+
+
 class TasksScheduler:
     def __init__(self, tasksQueue, pathsController, executorsManager):
         self.__queue = tasksQueue
@@ -29,14 +32,17 @@ class TasksScheduler:
         while not self.__killed:
             if len(self.__tasks) > 0 and self.__executorsManager.freeExecutorsNumber() > 0:
                 jobsDict = dict()
+                length = 0
                 while len(self.__tasks) > 0:
-                    for i in range(0, self.__executorsManager.freeExecutorsNumber()):
-                        if len(self.__tasks) == 0:
+                    freeExecutors = self.__executorsManager.freeExecutorsNumber()
+                    for i in range(0, freeExecutors):
+                        if len(self.__tasks) == 0 or length >= MAX_JOB_LENGTH:
                             break
                         if i not in jobsDict:
                             jobsDict[i] = list()
                         if len(self.__tasks) > 0:
                             jobsDict[i].append(self.__tasks.pop(0))
+                            length += 1
                 self.__jobsDict = jobsDict
                 pathsPerJobId = self.coordinateJobs(iterations=100)  # todo: un-hardcode this stuff
                 for jobId in pathsPerJobId:

@@ -26,6 +26,11 @@ class JobExecutor:
         self.__thread.join()
         self.__thread = None
 
+    def tasksCount(self):
+        if self.__job is None:
+            return 0
+        return len(self.__job) - self.__currentTask
+
     def __executeJob(self):
         for i in range(0, len(self.__job)):
             self.__currentTask = i
@@ -35,5 +40,13 @@ class JobExecutor:
     def __onJobFinished(self):
         self.__job = None
         self.__busy = False
+        self.__currentTask = 0
         self.__owner.onExecutorFinished()
 
+
+class JobExecutorView:
+    def __init__(self, jobExecutor: JobExecutor):
+        self.__executor = jobExecutor
+
+    def tasksCount(self):
+        return self.__executor.tasksCount()

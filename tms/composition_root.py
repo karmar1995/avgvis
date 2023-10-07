@@ -10,7 +10,7 @@ from storage.graph_storage import GraphStorage
 
 
 class QueueObserver:
-    def probeQueueState(self, queue, timePoint):
+    def probeQueueState(self, queue, executorsViews, timePoint):
         pass
 
 
@@ -25,11 +25,12 @@ class TmsInitInfo:
 
 
 class QueueObservingThread:
-    def __init__(self, queue, queueObserver):
+    def __init__(self, queue, executorsViews, queueObserver):
         self.__working = False
         self.__thread = None
         self.__queue = queue
         self.__queueObserver = queueObserver
+        self.__executorsViews = executorsViews
 
     def start(self):
         self.__working = True
@@ -44,9 +45,9 @@ class QueueObservingThread:
 
     def __observeQueue(self):
         timePoint = 0
-        interval = 0.2
+        interval = 0.1
         while self.__working:
-            self.__queueObserver.probeQueueState(self.__queue, timePoint)
+            self.__queueObserver.probeQueueState(self.__queue, self.__executorsViews, timePoint)
             time.sleep(interval)
             timePoint += interval
 
@@ -82,7 +83,7 @@ class CompositionRoot:
             'tasksQueue': self.__simulationRoot.tasksQueue()
         })
         self.__mesRoot.initialize(mesInitInfo)
-        self.__queueObservingThread = QueueObservingThread(self.__simulationRoot.tasksScheduler().tasks(), tmsInitInfo.queueObserver)
+        self.__queueObservingThread = QueueObservingThread(self.__simulationRoot.tasksScheduler().tasks(), self.__simulationRoot.executorsManager().executorsViews(), tmsInitInfo.queueObserver)
 
     def start(self):
         self.__mesRoot.start()
