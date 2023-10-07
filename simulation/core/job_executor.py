@@ -50,3 +50,4 @@ class JobExecutorView:
 
     def tasksCount(self):
         return self.__executor.tasksCount()
+

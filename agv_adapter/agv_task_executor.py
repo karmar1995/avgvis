@@ -3,8 +3,6 @@ from simulation.core.task_executor import TaskExecutor
 from agv_adapter.frame_builder import FrameBuilder
 
 
-
-
 class AgvTaskExecutor(TaskExecutor):
 
     def __init__(self, agvSender):

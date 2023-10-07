@@ -53,8 +53,7 @@ class TasksScheduler:
                 self.__jobsDict = jobsDict
                 pathsPerJobId = self.coordinateJobs(iterations=100)  # todo: un-hardcode this stuff
                 for jobId in pathsPerJobId:
-                    executor = self.__executorsManager.freeExecutor()
-                    executor.executeJob(pathsPerJobId[jobId].path)
+                    self.__executorsManager.freeExecutor().executeJob(pathsPerJobId[jobId].path)
                 self.__idle = False
             else:
                 self.__idle = True
