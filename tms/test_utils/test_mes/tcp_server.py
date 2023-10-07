@@ -62,6 +62,7 @@ class TcpServer():
             global currentTask, sleeping
             if len(self.__tasksLists) > 0 and currentTask == -1:
                 currentTask = self.__tasksLists.pop(0)
+                print("Sending task: {}".format(currentTask))
                 self.__listener.onMsg("Sending task: {}".format(currentTask))
                 sleeping = True
                 if self.__sleepFunction is None:

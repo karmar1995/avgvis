@@ -25,11 +25,12 @@ class JobExecutorsManager:
         return res
 
     def freeExecutor(self):
-        for i in range(0, len(self.__executors)):
+        executor = None
+        while executor is None:
             executorId = random.choice(list(self.__executors.keys()))
             if not self.__executors[executorId].busy():
-                return self.__executors[executorId]
-        return None
+                executor = self.__executors[executorId]
+        return executor
 
     def onExecutorFinished(self):
         pass

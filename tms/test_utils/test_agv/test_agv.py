@@ -54,6 +54,7 @@ class AgvServer:
         time.sleep(workTime)
         executedTasks += 1
         tasksCountLogger.logLine("Executed tasks: {}".format(executedTasks))
+        print("Executed tasks: {}".format(executedTasks))
         logger.logLine("\nDone")
         working = False
 
