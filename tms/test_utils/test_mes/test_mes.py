@@ -5,7 +5,7 @@ from tms.test_utils.logger import Logger
 
 
 def sleepFunction(interval):
-    return interval/2 + random.expovariate(interval)
+    return interval/2 + random.expovariate(interval/2)
 
 
 class ServerListener:
