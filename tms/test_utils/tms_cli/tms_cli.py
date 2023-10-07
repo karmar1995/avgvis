@@ -17,12 +17,12 @@ class CliQueueObserver(QueueObserver):
         self.__qlens.append({'time': round(timePoint, 2), 'qlen': qlen})
         if len(self.__qlens) > 100:
             self.save()
-            self.__qlens.clear()
 
     def save(self):
         with open(self.__filename, 'a') as csvfile:
             writer = csv.DictWriter(csvfile, fieldnames=self.__fields)
             writer.writerows(self.__qlens)
+            self.__qlens.clear()
 
 
 class SignalHandler:
