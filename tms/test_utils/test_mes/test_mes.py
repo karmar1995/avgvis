@@ -56,7 +56,7 @@ class TestMes:
         self.__serverListener.logger.logLine("Running batch mode on : {} with interval: {} and tasksNumber: {}".format(connectionString, interval, tasksNumber))
         self.__batchMode = True
         self.__serverListener.activate()
-        self.__server.setSleepFunction(random.expovariate)
+        self.__server.setSleepFunction(None)
         tmp = connectionString.split(':')
         host = tmp[0]
         self.__server.setHost(host)

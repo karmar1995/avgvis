@@ -38,7 +38,7 @@ class TestTcpHandler(socketserver.BaseRequestHandler):
     def __processingThread(self):
         global working, workNumber, interval, executedTasks, logger, tasksCountLogger
         working = True
-        workTime = random.expovariate(interval)
+        workTime = interval #random.expovariate(interval)
         logger.logLine("Starting work {}, number: {} for: {}...".format(workNumber, executedTasks, workTime))
         time.sleep(workTime)
         executedTasks += 1
