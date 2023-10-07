@@ -3,6 +3,9 @@ from simulation.core.task_executor import TaskExecutor
 from agv_adapter.frame_builder import FrameBuilder
 
 
+globalTasksCount = 0
+
+
 class AgvTaskExecutor(TaskExecutor):
 
     def __init__(self, agvSender):
@@ -10,9 +13,13 @@ class AgvTaskExecutor(TaskExecutor):
         self.__frameBuilder = FrameBuilder()
 
     def execute(self, task):
+        global  globalTasksCount
+        print("Executing task number: {}".format(globalTasksCount))
         frame = self.__frameBuilder.startFrame().withNodeToVisit(task).consumeFrame()
+        globalTasksCount += 1
         try:
             print("Sending task to AGV: {}".format(task))
+            self.__waitForAgvResponse(0)
             self.__agvSender.sendDataToServer(frame)
             self.__waitForAgvResponse(0)
         except ConnectionRefusedError as e:

@@ -32,6 +32,7 @@ class TasksScheduler:
     def __processQueue(self):
         self.__started = True
         while not self.__killed:
+            print("Queue length: {}".format(len(self.__tasks)))
             if len(self.__tasks) > 0 and self.__executorsManager.freeExecutorsNumber() > 0:
                 jobsDict = dict()
                 length = 0

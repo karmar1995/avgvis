@@ -30,17 +30,16 @@ class AgvServer:
         while True:
             global working, logger
             if not working:
-                ready = select.select([self.connection], [], [], 0.25)
+                ready = select.select([self.connection], [], [], 0)
                 if ready[0]:
+                    working = True
                     received = self.connection.recv(4096)
                     logger.logLine("Received: {}".format(received))
-                    print("Received: {}".format(received))
                     if len(received) > 0:
                         global workNumber
                         workNumber = int.from_bytes(received, 'big')
                         self.__createProcessingThread()
             frame = getAcknowledgementFrame(working)
-            print("Sending working: {}".format(frame))
             self.connection.sendall(frame)
             time.sleep(0.1)
 
@@ -50,7 +49,6 @@ class AgvServer:
 
     def __processingThread(self):
         global working, workNumber, interval, executedTasks, logger, tasksCountLogger
-        working = True
         workTime = (interval/2) + random.expovariate(interval/2)
         logger.logLine("Starting work {}, number: {} for: {}...".format(workNumber, executedTasks, workTime))
         time.sleep(workTime)
