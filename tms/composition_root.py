@@ -67,7 +67,10 @@ class CompositionRoot:
         topologyBuilder = TopologyBuilder(self.__simpyRoot.simulation.env, graphStorage)
         agvsSenders = list()
         for agvConnectionData in tmsInitInfo.agvConnectionsData:
-            agvsSenders.append(self.__networkSenderFactory(agvConnectionData[0], agvConnectionData[1]))
+            try:
+                agvsSenders.append(self.__networkSenderFactory(agvConnectionData[0], agvConnectionData[1]))
+            except Exception as e:
+                print("Cannot create network client: {}".format(e))
         executorsNumber = len(agvsSenders)
         self.__agvRoot.initialize(agvsSenders)
 

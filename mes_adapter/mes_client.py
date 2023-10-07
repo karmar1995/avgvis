@@ -20,7 +20,8 @@ class MesClient:
     def __pollMes(self):
         while self.__running:
             try:
-                self.__tasksSource.handleRequest(self.__frameParser.onFrameReceived(self.__mesDataSource.readDataFromServer()).id)
+                data = self.__mesDataSource.readDataFromServer()
+                self.__tasksSource.handleRequest(self.__frameParser.onFrameReceived(data).id)
                 time.sleep(0.5)
             except ConnectionRefusedError as e:
                 pass

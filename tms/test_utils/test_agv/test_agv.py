@@ -1,5 +1,5 @@
 from tms.test_utils.logger import Logger
-import socketserver, sys, time, threading, random, signal
+import socket, sys, time, threading, random, signal, select
 
 
 def getAcknowledgementFrame(working):
@@ -15,21 +15,34 @@ interval = 1.0
 executedTasks = 0
 
 
-class TestTcpHandler(socketserver.BaseRequestHandler):
-
-    def setup(self):
+class AgvServer:
+    def __init__(self):
+        self.socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+        self.connection = None
         self.__workingThread = None
 
-    def handle(self):
-        global working, logger
-        if not working:
-            received = self.request.recv(4096)
-            logger.logLine("Received: {}".format(received))
-            if len(received) > 0:
-                global workNumber
-                workNumber = int.from_bytes(received, 'big')
-                self.__createProcessingThread()
-        self.request.sendall(getAcknowledgementFrame(working))
+    def connect(self, host, port):
+        self.socket.bind((host, port))
+        self.socket.listen(1)
+        self.connection, _ = self.socket.accept()
+
+    def run(self):
+        while True:
+            global working, logger
+            if not working:
+                ready = select.select([self.connection], [], [], 0.25)
+                if ready[0]:
+                    received = self.connection.recv(4096)
+                    logger.logLine("Received: {}".format(received))
+                    print("Received: {}".format(received))
+                    if len(received) > 0:
+                        global workNumber
+                        workNumber = int.from_bytes(received, 'big')
+                        self.__createProcessingThread()
+            frame = getAcknowledgementFrame(working)
+            print("Sending working: {}".format(frame))
+            self.connection.sendall(frame)
+            time.sleep(0.5)
 
     def __createProcessingThread(self):
         self.__workingThread = threading.Thread(target=self.__processingThread)
@@ -47,6 +60,7 @@ class TestTcpHandler(socketserver.BaseRequestHandler):
         working = False
 
 
+
 def onSigInt(signum, frame):
     global executedTasks, logger
     logger.logLine("SIGINT or SIGTERM handled")
@@ -62,5 +76,6 @@ logger.logLine("Starting test agv on: {}:{}".format(host, port))
 tasksCountLogger = Logger("agv_{}_tasks_count.txt".format(host).replace('.', '_'))
 tasksCountLogger.logLine("Executed tasks: {}".format(executedTasks))
 
-with socketserver.TCPServer((host, port), TestTcpHandler) as server:
-    server.serve_forever()
+agvServer = AgvServer()
+agvServer.connect(host, port)
+agvServer.run()
