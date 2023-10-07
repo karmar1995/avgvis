@@ -57,7 +57,7 @@ host, port, interval = tmp[0], int(tmp[1]), float(sys.argv[2])
 s1 = signal.signal(signal.SIGINT, onSigInt)
 s2 = signal.signal(signal.SIGTERM, onSigInt)
 
-logger = Logger("test_agv_log.txt")
+logger = Logger("test_agv_log_{}.txt".format(host).replace('.', '_'))
 logger.logLine("Starting test agv on: {}:{}".format(host, port))
 tasksCountLogger = Logger("agv_{}_tasks_count.txt".format(host).replace('.', '_'))
 tasksCountLogger.logLine("Executed tasks: {}".format(executedTasks))
