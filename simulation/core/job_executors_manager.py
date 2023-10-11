@@ -17,6 +17,13 @@ class JobExecutorsManager:
             executor = JobExecutor(self.__taskExecutorsFactory(), self)
             self.__executors[id(executor)] = executor
 
+    def freeExecutors(self):
+        res = []
+        for executorId in self.__executors:
+            if not self.__executors[executorId].busy():
+                res.append(self.__executors[executorId])
+        return res
+
     def freeExecutorsNumber(self):
         res = 0
         for executorId in self.__executors:

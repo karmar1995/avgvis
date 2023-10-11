@@ -1,3 +1,4 @@
+import random
 import time, threading
 from simulation.core.tasks_source import TasksSource
 
@@ -32,14 +33,13 @@ class TasksScheduler:
     def __processQueue(self):
         self.__started = True
         while not self.__killed:
-            print("Queue length: {}".format(len(self.__tasks)))
-            if len(self.__tasks) > 0 and self.__executorsManager.freeExecutorsNumber() > 0:
+            freeExecutors = self.__executorsManager.freeExecutors()
+            if len(self.__tasks) > 0 and len(freeExecutors) > 0:
                 jobsDict = dict()
                 length = 0
                 self.__tasksGuard = True
                 while len(self.__tasks) > 0:
-                    freeExecutors = self.__executorsManager.freeExecutorsNumber()
-                    for i in range(0, freeExecutors):
+                    for i in range(0, len(freeExecutors)):
                         if len(self.__tasks) == 0 or length >= MAX_JOB_LENGTH:
                             break
                         if i not in jobsDict:
@@ -52,7 +52,9 @@ class TasksScheduler:
                 self.__tasksGuard = False
                 self.__jobsDict = jobsDict
                 pathsPerJobId = self.coordinateJobs(iterations=100)  # todo: un-hardcode this stuff
+                random.shuffle(freeExecutors)
                 for jobId in pathsPerJobId:
+                    freeExecutors.pop(0).executeJob(pathsPerJobId[jobId].path)
                     self.__executorsManager.freeExecutor().executeJob(pathsPerJobId[jobId].path)
                 self.__idle = False
             else:
