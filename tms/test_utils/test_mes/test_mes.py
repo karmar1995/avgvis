@@ -1,11 +1,8 @@
-import sys, signal, random, time
+import sys, signal, time
 from tms.test_utils.test_mes.utils import MES_PROMPT
 from tms.test_utils.test_mes.tcp_server import TcpServer
 from tms.test_utils.logger import Logger
-
-
-def sleepFunction(interval):
-    return interval/2 + random.expovariate(interval/2)
+from tms.test_utils.sleepTimeFunction import sleepFunction
 
 
 class ServerListener:

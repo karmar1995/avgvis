@@ -1,5 +1,6 @@
 from tms.test_utils.logger import Logger
 import socket, sys, time, threading, random, signal, select
+from tms.test_utils.sleepTimeFunction import sleepFunction
 
 
 def getAcknowledgementFrame(working):
@@ -49,7 +50,7 @@ class AgvServer:
 
     def __processingThread(self):
         global working, workNumber, interval, executedTasks, logger, tasksCountLogger
-        workTime = (interval/2) + random.expovariate(interval/2)
+        workTime = sleepFunction(mean=interval)
         logger.logLine("Starting work {}, number: {} for: {}...".format(workNumber, executedTasks, workTime))
         time.sleep(workTime)
         executedTasks += 1
