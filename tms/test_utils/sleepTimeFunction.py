@@ -1,10 +1,11 @@
 import random
 
-avg = 5
+avg = 1.1
 
 
 def sleepFunction(mean):
-    return random.gauss(mu=mean, sigma=0.5)
+    randomFactor = 0.25
+    return (mean * (1-randomFactor)) + random.expovariate(1/(mean*randomFactor))
 
 
 def check(samples):
