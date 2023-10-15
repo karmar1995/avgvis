@@ -4,7 +4,7 @@ avg = 1.1
 
 
 def sleepFunction(mean):
-    randomFactor = 0.25
+    randomFactor = 0.5
     return (mean * (1-randomFactor)) + random.expovariate(1/(mean*randomFactor))
 
 
@@ -18,4 +18,4 @@ def check(samples):
     print("Avg: {}".format(sum(res)/len(res)))
     print("Max: {}".format(max(res)))
 
-#check(100)
+#check(100000000)
