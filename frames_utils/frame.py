@@ -12,7 +12,9 @@ class FrameField:
 
 
 dataLengthByFrameId = {
-    5000: 32
+    5000: 32,
+    6000: 188,
+    6100: 134
 }
 
 
@@ -98,6 +100,9 @@ class FrameParser:
     def __parseField(self, data, field, frameId):
         length = field.length
         if length == VARIABLE_LENGTH_MARK and frameId is not None:
+            if frameId == 0:
+                i = 0
+                i += 1
             length = dataLengthByFrameId[frameId]
         tmp = copy.deepcopy(data[field.startingByte: (field.startingByte + length)])
         if field.type == bytes:
@@ -122,7 +127,9 @@ class FrameBuilder:
         return bytes(frameBytes)
 
     def __buildField(self, frameField, frameBytes):
-        value = self.__fields[frameField.name]
+        value = 0
+        if frameField.name in self.__fields:
+            value = self.__fields[frameField.name]
         length = frameField.length
         if length == VARIABLE_LENGTH_MARK:
             length = dataLengthByFrameId[self.__fields['id']]

@@ -1,16 +1,16 @@
 import time
 from simulation.core.task_executor import TaskExecutor
-from agv_adapter.frame_builder import FrameBuilder
+from agv_adapter.agv_frame_builder import AgvFrameBuilder
+from agv_adapter.agv_response_parser import AgvResponseParser
 
 
 class AgvTaskExecutor(TaskExecutor):
 
     def __init__(self, agvSender):
         self.__agvSender = agvSender
-        self.__frameBuilder = FrameBuilder()
 
     def execute(self, task):
-        frame = self.__frameBuilder.startFrame().withNodeToVisit(task).consumeFrame()
+        frame = AgvFrameBuilder().startFrame().withNodeToVisit(task).consumeFrame()
         try:
             print("Sending task to AGV: {}".format(task))
             self.__waitForAgvResponse(0)
@@ -20,7 +20,9 @@ class AgvTaskExecutor(TaskExecutor):
             print("Cannot connect to AGV")
 
     def __waitForAgvResponse(self, value):
-        agvResponse = int.from_bytes(self.__agvSender.readDataFromServer(), 'big')
+        responseParser = AgvResponseParser(self.__agvSender.readDataFromServer())
+        agvResponse = responseParser.getNaturalNavigationCommandFeedback()
         while agvResponse != value:
-            agvResponse = int.from_bytes(self.__agvSender.readDataFromServer(), 'big')
+            responseParser = AgvResponseParser(self.__agvSender.readDataFromServer())
+            agvResponse = responseParser.getNaturalNavigationCommandFeedback()
             time.sleep(0.25)

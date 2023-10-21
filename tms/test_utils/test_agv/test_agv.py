@@ -1,13 +1,26 @@
 from tms.test_utils.logger import Logger
 import socket, sys, time, threading, random, signal, select
 from tms.test_utils.sleepTimeFunction import sleepFunction
+from frames_utils.frame import FrameBuilder, FrameParser, Frame6100Description, Frame6000Description, GenericFrameDescription
 
 
 def getAcknowledgementFrame(working):
-    res = 0
+    value = 0
     if working:
-        res = 1
-    return res.to_bytes(1, 'big')
+        value = 1
+    frame6000 = FrameBuilder(Frame6000Description()).setFieldValue('naturalNavigationCommandFeedback',
+                                                                   value.to_bytes(20, 'big')).build()
+    frame = FrameBuilder(GenericFrameDescription()).setFieldValue('id', 6000).setFieldValue('data', frame6000).build()
+    return frame
+
+def parseTmsRequest(frameBytes):
+    genericFrameParser = FrameParser(GenericFrameDescription())
+    frameData = genericFrameParser.parse(frameBytes).data
+    try:
+        feedbackBytes = FrameParser(Frame6100Description()).parse(frameData).naturalNavigationCommand
+        return int.from_bytes(feedbackBytes, 'big')
+    except Exception as e:
+        return -1
 
 
 working = False
@@ -37,9 +50,13 @@ class AgvServer:
                     received = self.connection.recv(4096)
                     logger.logLine("Received: {}".format(received))
                     if len(received) > 0:
-                        global workNumber
-                        workNumber = int.from_bytes(received, 'big')
-                        self.__createProcessingThread()
+                        tmsRequest = parseTmsRequest(received)
+                        if tmsRequest >= 0:
+                            global workNumber
+                            workNumber = int.from_bytes(received, 'big')
+                            self.__createProcessingThread()
+                        else:
+                            print("Received invalid request")
             frame = getAcknowledgementFrame(working)
             self.connection.sendall(frame)
             time.sleep(0.5)
