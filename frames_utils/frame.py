@@ -16,7 +16,7 @@ dataLengthByFrameId = {
 }
 
 
-VARIABLE_LENGTH_MARK = -1
+VARIABLE_LENGTH_MARK = 100000
 
 
 class DtlDateTime:
@@ -64,11 +64,21 @@ class Frame:
 class FrameDescription:
     def __init__(self):
         self.fields = list()
+        self.__initialize()
 
     def addField(self, field: FrameField):
         self.fields.append(field)
         return self
 
+    def __initialize(self):
+        fields = []
+        for attrName in dir(self):
+            attr = getattr(self, attrName)
+            if isinstance(attr, FrameField):
+                fields.append(attr)
+        sortedFields = sorted(fields, key=lambda field: field.startingByte)
+        for field in sortedFields:
+            self.addField(field)
 
 class FrameParser:
     def __init__(self, frameDescription: FrameDescription):
@@ -137,17 +147,9 @@ class GenericFrameDescription(FrameDescription):
 
     def __init__(self):
         super().__init__()
-        self.addField(GenericFrameDescription.beginningField).\
-            addField(GenericFrameDescription.emptyField).\
-            addField(GenericFrameDescription.idField). \
-            addField(GenericFrameDescription.statusField).\
-            addField(GenericFrameDescription.timestampField).\
-            addField(GenericFrameDescription.numberField). \
-            addField(GenericFrameDescription.versionField).\
-            addField(GenericFrameDescription.lengthField).\
-            addField(GenericFrameDescription.dataField).addField(GenericFrameDescription.endingField)
 
 
+# communication direction: MES -> TMS
 class Frame5000Description(FrameDescription):
     timestampField = FrameField(startingByte=0, length=12, type=DtlDateTime, endianStyle='big', name='timestamp')
     productionOrderIdField = FrameField(startingByte=12, length=2, type=int, endianStyle='big', name='productionOrderId')
@@ -158,9 +160,52 @@ class Frame5000Description(FrameDescription):
 
     def __init__(self):
         super().__init__()
-        self.addField(Frame5000Description.timestampField).\
-            addField(Frame5000Description.productionOrderIdField).\
-            addField(Frame5000Description.orderPriorityField). \
-            addField(Frame5000Description.sourcePointIdField).\
-            addField(Frame5000Description.destinationPointIdField).\
-            addField(Frame5000Description.requiredOutputTimeField)
+
+
+# communication direction: AGV -> TMS
+class Frame6000Description(FrameDescription):
+    timestampField = FrameField(startingByte=0, length=12, type=bytes, endianStyle='big', name='timestamp')
+    generalSignalsField = FrameField(startingByte=12, length=2, type=bytes, endianStyle='big', name='generalSignals')
+    safetySignalsField = FrameField(startingByte=14, length=6, type=bytes, endianStyle='big', name='safetySignals')
+    LEDStatusField = FrameField(startingByte=20, length=4, type=bytes, endianStyle='big', name='ledStatus')
+    exclusionStatusesField = FrameField(startingByte=24, length=2, type=bytes, endianStyle='big', name='exclusionStatuses')
+    otherStatusesField = FrameField(startingByte=26, length=4, type=bytes, endianStyle='big', name='otherStatuses')
+    weightSignalField = FrameField(startingByte=30, length=8, type=bytes, endianStyle='big', name='weightSignal')
+    group1RightDriveSignalsField = FrameField(startingByte=38, length=4, type=bytes, endianStyle='big', name='rightDriveSignals')
+    group2LeftDriveSignalsField = FrameField(startingByte=42, length=4, type=bytes, endianStyle='big', name='leftDriveSignals')
+    group3BrakeSignalsField = FrameField(startingByte=46, length=2, type=bytes, endianStyle='big', name='brakeSignals')
+    group4PinActuatorSignalsField = FrameField(startingByte=48, length=2, type=bytes, endianStyle='big', name='pinActuatorsSignals')
+    group5LiftingPlateSignalField = FrameField(startingByte=50, length=2, type=bytes, endianStyle='big', name='liftingPlateSignals')
+    alarmInformationField = FrameField(startingByte=52, length=10, type=bytes, endianStyle='big', name='alarmInformation')
+    warningInformationField = FrameField(startingByte=62, length=4, type=bytes, endianStyle='big', name='warningInformation')
+    messageInformationField = FrameField(startingByte=66, length=4, type=bytes, endianStyle='big', name='messageInformation')
+    odometrySignalsField = FrameField(startingByte=70, length=12, type=bytes, endianStyle='big', name='odometrySignals')
+    energySignalsField = FrameField(startingByte=82, length=16, type=bytes, endianStyle='big', name='energySignals')
+    inclinationSignalsField = FrameField(startingByte=98, length=8, type=bytes, endianStyle='big', name='inclinationStatus')
+    naturalNavigationSignalsField = FrameField(startingByte=106, length=36, type=bytes, endianStyle='big', name='naturalNavigationSignals')
+    naturalNavigationCommandFeedbackField = FrameField(startingByte=142, length=20, type=bytes, endianStyle='big', name='naturalNavigationCommandFeedback')
+    collaborativeRobotFeedbackField = FrameField(startingByte=162, length=10, type=bytes, endianStyle='big', name='collaborativeRobotFeedback')
+    collaborativeRobotEnergySignalsField = FrameField(startingByte=172, length=16, type=bytes, endianStyle='big', name='collaborativeRobotEnergySignals')
+
+    def __init__(self):
+        super().__init__()
+
+
+# communication direction: TMS -> AGV
+class Frame6100Description(FrameDescription):
+    timestampField = FrameField(startingByte=0, length=12, type=bytes, endianStyle='big', name='timestamp')
+    generalSignalsControlField = FrameField(startingByte=12, length=2, type=bytes, endianStyle='big', name='generalSignalsControl')
+    brakesControlField = FrameField(startingByte=14, length=2, type=bytes, endianStyle='big', name='brakesControl')
+    actuatorControlField = FrameField(startingByte=16, length=2, type=bytes, endianStyle='big', name='actuatorControl')
+    liftingPlateControlField = FrameField(startingByte=18, length=2, type=bytes, endianStyle='big', name='liftingPlateControl')
+    LEDControlField = FrameField(startingByte=20, length=2, type=bytes, endianStyle='big', name='LEDControl')
+    safetySignalsControlField = FrameField(startingByte=22, length=2, type=bytes, endianStyle='big', name='safetySignals')
+    exclusionControlField = FrameField(startingByte=24, length=2, type=bytes, endianStyle='big', name='exclusionControl')
+    customSignalControlField = FrameField(startingByte=26, length=40, type=bytes, endianStyle='big', name='customSignalControl')
+    singleDrivesControlField = FrameField(startingByte=66, length=10, type=bytes, endianStyle='big', name='singleDrivesControl')
+    manualControlField = FrameField(startingByte=76, length=6, type=bytes, endianStyle='big', name='manualControl')
+    naturalNavigationCommandField = FrameField(startingByte=82, length=40, type=bytes, endianStyle='big', name='naturalNavigationCommand')
+    collaborativeRobotCommandField = FrameField(startingByte=122, length=12, type=bytes, endianStyle='big', name='collaborativeRobotCommand')
+
+    def __init__(self):
+        super().__init__()
