@@ -21,7 +21,8 @@ class MesClient:
         while self.__running:
             try:
                 data = self.__mesDataSource.readDataFromServer()
-                self.__tasksSource.handleRequest(self.__frameParser.onFrameReceived(data).id)
+                frame = self.__frameParser.onFrameReceived(data)
+                self.__tasksSource.handleRequest(frame.productionOrderId)
                 time.sleep(0.5)
             except ConnectionRefusedError as e:
                 pass

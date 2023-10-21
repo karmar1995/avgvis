@@ -9,7 +9,6 @@ class MesFrameBuilder(FrameBuilder):
 class MesFrameParser:
     def __init__(self):
         self.__data = None
-        self.__mesFrameDescription = GenericFrameDescription()
 
     def onFrameReceived(self, frame):
         self.__data = frame
@@ -17,9 +16,11 @@ class MesFrameParser:
 
     def __parse(self):
         try:
-            return FrameParser(self.__mesFrameDescription).parse(self.__data)
+            genericFrameParser = FrameParser(GenericFrameDescription())
+            frameData = genericFrameParser.parse(self.__data).data
+            return FrameParser(Frame5000Description()).parse(frameData)
         except Exception as e:
-            return Frame().addField('id', -1)
+            return Frame().addField('productionOrderId', -1)
 
     def __validate(self, totalLength):
         pass
