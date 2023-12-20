@@ -29,6 +29,9 @@ class CompositionRoot:
         self.__executorsManager.setTasksScheduler(self.__tasksScheduler)
         self.__executorsManager.createExecutors()
 
+    def start(self):
+        self.__tasksScheduler.start()
+
     def shutdown(self):
         self.__tasksScheduler.shutdown()
 

@@ -3,7 +3,7 @@ import threading
 
 
 class JobExecutor:
-    def __init__(self, actualExecutor: TaskExecutor, owner):
+    def  __init__(self, actualExecutor: TaskExecutor, owner):
         self.__job = None
         self.__taskExecutor = actualExecutor
         self.__currentTask = 0

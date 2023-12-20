@@ -91,6 +91,7 @@ class CompositionRoot:
     def start(self):
         self.__mesRoot.start()
         self.__queueObservingThread.start()
+        self.__simulationRoot.start()
 
     def shutdown(self):
         self.__mesRoot.shutdown()

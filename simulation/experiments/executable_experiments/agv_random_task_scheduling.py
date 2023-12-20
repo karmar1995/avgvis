@@ -6,7 +6,6 @@ from simulation.experiments_utils.logger import Logger
 from simulation.experiments_utils.analytics.experiment_analyzer import *
 from simulation.test_utils.tasks_generator import generateTasksQueue
 from simulation.experiments_utils.csv_writer import CsvWriter
-from simulation.experiments_utils.test_graphs_builders import *
 
 
 def run(tasksNumber, agvsNumber, stationsNumber, graphBuilderClass, subdirectory):
@@ -16,9 +15,9 @@ def run(tasksNumber, agvsNumber, stationsNumber, graphBuilderClass, subdirectory
     tasksQueue = generateTasksQueue(tasksNumber, stationsNumber)
     graphBuilder = graphBuilderClass(stationsNumber)
 
-    for iterations in range(1, 310, 10):
+    for iterations in range(1, 160, 10):
         experiment = RandomTasksScheduling(tasksQueue, agvsNumber, iterations, graphBuilder)
-        Runner(experiment, experimentCollector.getRetriesCollector(iterations)).run(times=20)
+        Runner(experiment, experimentCollector.getRetriesCollector(iterations)).run(times=10)
 
     legend = {
         'Tasks number': tasksNumber,
@@ -26,7 +25,7 @@ def run(tasksNumber, agvsNumber, stationsNumber, graphBuilderClass, subdirectory
         'Stations Number': stationsNumber
     }
 
-    resultsDir = '/home/kmarszal/Documents/dev/avgvis/simulation/experiments/results/agv_random_task_scheduling_2/{}'.format(subdirectory)
+    resultsDir = '/home/kmarszal/Documents/dev/avgvis/simulation/experiments/results/agv_random_task_scheduling/{}'.format(subdirectory)
     csvWriter = CsvWriter(resultsDir, analyzer)
     csvWriter.write('cost', 'iterations', legend)
     csvWriter.write('time', 'iterations', legend)
@@ -40,6 +39,3 @@ def run(tasksNumber, agvsNumber, stationsNumber, graphBuilderClass, subdirectory
     plotSeries(analyzer.analyze('queueLength', ['mean']), 'Average queue length', 'Queue length', x_label, os.path.join(resultsDir, "queueLength.png"))
 
 
-run(tasksNumber=1000, agvsNumber=100, stationsNumber=40, graphBuilderClass=VeryLongServiceTimeFullGraphBuilder, subdirectory='long_service_many_agvs')
-#run(tasksNumber=1000, agvsNumber=25, stationsNumber=40, graphBuilderClass=LongServiceTimeFullGraphBuilder, subdirectory='long_service_few_agvs')
-#run(tasksNumber=1000, agvsNumber=60, stationsNumber=10, graphBuilderClass=ShortServiceTimeFullGraphBuilder, subdirectory='short_service_many_agvs')

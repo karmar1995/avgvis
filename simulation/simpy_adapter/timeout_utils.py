@@ -9,4 +9,4 @@ def timeoutFor(val):
 
 
 def transitionTimeout(val):
-    return val
+    return random.gauss(val, 0.5)

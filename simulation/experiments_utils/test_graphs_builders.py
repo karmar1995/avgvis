@@ -59,11 +59,11 @@ class LongServiceTimeFullGraphBuilder:
     def build(self, systemBuilder):
         n = self.__nodesNumber
         for i in range(0, n):
-            systemBuilder.addVertex(Vertex(node=Node(env=self.__env, serviceTime=longServiceTimeWeightsManager.getWeight(i), index=i)))
+            systemBuilder.addVertex(Vertex(name="unused", node=Node(env=self.__env, serviceTime=longServiceTimeWeightsManager.getWeight(i), index=i)))
 
         for i in range(0, n ):
             for j in range(0, n ):
-                systemBuilder.addEdge(Edge(source=i, target=j, weight=random.uniform(10, 100)))
+                systemBuilder.addEdge(Edge(name="unused", source=i, target=j, weight=random.uniform(10, 100)))
 
 
 class ShortServiceTimeFullGraphBuilder:
@@ -79,11 +79,11 @@ class ShortServiceTimeFullGraphBuilder:
     def build(self, systemBuilder):
         n = self.__nodesNumber
         for i in range(0, n):
-            systemBuilder.addVertex(Vertex(node=Node(env=self.__env, serviceTime=shortServiceTimeWeightsManager.getWeight(i), index=i)))
+            systemBuilder.addVertex(Vertex(name="unused", node=Node(env=self.__env, serviceTime=shortServiceTimeWeightsManager.getWeight(i), index=i)))
 
         for i in range(0, n ):
             for j in range(0, n ):
-                systemBuilder.addEdge(Edge(source=i, target=j, weight=random.uniform(10, 100)))
+                systemBuilder.addEdge(Edge(name="unused", source=i, target=j, weight=random.uniform(10, 100)))
 
 
 class TreeGraphBuilder:
@@ -104,17 +104,17 @@ class TreeGraphBuilder:
         n = self.__switchesNumber
         for i in range(0, n):
             self.__switches.append(index)
-            systemBuilder.addVertex(Vertex(node=Node(env=self.__env, serviceTime=10, index=index)))
+            systemBuilder.addVertex(Vertex(name="unused", node=Node(env=self.__env, serviceTime=10, index=index)))
             index += 1
 
         for i in range(0, n ):
             for j in range(0, n ):
-                systemBuilder.addEdge(Edge(source=i, target=j, weight=10))
+                systemBuilder.addEdge(Edge(name="unused", source=i, target=j, weight=10))
 
         n = self.__hostsNumberPerSwitch
         for switch in self.__switches:
             for i in range(0, n):
-                systemBuilder.addVertex(Vertex(node=Node(env=self.__env, serviceTime=0, index=index)))
+                systemBuilder.addVertex(Vertex(name="unused", node=Node(env=self.__env, serviceTime=0, index=index)))
                 self.__hosts.append(index)
-                systemBuilder.addEdge(Edge(source=index, target=switch, weight=1))
+                systemBuilder.addEdge(Edge(name="unused", source=index, target=switch, weight=1))
                 index += 1

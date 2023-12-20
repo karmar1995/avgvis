@@ -3,7 +3,7 @@ import time, threading
 from simulation.core.tasks_source import TasksSource
 
 
-MAX_JOB_LENGTH = 10
+MAX_JOB_LENGTH = 1000000
 
 
 class TasksScheduler:
@@ -15,12 +15,10 @@ class TasksScheduler:
         self.__jobsDict = None
         self.__tasksSources = dict()
         self.__tasks = list()
-        self.__queueProcessingThread = threading.Thread(target=self.__processQueue)
-        self.__queueProcessingThread.daemon = True
+        self.__queueProcessingThread = None
         self.__killed = False
         self.__idle = False
         self.__started = False
-        self.__queueProcessingThread.start()
         self.__tasksGuard = False
 
     def onEnqueue(self):
@@ -35,31 +33,34 @@ class TasksScheduler:
         while not self.__killed:
             if len(self.__tasks) > 0:
                 freeExecutors = self.__executorsManager.freeExecutors()
-                if len(freeExecutors) > 0:
-                    jobsDict = dict()
-                    length = 0
-                    self.__tasksGuard = True
-                    while len(self.__tasks) > 0:
-                        for i in range(0, len(freeExecutors)):
-                            if len(self.__tasks) == 0 or length >= MAX_JOB_LENGTH:
-                                break
-                            if i not in jobsDict:
-                                jobsDict[i] = list()
-                            if len(self.__tasks) > 0:
-                                jobsDict[i].append(self.__tasks.pop(0))
-                                length += 1
-                        if length >= MAX_JOB_LENGTH:
-                            break
-                    self.__tasksGuard = False
-                    self.__jobsDict = jobsDict
-                    pathsPerJobId = self.coordinateJobs(iterations=100)  # todo: un-hardcode this stuff
-                    random.shuffle(freeExecutors)
-                    for jobId in pathsPerJobId:
-                        freeExecutors.pop(0).executeJob(pathsPerJobId[jobId].path)
-                    self.__idle = False
+                pathsPerJobId = self.coordinateJobs(iterations=100)  # todo: un-hardcode this stuff
+                random.shuffle(freeExecutors)
+                for jobId in pathsPerJobId:
+                    freeExecutors.pop(0).executeJob(pathsPerJobId[jobId].path)
+                self.__idle = False
             else:
                 self.__idle = True
                 time.sleep(0.1)
+
+    def distributeTasks(self):
+        freeExecutors = self.__executorsManager.freeExecutors()
+        if len(freeExecutors) > 0:
+            jobsDict = dict()
+            length = 0
+            self.__tasksGuard = True
+            while len(self.__tasks) > 0:
+                for i in range(0, len(freeExecutors)):
+                    if len(self.__tasks) == 0 or length >= MAX_JOB_LENGTH:
+                        break
+                    if i not in jobsDict:
+                        jobsDict[i] = list()
+                    if len(self.__tasks) > 0:
+                        jobsDict[i].append(self.__tasks.pop(0))
+                        length += 1
+                if length >= MAX_JOB_LENGTH:
+                    break
+            self.__tasksGuard = False
+            self.__jobsDict = jobsDict
 
     def addTasksSource(self, source: TasksSource):
         self.__tasksSources[id(source)] = source
@@ -70,6 +71,7 @@ class TasksScheduler:
 
     # public only for testing purposes
     def coordinateJobs(self, iterations):
+        self.distributeTasks()
         return self.__pathsController.coordinatePaths(self.__jobsDict, iterations)
 
     # only for testing purposes
@@ -85,6 +87,11 @@ class TasksScheduler:
                 time.sleep(1)
         else:
             raise Exception("Queue not started yet!")
+
+    def start(self):
+        self.__queueProcessingThread = threading.Thread(target=self.__processQueue)
+        self.__queueProcessingThread.daemon = True
+        self.__queueProcessingThread.start()
 
     def shutdown(self):
         self.__killed = True

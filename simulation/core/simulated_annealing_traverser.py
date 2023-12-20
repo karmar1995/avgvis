@@ -1,69 +1,35 @@
 import random, copy, math
 from simulation.core.path import Path
+from simulation.core.traverser_base import TraverserBase
 
 
-class SimulatedAnnealingTraverser:
+class SimulatedAnnealingTraverser(TraverserBase):
     def __init__(self, system, controller, nodesToVisit, maxIterations):
-        self.system = system
-        self.controller = controller
-        self.__bestPath = None
-        self.__bestSequence = nodesToVisit
-        self.__tasksSequence = nodesToVisit
-        self.__generatePathFromTasks()
+        super().__init__(system, nodesToVisit)
+        self.generatePathFromTasks()
         self.__temperaturePoint = 0
         self.__temperatureStep = 10 / maxIterations
 
-    def __generatePathFromTasks(self):
-        path = []
-        k = 1
-        for i in range(0, len(self.__tasksSequence)):
-            partialPath = random.choice(self.system.graph.get_k_shortest_paths(self.__tasksSequence[i].source(), self.__tasksSequence[i].destination(), k))
-            if i > 0 and self.__tasksSequence[i-1].destination() == self.__tasksSequence[i].source():
-                partialPath.pop(0)
-            path.extend(partialPath)
-            if (i < len(self.__tasksSequence) - 1) and self.__tasksSequence[i].destination() != self.__tasksSequence[i+1].source():
-                partialPath = random.choice(self.system.graph.get_k_shortest_paths(self.__tasksSequence[i].destination(), self.__tasksSequence[i+1].source(), k))
-                partialPath.pop(0)
-                partialPath.pop()
-                path.extend(partialPath)
-        return self.__validatePath(path)
-
-    def __validatePath(self, path):
-        for i in range(0, len(path) - 2):
-            if path[i] == path[i+1]:
-                raise Exception("Invalid path!")
-        return path
-
     def __generateSequence(self):
-        self.__tasksSequence = copy.deepcopy(self.__bestSequence)
-        pos1 = random.randint(0, len(self.__tasksSequence)-1)
-        pos2 = random.randint(0, len(self.__tasksSequence)-1)
-        self.__tasksSequence[pos1], self.__tasksSequence[pos2] = self.__tasksSequence[pos2], self.__tasksSequence[pos1]
+        self._tasksSequence = copy.deepcopy(self._tasksSequence)
+        pos1 = random.randint(0, len(self._tasksSequence)-1)
+        pos2 = random.randint(0, len(self._tasksSequence)-1)
+        self._tasksSequence[pos1], self._tasksSequence[pos2] = self._tasksSequence[pos2], self._tasksSequence[pos1]
 
     def nextIteration(self):
-        self.__temperaturePoint += self.__temperatureStep
-
-    def path(self):
         self.__generateSequence()
-        return self.__generatePathFromTasks()
-
-    def node(self, index):
-        return self.system.node(index)
-
-    def transitionTime(self, nodeIndex1, nodeIndex2):
-        time = self.system.graph[nodeIndex1, nodeIndex2]
-        return time
+        self.__temperaturePoint += self.__temperatureStep
 
     def feedback(self, path, pathCost, collisions):
         self.__performStateTransition(Path(path, pathCost, collisions))
 
     def __performStateTransition(self, newPath):
-        if self.__bestPath is None:
-            self.__bestPath = newPath
+        if self._bestPath is None:
+            self._bestPath = newPath
         else:
-            if random.random() < self.__transitionProbability(currentEnergy=self.__bestPath.cost, newEnergy=newPath.cost):
-                self.__bestPath = newPath
-                self.__bestSequence = self.__tasksSequence
+            if random.random() < self.__transitionProbability(currentEnergy=self._bestPath.cost, newEnergy=newPath.cost):
+                self._bestPath = newPath
+                self._tasksSequence = self._tasksSequence
 
     def __transitionProbability(self, currentEnergy, newEnergy):
         upwardsTransitionProbability = self.__temperature()
@@ -79,5 +45,3 @@ class SimulatedAnnealingTraverser:
     def __temperature(self):
         return self.__temperatureFunction(self.__temperaturePoint)
 
-    def bestPath(self):
-        return self.__bestPath

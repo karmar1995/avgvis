@@ -13,6 +13,7 @@ class TasksSchedulingTests(unittest.TestCase):
         self.__coreRoot = CoreRoot()
         self.__simpyRoot = SimpyRoot(1000000)
         self.__graphBuilder = GraphBuilder(self.__simpyRoot.simulation.env)
+        self.__coreRoot.start()
 
     def tearDown(self) -> None:
         fakeExecutors.clear()
