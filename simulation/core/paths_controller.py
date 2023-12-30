@@ -8,7 +8,7 @@ class PathsController:
         self.__agentsFactory = agentsFactory
         self.__simulation = simulation
 
-    def coordinatePaths(self, jobsDict, iterations):
+    def coordinatePaths(self, jobsDict, iterations, traverserFactory=SimulatedAnnealingTraverser):
         def assignTraversersToResult(__res, __traversers):
             for __jobId in __traversers:
                 __res[__jobId] = __traversers[__jobId].bestPath()
@@ -17,7 +17,7 @@ class PathsController:
         res = dict()
 
         for jobId in jobsDict:
-            traversers[jobId] = SimulatedAnnealingTraverser(system=self.__system, controller=self, nodesToVisit=jobsDict[jobId], maxIterations=iterations)
+            traversers[jobId] = traverserFactory(system=self.__system, nodesToVisit=jobsDict[jobId], maxIterations=iterations)
 
         for i in range(0, iterations):
             for jobId in jobsDict:

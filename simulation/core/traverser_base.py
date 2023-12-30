@@ -1,4 +1,5 @@
 import random, copy, math
+from simulation.core.path import Path
 
 
 class TraverserBase:
@@ -8,16 +9,16 @@ class TraverserBase:
         self._tasksSequence = nodesToVisit
         self._bestPath = None
 
-    def generatePathFromTasks(self):
+    def generatePathFromTasks(self, tasks):
         path = []
         k = 1
-        for i in range(0, len(self._tasksSequence)):
-            partialPath = random.choice(self.system.graph.get_k_shortest_paths(self._tasksSequence[i].source(), self._tasksSequence[i].destination(), k))
-            if i > 0 and self._tasksSequence[i-1].destination() == self._tasksSequence[i].source():
+        for i in range(0, len(tasks)):
+            partialPath = random.choice(self.system.graph.get_k_shortest_paths(tasks[i].source(), tasks[i].destination(), k))
+            if i > 0 and tasks[i-1].destination() == tasks[i].source():
                 partialPath.pop(0)
             path.extend(partialPath)
-            if (i < len(self._tasksSequence) - 1) and self._tasksSequence[i].destination() != self._tasksSequence[i+1].source():
-                partialPath = random.choice(self.system.graph.get_k_shortest_paths(self._tasksSequence[i].destination(), self._tasksSequence[i+1].source(), k))
+            if (i < len(tasks) - 1) and tasks[i].destination() != tasks[i+1].source():
+                partialPath = random.choice(self.system.graph.get_k_shortest_paths(tasks[i].destination(), tasks[i+1].source(), k))
                 partialPath.pop(0)
                 partialPath.pop()
                 path.extend(partialPath)
@@ -29,14 +30,14 @@ class TraverserBase:
                 raise Exception("Invalid path!")
         return path
 
-    def feedback(self, path, pathCost, collisions):
+    def feedback(self, path, pathCost, collisions, timeInQueue, timeInPenalty):
         raise NotImplementedError("To be implemented in concrete traverser!")
 
     def nextIteration(self):
         raise NotImplementedError("To be implemented in concrete traverser!")
 
     def path(self):
-        return self.generatePathFromTasks()
+        return self.generatePathFromTasks(self._tasksSequence)
 
     def node(self, index):
         return self.system.node(index)

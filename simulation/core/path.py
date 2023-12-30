@@ -1,8 +1,10 @@
 class Path:
-    def __init__(self, path, cost, collisions):
+    def __init__(self, path, cost, collisions, timeInQueue, timeInPenalty):
         self.path = path
         self.cost = cost
         self.collisions = collisions
+        self.timeInQueue = timeInQueue
+        self.timeInPenalty = timeInPenalty
 
     def __gt__(self, other):
         return self.cost > other.cost

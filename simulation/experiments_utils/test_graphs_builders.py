@@ -11,6 +11,7 @@ class GraphNodesWeightsManager:
         self.__max = max
 
     def getWeight(self, index):
+#        return random.uniform(self.__min, self.__max)
         if self.__weights is None:
             self.__generateWeights()
         return self.__weights[index]
@@ -22,7 +23,7 @@ class GraphNodesWeightsManager:
 
 
 veryLongServiceTimeWeightsManager = GraphNodesWeightsManager(1000, 100, 5000)
-longServiceTimeWeightsManager = GraphNodesWeightsManager(1000, 500, 1000)
+longServiceTimeWeightsManager = GraphNodesWeightsManager(1000, 10, 100)
 shortServiceTimeWeightsManager = GraphNodesWeightsManager(1000, 1, 10)
 
 

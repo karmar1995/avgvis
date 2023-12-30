@@ -8,34 +8,79 @@ from simulation.test_utils.tasks_generator import generateTasksQueue
 from simulation.experiments_utils.csv_writer import CsvWriter
 
 
-def run(tasksNumber, agvsNumber, stationsNumber, graphBuilderClass, subdirectory):
-    experimentCollector = ExperimentCollector(Logger())
-    analyzer = ExperimentAnalyzer(experimentCollector)
+traversersLabels = {
+    'geneticAlgorithm': 'Genetic Algorithm',
+    'simulatedAnnealing': 'Simulated Annealing'
+}
 
+
+def prepateDataSeries(analyzer, traverserName, measure):
+    seriesName = "{}_{}".format(traverserName, measure)
+    return seriesName, analyzer.analyze(measure, ['mean'])['mean']
+
+
+def prepareSeriesCollections(analyzer, traverserName, seriesCollection, labelsBySeriesName, measure):
+    seriesName, series = prepateDataSeries(analyzer, traverserName, measure)
+    seriesCollection[seriesName] = series
+    labelsBySeriesName[seriesName] = traversersLabels[traverserName]
+
+
+def run(tasksNumber, agvsNumber, stationsNumber, graphBuilderClass, subdirectory):
+    traverserNames = [
+        'simulatedAnnealing',
+        'geneticAlgorithm'
+    ]
     tasksQueue = generateTasksQueue(tasksNumber, stationsNumber)
     graphBuilder = graphBuilderClass(stationsNumber)
 
-    for iterations in range(1, 160, 10):
-        experiment = RandomTasksScheduling(tasksQueue, agvsNumber, iterations, graphBuilder)
-        Runner(experiment, experimentCollector.getRetriesCollector(iterations)).run(times=10)
+    analyzerPerTraverser = dict()
 
-    legend = {
-        'Tasks number': tasksNumber,
-        'AGVs number': agvsNumber,
-        'Stations Number': stationsNumber
-    }
+    resultsDir = '/home/kmarszal/Documents/dev/avgvis/simulation/experiments/results_temp/agv_random_task_scheduling/{}'.format(subdirectory)
+    for traverserName in traverserNames:
+        experimentCollector = ExperimentCollector(Logger())
+        analyzerPerTraverser[traverserName] = ExperimentAnalyzer(experimentCollector)
 
-    resultsDir = '/home/kmarszal/Documents/dev/avgvis/simulation/experiments/results/agv_random_task_scheduling/{}'.format(subdirectory)
-    csvWriter = CsvWriter(resultsDir, analyzer)
-    csvWriter.write('cost', 'iterations', legend)
-    csvWriter.write('time', 'iterations', legend)
-    csvWriter.write('collisions', 'iterations', legend)
-    csvWriter.write('queueLength', 'iterations', legend)
+        for iterations in range(1, 410, 20):
+            experiment = RandomTasksScheduling(tasksQueue, agvsNumber, iterations, graphBuilder, traverserName)
+            Runner(experiment, experimentCollector.getRetriesCollector(iterations)).run(times=3)
+
+        legend = {
+            'Tasks number': tasksNumber,
+            'AGVs number': agvsNumber,
+            'Stations Number': stationsNumber
+        }
+
+        csvWriter = CsvWriter(os.path.join(resultsDir, traverserName), analyzerPerTraverser[traverserName])
+        csvWriter.write('cost', 'iterations', legend)
+        csvWriter.write('time', 'iterations', legend)
+        csvWriter.write('collisions', 'iterations', legend)
+        csvWriter.write('queueLength', 'iterations', legend)
+        csvWriter.write('timeInQueue', 'iterations', legend)
+        csvWriter.write('timeInPenalty', 'iterations', legend)
+
+    costs = dict()
+    collisions = dict()
+    times = dict()
+    queueLengths = dict()
+    timeInQueue = dict()
+    timeInPenalty = dict()
+
+    labelsBySeriesName = dict()
+
+    for traverserName in traverserNames:
+        prepareSeriesCollections(analyzerPerTraverser[traverserName], traverserName, costs, labelsBySeriesName, 'cost')
+        prepareSeriesCollections(analyzerPerTraverser[traverserName], traverserName, collisions, labelsBySeriesName, 'collisions')
+        prepareSeriesCollections(analyzerPerTraverser[traverserName], traverserName, times, labelsBySeriesName, 'time')
+        prepareSeriesCollections(analyzerPerTraverser[traverserName], traverserName, queueLengths, labelsBySeriesName, 'queueLength')
+        prepareSeriesCollections(analyzerPerTraverser[traverserName], traverserName, timeInQueue, labelsBySeriesName, 'timeInQueue')
+        prepareSeriesCollections(analyzerPerTraverser[traverserName], traverserName, timeInPenalty, labelsBySeriesName, 'timeInPenalty')
 
     x_label = 'Calculation time [iterations]'
-    plotSeries(analyzer.analyze('cost', ['mean']), 'Average job cost', 'Cost', x_label, os.path.join(resultsDir, "cost.png"))
-    plotSeries(analyzer.analyze('collisions', ['mean']), 'Average collisions during job execution', 'Collisions', x_label, os.path.join(resultsDir, "collisions.png"))
-    plotSeries(analyzer.analyze('time', ['mean']), 'Calculation time', 'Time [s]', x_label, os.path.join(resultsDir, "time.png"))
-    plotSeries(analyzer.analyze('queueLength', ['mean']), 'Average queue length', 'Queue length', x_label, os.path.join(resultsDir, "queueLength.png"))
+    plotSeries(costs, 'Average job cost', 'Cost', x_label, os.path.join(resultsDir, "cost.png"), labelsBySeriesName)
+    plotSeries(collisions, 'Average collisions during job execution', 'Collisions', x_label, os.path.join(resultsDir, "collisions.png"), labelsBySeriesName)
+    plotSeries(times, 'Calculation time', 'Time [s]', x_label, os.path.join(resultsDir, "time.png"), labelsBySeriesName)
+    plotSeries(queueLengths, 'Average queue length', 'Queue length', x_label, os.path.join(resultsDir, "queueLength.png"), labelsBySeriesName)
+    plotSeries(timeInQueue, 'Average time in queue', 'Time in queue', x_label, os.path.join(resultsDir, "timeInQueue.png"), labelsBySeriesName)
+    plotSeries(timeInPenalty, 'Average time in penalty', 'Time in penalty', x_label, os.path.join(resultsDir, "timeInPenalty.png"), labelsBySeriesName)
 
 

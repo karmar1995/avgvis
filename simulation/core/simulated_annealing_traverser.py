@@ -1,12 +1,10 @@
-import random, copy, math
-from simulation.core.path import Path
-from simulation.core.traverser_base import TraverserBase
+from simulation.core.traverser_base import *
 
 
 class SimulatedAnnealingTraverser(TraverserBase):
-    def __init__(self, system, controller, nodesToVisit, maxIterations):
+    def __init__(self, system, nodesToVisit, maxIterations):
         super().__init__(system, nodesToVisit)
-        self.generatePathFromTasks()
+        self.generatePathFromTasks(self._tasksSequence)
         self.__temperaturePoint = 0
         self.__temperatureStep = 10 / maxIterations
 
@@ -20,8 +18,8 @@ class SimulatedAnnealingTraverser(TraverserBase):
         self.__generateSequence()
         self.__temperaturePoint += self.__temperatureStep
 
-    def feedback(self, path, pathCost, collisions):
-        self.__performStateTransition(Path(path, pathCost, collisions))
+    def feedback(self, path, pathCost, collisions, timeInQueue, timeInPenalty):
+        self.__performStateTransition(Path(path, pathCost, collisions, timeInQueue, timeInPenalty))
 
     def __performStateTransition(self, newPath):
         if self._bestPath is None:
@@ -29,7 +27,7 @@ class SimulatedAnnealingTraverser(TraverserBase):
         else:
             if random.random() < self.__transitionProbability(currentEnergy=self._bestPath.cost, newEnergy=newPath.cost):
                 self._bestPath = newPath
-                self._tasksSequence = self._tasksSequence
+                self._bestSequence = self._tasksSequence
 
     def __transitionProbability(self, currentEnergy, newEnergy):
         upwardsTransitionProbability = self.__temperature()

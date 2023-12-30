@@ -1,6 +1,14 @@
 import random
 import time, threading
 from simulation.core.tasks_source import TasksSource
+from simulation.core.simulated_annealing_traverser import SimulatedAnnealingTraverser
+from simulation.core.genetic_algorithm_traverser import GeneticAlgorithmTraverser
+
+
+TRAVERSERS = {
+    'simulatedAnnealing': SimulatedAnnealingTraverser,
+    'geneticAlgorithm': GeneticAlgorithmTraverser
+}
 
 
 MAX_JOB_LENGTH = 1000000
@@ -70,9 +78,17 @@ class TasksScheduler:
         del self.__tasksSources[id(source)]
 
     # public only for testing purposes
-    def coordinateJobs(self, iterations):
+    def coordinateJobs(self, iterations, traverserName):
         self.distributeTasks()
-        return self.__pathsController.coordinatePaths(self.__jobsDict, iterations)
+        try:
+            traverserFactory = TRAVERSERS[traverserName]
+            return self.__pathsController.coordinatePaths(self.__jobsDict, iterations, traverserFactory)
+        except KeyError:
+            print("Unknown traverser: {}".format(traverserName))
+            print("Allowed traversers are:")
+            for knownTraverserName in TRAVERSERS:
+                print(knownTraverserName)
+        return None
 
     # only for testing purposes
     def waitForQueueProcessed(self):
