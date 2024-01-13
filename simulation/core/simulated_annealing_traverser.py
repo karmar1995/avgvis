@@ -18,8 +18,8 @@ class SimulatedAnnealingTraverser(TraverserBase):
         self.__generateSequence()
         self.__temperaturePoint += self.__temperatureStep
 
-    def feedback(self, path, pathCost, collisions, timeInQueue, timeInPenalty):
-        self.__performStateTransition(Path(path, pathCost, collisions, timeInQueue, timeInPenalty))
+    def feedback(self, path, pathCost, collisions, timeInQueue, timeInPenalty, timeInTransition):
+        self.__performStateTransition(Path(path, pathCost, collisions, timeInQueue, timeInPenalty, timeInTransition))
 
     def __performStateTransition(self, newPath):
         if self._bestPath is None:

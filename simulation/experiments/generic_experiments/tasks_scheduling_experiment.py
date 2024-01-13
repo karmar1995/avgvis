@@ -34,6 +34,8 @@ class RandomTasksScheduling:
             statisticsCollector.collect('cost', path.cost)
             statisticsCollector.collect('collisions', path.collisions)
             statisticsCollector.collect('timeInQueue', path.timeInQueue)
+            statisticsCollector.collect('timeInPenalty', path.timeInPenalty)
+            statisticsCollector.collect('timeInTransition', path.timeInTransition)
 
         for i in range(0, self.__coreRoot.system().nodesCount()):
             tmp = self.__coreRoot.system().node(i).queueLengthHistory()

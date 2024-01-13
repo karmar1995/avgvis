@@ -30,7 +30,7 @@ class TraverserBase:
                 raise Exception("Invalid path!")
         return path
 
-    def feedback(self, path, pathCost, collisions, timeInQueue, timeInPenalty):
+    def feedback(self, path, pathCost, collisions, timeInQueue, timeInPenalty, timeInTransition):
         raise NotImplementedError("To be implemented in concrete traverser!")
 
     def nextIteration(self):

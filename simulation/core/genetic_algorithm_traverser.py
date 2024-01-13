@@ -61,12 +61,12 @@ class GeneticAlgorithmTraverser(TraverserBase):
         if self._tasksSequence is None:
             raise RuntimeError("Invalid tasks sequence")
 
-    def feedback(self, path, pathCost, collisions, timeInQueue, timeInPenalty):
+    def feedback(self, path, pathCost, collisions, timeInQueue, timeInPenalty, timeInTransition):
         self._genes[self.__currentGene].cost = pathCost
         if self._bestGene is None or self._bestGene.cost > pathCost:
             self._bestGene = self._genes[self.__currentGene]
             self._bestSequence = self._bestGene.tasks
-            self._bestPath = Path(path, pathCost, collisions, timeInQueue, timeInPenalty)
+            self._bestPath = Path(path, pathCost, collisions, timeInQueue, timeInPenalty, timeInTransition)
 
     def __crossover(self):
         newGenes = []

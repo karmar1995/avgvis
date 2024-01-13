@@ -23,7 +23,7 @@ class GraphNodesWeightsManager:
 
 
 veryLongServiceTimeWeightsManager = GraphNodesWeightsManager(1000, 100, 5000)
-longServiceTimeWeightsManager = GraphNodesWeightsManager(1000, 10, 100)
+longServiceTimeWeightsManager = GraphNodesWeightsManager(1000, 1, 10)
 shortServiceTimeWeightsManager = GraphNodesWeightsManager(1000, 1, 10)
 
 
