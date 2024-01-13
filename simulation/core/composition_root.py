@@ -13,13 +13,12 @@ class CompositionRoot:
         self.__tasksScheduler = None
         self.__executorsManager = None
 
-    def initialize(self, dependencies, topologyBuilder, initInfo):
+    def initialize(self, dependencies, topologyBuilder):
         systemBuilder = SystemBuilder()
         self.__tasksQueue = TasksQueue()
         topologyBuilder.build(systemBuilder)
         self.__system = systemBuilder.system()
-        self.__executorsManager = JobExecutorsManager(executorsNumber=initInfo['executorsNumber'],
-                                                      taskExecutorsFactory=dependencies['tasksExecutorsFactory'])
+        self.__executorsManager = JobExecutorsManager(taskExecutorsManager=dependencies['taskExecutorsManager'])
         self.__pathsController = PathsController(system=self.__system,
                                                  agentsFactory=dependencies['agentsFactory'],
                                                  simulation=dependencies['simulation'])

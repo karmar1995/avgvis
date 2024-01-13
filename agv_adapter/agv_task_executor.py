@@ -2,27 +2,19 @@ import time
 from simulation.core.task_executor import TaskExecutor
 from agv_adapter.agv_frame_builder import AgvFrameBuilder
 from agv_adapter.agv_response_parser import AgvResponseParser
+from agv_adapter.agv_controller_client import AgvControllerClient
 
 
 class AgvTaskExecutor(TaskExecutor):
 
-    def __init__(self, agvSender):
-        self.__agvSender = agvSender
+    def __init__(self, agvId, agvControllerClient: AgvControllerClient):
+        self.__agvId = agvId
+        self.__agvControllerClient = agvControllerClient
 
     def execute(self, task):
-        frame = AgvFrameBuilder().startFrame().withNodeToVisit(task).consumeFrame()
-        try:
-            print("Sending task to AGV: {}".format(task))
-            self.__waitForAgvResponse(0)
-            self.__agvSender.sendDataToServer(frame)
-            self.__waitForAgvResponse(0)
-        except ConnectionRefusedError as e:
-            print("Cannot connect to AGV")
+        self.__agvControllerClient.requestGoToPoints([task])
+        while self.__agvControllerClient.requestAgvStatus(self.__agvId).location != str(task):
+            time.sleep(1)
 
-    def __waitForAgvResponse(self, value):
-        responseParser = AgvResponseParser(self.__agvSender.readDataFromServer())
-        agvResponse = responseParser.getNaturalNavigationCommandFeedback()
-        while agvResponse != value:
-            responseParser = AgvResponseParser(self.__agvSender.readDataFromServer())
-            agvResponse = responseParser.getNaturalNavigationCommandFeedback()
-            time.sleep(0.25)
+    def getId(self):
+        raise self.__agvId

@@ -20,7 +20,8 @@ class TmsInitInfo:
     mesIp: str
     mesPort: int
     mesTasksMappingPath: str
-    agvConnectionsData: list
+    agvControllerIp: str
+    agvControllerPort: int
     queueObserver: QueueObserver
 
 
@@ -65,22 +66,14 @@ class CompositionRoot:
         graphStorage = GraphStorage()
         graphStorage.read(tmsInitInfo.topologyDescriptionPath)
         topologyBuilder = TopologyBuilder(self.__simpyRoot.simulation.env, graphStorage)
-        agvsSenders = list()
-        for agvConnectionData in tmsInitInfo.agvConnectionsData:
-            try:
-                agvsSenders.append(self.__networkSenderFactory(agvConnectionData[0], agvConnectionData[1]))
-            except Exception as e:
-                print("Cannot create network client: {}".format(e))
-        executorsNumber = len(agvsSenders)
-        self.__agvRoot.initialize(agvsSenders)
+        self.__agvRoot.initialize(tmsInitInfo.agvControllerIp, tmsInitInfo.agvControllerPort)
 
         dependencies = {
             'agentsFactory': self.__simpyRoot.simpyAgentsFactory,
             'simulation': self.__simpyRoot.simulation,
-            'tasksExecutorsFactory': self.__agvRoot.executorsFactory()
+            'tasksExecutorsManager': self.__agvRoot.executorsManager()
         }
-        simulationInitInfo = {'executorsNumber': executorsNumber}
-        self.__simulationRoot.initialize(dependencies, topologyBuilder, simulationInitInfo)
+        self.__simulationRoot.initialize(dependencies, topologyBuilder)
         mesInitInfo = MesCompositionRootInitInfo(tasksMapperConfigPath=tmsInitInfo.mesTasksMappingPath, dependencies={
             'mesDataSource': self.__networkSenderFactory(host=tmsInitInfo.mesIp, port=tmsInitInfo.mesPort),
             'tasksQueue': self.__simulationRoot.tasksQueue()

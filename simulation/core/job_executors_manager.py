@@ -1,21 +1,20 @@
 import random
 from simulation.core.job_executor import JobExecutor, JobExecutorView
+from simulation.core.tasks_executor_manager import TasksExecutorManager
 
 
 class JobExecutorsManager:
-    def __init__(self, executorsNumber, taskExecutorsFactory):
-        self.__executorsNumber = executorsNumber
+    def __init__(self, taskExecutorsManager : TasksExecutorManager):
         self.__executors = dict()
-        self.__taskExecutorsFactory = taskExecutorsFactory
+        self.__taskExecutorsManager = taskExecutorsManager
         self.__tasksScheduler = None
 
     def setTasksScheduler(self, scheduler):
         self.__tasksScheduler = scheduler
 
     def createExecutors(self):
-        for i in range(self.__executorsNumber):
-            executor = JobExecutor(self.__taskExecutorsFactory(), self)
-            self.__executors[id(executor)] = executor
+        for tasksExecutor in self.__taskExecutorsManager.tasksExecutors():
+            self.__executors[tasksExecutor.getId()] = JobExecutor(tasksExecutor, self)
 
     def freeExecutors(self):
         res = []

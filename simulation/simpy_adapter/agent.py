@@ -21,6 +21,7 @@ class Agent:
         collisions = 0
         timeInQueue = 0
         timeInPenalty = 0
+        timeInTransition = 0
         while i < len(path):
             self.currentNode = self.traverser.node(path[i-1])
             self.nextNode = self.traverser.node(path[i])
@@ -37,27 +38,32 @@ class Agent:
             self.currentNode.addAgentLeavingNode(self)
             agents = self.nextNode.getAgentsLeavingNode()
             transitionTime = self.traverser.transitionTime(path[i-1], path[i])
-            penaltyTime = transitionTime * 0.25
+            penaltyTime = 200
 
             for agentId in agents:
                 if agents[agentId].nextNode.index == self.currentNode.index:
                     collisions += 1
-                    timeInPenalty += penaltyTime
+                    beforeCollisonTime = self.env.now
                     yield self.env.timeout(transitionTimeout(penaltyTime))
+                    timeInPenalty += self.env.now - beforeCollisonTime
                     break
 
+            timeBeforeTransition = self.env.now
             yield self.env.timeout(transitionTimeout(transitionTime))
+            timeInTransition += self.env.now - timeBeforeTransition
             self.currentNode.removeAgentLeavingNode(self)
 
             i += 1
         self.currentNode = self.traverser.node(path[i - 1])
         with self.nextNode.executor.request() as request:
             yield request
+            processsingStartTime = self.env.now
             yield self.env.process(self.currentNode.process())
+            timeInQueue += self.env.now - processsingStartTime
 
         self.currentNode = None
         self.nextNode = None
 
         endTime = self.env.now
         pathCost = endTime - startTime
-        self.traverser.feedback(path, pathCost, collisions, timeInQueue, timeInPenalty)
+        self.traverser.feedback(path, pathCost, collisions, timeInQueue, timeInPenalty, timeInTransition)

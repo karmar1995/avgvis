@@ -1,12 +1,12 @@
-from agv_adapter.agv_task_executors_factory import AgvTaskExecutorFactory
+from agv_adapter.agv_task_executors_manager import AgvTaskExecutorManager
 
 
 class CompositionRoot:
     def __init__(self):
-        self.__executorsFactory = None
+        self.__executorsManager = None
 
     def initialize(self, agvSenders):
-        self.__executorsFactory = AgvTaskExecutorFactory(agvSenders)
+        self.__executorsManager = AgvTaskExecutorManager(agvSenders)
 
-    def executorsFactory(self):
-        return self.__executorsFactory
+    def executorsManager(self):
+        return self.__executorsManager

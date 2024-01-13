@@ -1,7 +1,7 @@
 import os
 from simulation.experiments.generic_experiments.tasks_scheduling_experiment import RandomTasksScheduling
 from simulation.experiments_utils.runner import Runner
-from simulation.experiments_utils.plotters.boxplot import plotSeries
+from simulation.experiments_utils.plotters.boxplot import plotSeries, plotStackedSeries
 from simulation.experiments_utils.logger import Logger
 from simulation.experiments_utils.analytics.experiment_analyzer import *
 from simulation.test_utils.tasks_generator import generateTasksQueue
@@ -35,14 +35,14 @@ def run(tasksNumber, agvsNumber, stationsNumber, graphBuilderClass, subdirectory
 
     analyzerPerTraverser = dict()
 
-    resultsDir = '/home/kmarszal/Documents/dev/avgvis/simulation/experiments/results_temp/agv_random_task_scheduling/{}'.format(subdirectory)
+    resultsDir = '/home/kmarszal/Documents/dev/avgvis/simulation/experiments/results2/agv_random_task_scheduling/{}'.format(subdirectory)
     for traverserName in traverserNames:
         experimentCollector = ExperimentCollector(Logger())
         analyzerPerTraverser[traverserName] = ExperimentAnalyzer(experimentCollector)
 
         for iterations in range(1, 410, 20):
             experiment = RandomTasksScheduling(tasksQueue, agvsNumber, iterations, graphBuilder, traverserName)
-            Runner(experiment, experimentCollector.getRetriesCollector(iterations)).run(times=3)
+            Runner(experiment, experimentCollector.getRetriesCollector(iterations)).run(times=10)
 
         legend = {
             'Tasks number': tasksNumber,
@@ -57,6 +57,12 @@ def run(tasksNumber, agvsNumber, stationsNumber, graphBuilderClass, subdirectory
         csvWriter.write('queueLength', 'iterations', legend)
         csvWriter.write('timeInQueue', 'iterations', legend)
         csvWriter.write('timeInPenalty', 'iterations', legend)
+        csvWriter.write('timeInTransition', 'iterations', legend)
+        stackedSeriesDict = {'Time in queue': analyzerPerTraverser[traverserName].analyze('timeInQueue')['mean'],
+                             'Penalty time': analyzerPerTraverser[traverserName].analyze('timeInPenalty')['mean'],
+                             'Time in transit': analyzerPerTraverser[traverserName].analyze('timeInTransition')['mean']
+                             }
+        plotStackedSeries(stackedSeriesDict, 'Time constituents - {}'.format(traversersLabels[traverserName]), os.path.join(resultsDir, '{}_timeComposition.png'.format(traverserName)))
 
     costs = dict()
     collisions = dict()
@@ -64,6 +70,7 @@ def run(tasksNumber, agvsNumber, stationsNumber, graphBuilderClass, subdirectory
     queueLengths = dict()
     timeInQueue = dict()
     timeInPenalty = dict()
+    timeInTransition = dict()
 
     labelsBySeriesName = dict()
 
@@ -74,6 +81,7 @@ def run(tasksNumber, agvsNumber, stationsNumber, graphBuilderClass, subdirectory
         prepareSeriesCollections(analyzerPerTraverser[traverserName], traverserName, queueLengths, labelsBySeriesName, 'queueLength')
         prepareSeriesCollections(analyzerPerTraverser[traverserName], traverserName, timeInQueue, labelsBySeriesName, 'timeInQueue')
         prepareSeriesCollections(analyzerPerTraverser[traverserName], traverserName, timeInPenalty, labelsBySeriesName, 'timeInPenalty')
+        prepareSeriesCollections(analyzerPerTraverser[traverserName], traverserName, timeInTransition, labelsBySeriesName, 'timeInTransition')
 
     x_label = 'Calculation time [iterations]'
     plotSeries(costs, 'Average job cost', 'Cost', x_label, os.path.join(resultsDir, "cost.png"), labelsBySeriesName)
@@ -82,5 +90,6 @@ def run(tasksNumber, agvsNumber, stationsNumber, graphBuilderClass, subdirectory
     plotSeries(queueLengths, 'Average queue length', 'Queue length', x_label, os.path.join(resultsDir, "queueLength.png"), labelsBySeriesName)
     plotSeries(timeInQueue, 'Average time in queue', 'Time in queue', x_label, os.path.join(resultsDir, "timeInQueue.png"), labelsBySeriesName)
     plotSeries(timeInPenalty, 'Average time in penalty', 'Time in penalty', x_label, os.path.join(resultsDir, "timeInPenalty.png"), labelsBySeriesName)
+    plotSeries(timeInTransition, 'Average time in transit', 'Time in transit', x_label, os.path.join(resultsDir, "timeInTransit.png"), labelsBySeriesName)
 
 
