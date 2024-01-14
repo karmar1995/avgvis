@@ -1,27 +1,43 @@
+import time
+
 from tcp_utils.client_utils import TcpClient
 from agv_adapter.data_structures import *
+from agv_adapter.request_builder import RequestBuilder
 
 
 class REQUESTS:
-    GET_AGVS_IDS = 0
-    GET_AGV_STATUS = 1
-    GO_TO_POINTS = 2
+    GET_AGVS_IDS = 1
+    GET_AGV_STATUS = 2
+    GO_TO_POINTS = 3
 
 
+#TODO: Ensure thread safety!
 class AgvControllerClient:
     def __init__(self, agvControllerIp, agvControllerPort):
         self.__tcpClient = TcpClient(agvControllerIp, agvControllerPort)
 
     def requestAgvsIds(self):
-        self.__tcpClient.sendDataToServer(self.__prepareRequest(REQUESTS.GET_AGV_STATUS, ""))
-        return agvIdsFromJson(self.__tcpClient.readDataFromServer())
+        request = RequestBuilder().startRequest(REQUESTS.GET_AGVS_IDS).finalize()
+        self.__tcpClient.sendDataToServer(request.encode('ASCII'))
+        response = self.__waitForResponse()
+        return agvIdsFromJson(response.decode('ASCII'))
 
     def requestAgvStatus(self, agvId):
-        self.__tcpClient.sendDataToServer(self.__prepareRequest(REQUESTS.GET_AGV_STATUS, agvId))
-        return agvStatusFromJson(self.__tcpClient.readDataFromServer())
+        request = RequestBuilder().startRequest(REQUESTS.GET_AGV_STATUS).withAgvId(agvId).finalize()
+        self.__tcpClient.sendDataToServer(request.encode('ASCII'))
+        response = self.__waitForResponse()
+        return agvStatusFromJson(response.decode('ASCII'))
 
-    def requestGoToPoints(self, points):
-        self.__tcpClient.sendDataToServer(self.__prepareRequest(REQUESTS.GO_TO_POINTS, points))
+    def requestGoToPoints(self, agvId, points):
+        request = RequestBuilder().startRequest(REQUESTS.GO_TO_POINTS).withAgvId(agvId).withPoints(points).finalize()
+        self.__tcpClient.sendDataToServer(request.encode('ASCII'))
+        self.__waitForResponse() # response not used for now
 
-    def __prepareRequest(self, requestId, payload):
-        return requestId
+
+    def __waitForResponse(self, retries = 10):
+        response = self.__tcpClient.readDataFromServer()
+        for i in range(0, retries):
+            if response is None:
+                time.sleep(0.1)
+                response = self.__tcpClient.readDataFromServer()
+        return response

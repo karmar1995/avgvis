@@ -8,7 +8,9 @@ class AgvTaskExecutorManager(TasksExecutorManager):
         self.__agvControllerClient = AgvControllerClient(agvControllerIp, agvControllerPort)
         self.__agvTaskExecutors = dict()
         for agvId in self.__agvControllerClient.requestAgvsIds():
-            self.__agvTaskExecutors[agvId] = AgvTaskExecutor(agvId, self.__agvControllerClient)
+            agvStatus = self.__agvControllerClient.requestAgvStatus(agvId)
+            if agvStatus.online:
+                self.__agvTaskExecutors[agvId] = AgvTaskExecutor(agvId, self.__agvControllerClient)
 
     def tasksExecutors(self):
-        return self.__agvTaskExecutors
+        return list(self.__agvTaskExecutors.values())

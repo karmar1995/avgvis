@@ -5,8 +5,8 @@ class CompositionRoot:
     def __init__(self):
         self.__executorsManager = None
 
-    def initialize(self, agvSenders):
-        self.__executorsManager = AgvTaskExecutorManager(agvSenders)
+    def initialize(self, agvControllerIp, agvControllerPort):
+        self.__executorsManager = AgvTaskExecutorManager(agvControllerIp, agvControllerPort)
 
     def executorsManager(self):
         return self.__executorsManager

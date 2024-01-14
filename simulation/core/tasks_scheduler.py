@@ -15,11 +15,12 @@ MAX_JOB_LENGTH = 1000000
 
 
 class TasksScheduler:
-    def __init__(self, tasksQueue, pathsController, executorsManager):
+    def __init__(self, tasksQueue, pathsController, executorsManager, traverserName):
         self.__queue = tasksQueue
         self.__pathsController = pathsController
         self.__executorsManager = executorsManager
         self.__queue.addQueueObserver(self)
+        self.__traverserName = traverserName
         self.__jobsDict = None
         self.__tasksSources = dict()
         self.__tasks = list()
@@ -39,16 +40,16 @@ class TasksScheduler:
     def __processQueue(self):
         self.__started = True
         while not self.__killed:
-            if len(self.__tasks) > 0:
-                freeExecutors = self.__executorsManager.freeExecutors()
-                pathsPerJobId = self.coordinateJobs(iterations=100)  # todo: un-hardcode this stuff
+            freeExecutors = self.__executorsManager.freeExecutors()
+            if len(self.__tasks) > 0 and len(freeExecutors) > 0:
+                pathsPerJobId = self.coordinateJobs(iterations=100, traverserName=self.__traverserName)  # todo: un-hardcode this stuff
                 random.shuffle(freeExecutors)
                 for jobId in pathsPerJobId:
                     freeExecutors.pop(0).executeJob(pathsPerJobId[jobId].path)
                 self.__idle = False
             else:
                 self.__idle = True
-                time.sleep(0.1)
+                time.sleep(0.5)
 
     def distributeTasks(self):
         freeExecutors = self.__executorsManager.freeExecutors()

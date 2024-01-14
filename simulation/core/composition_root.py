@@ -24,7 +24,8 @@ class CompositionRoot:
                                                  simulation=dependencies['simulation'])
         self.__tasksScheduler = TasksScheduler(tasksQueue=self.__tasksQueue,
                                                pathsController=self.__pathsController,
-                                               executorsManager=self.__executorsManager)
+                                               executorsManager=self.__executorsManager,
+                                               traverserName='simulatedAnnealing')
         self.__executorsManager.setTasksScheduler(self.__tasksScheduler)
         self.__executorsManager.createExecutors()
 

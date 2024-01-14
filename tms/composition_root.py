@@ -71,7 +71,7 @@ class CompositionRoot:
         dependencies = {
             'agentsFactory': self.__simpyRoot.simpyAgentsFactory,
             'simulation': self.__simpyRoot.simulation,
-            'tasksExecutorsManager': self.__agvRoot.executorsManager()
+            'taskExecutorsManager': self.__agvRoot.executorsManager()
         }
         self.__simulationRoot.initialize(dependencies, topologyBuilder)
         mesInitInfo = MesCompositionRootInitInfo(tasksMapperConfigPath=tmsInitInfo.mesTasksMappingPath, dependencies={
