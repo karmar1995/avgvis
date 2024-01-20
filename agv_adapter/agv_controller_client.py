@@ -34,10 +34,9 @@ class AgvControllerClient:
         self.__waitForResponse() # response not used for now
 
 
-    def __waitForResponse(self, retries = 10):
+    def __waitForResponse(self):
         response = self.__tcpClient.readDataFromServer()
-        for i in range(0, retries):
-            if response is None:
-                time.sleep(0.1)
-                response = self.__tcpClient.readDataFromServer()
+        while response is None:
+            time.sleep(0.1)
+            response = self.__tcpClient.readDataFromServer()
         return response

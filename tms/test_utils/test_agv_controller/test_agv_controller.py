@@ -1,3 +1,4 @@
+import random
 import socket, sys, time, signal, select, json, threading
 from tms.test_utils.logger import Logger
 
@@ -52,6 +53,7 @@ class AgvControllerServer:
                 if len(received) > 0:
                     tmsRequest = self.parseTmsRequest(received)
                     response = self.processTmsRequest(tmsRequest)
+                    time.sleep(random.random()*3)
                     self.connection.sendall(response)
                     time.sleep(1)
 
