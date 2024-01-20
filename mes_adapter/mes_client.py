@@ -20,7 +20,7 @@ class MesClient:
     def __pollMes(self):
         while self.__running:
             try:
-                while not self.__mesDataSource.isConnected():
+                while not self.isConnected():
                     self.__mesDataSource.connect()
                     time.sleep(5)
                     if not self.__running: # TMS killed in the meantime
@@ -39,3 +39,5 @@ class MesClient:
         self.__running = False
         self.__pollingThread.join()
 
+    def isConnected(self):
+        return self.__mesDataSource.isConnected()

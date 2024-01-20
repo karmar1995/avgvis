@@ -28,7 +28,7 @@ class AgvTaskExecutorManager(TasksExecutorManager):
     def kill(self):
         self.__killed = True
 
-    def __isClientRunning(self):
+    def isClientRunning(self):
         return self.__agvControllerClient is not None and self.__agvControllerClient.connected()
 
     def __broadcastExecutorsChanged(self):
@@ -44,13 +44,13 @@ class AgvTaskExecutorManager(TasksExecutorManager):
         self.__broadcastExecutorsChanged()
 
     def __ensureClientRunning(self):
-        if not self.__isClientRunning():
+        if not self.isClientRunning():
             self.__agvControllerClient = AgvControllerClient(self.__ip, self.__port)
-        if self.__isClientRunning():
+        if self.isClientRunning():
             self.__createTasksExecutors()
 
     def __reconnect(self):
-        while not self.__isClientRunning():
+        while not self.isClientRunning():
             self.__ensureClientRunning()
             time.sleep(5)
             if self.__killed:

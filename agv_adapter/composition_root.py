@@ -13,3 +13,6 @@ class CompositionRoot:
 
     def shutdown(self):
         self.__executorsManager.kill()
+
+    def isConnected(self):
+        return self.__executorsManager.isClientRunning()

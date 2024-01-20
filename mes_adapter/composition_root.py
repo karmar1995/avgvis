@@ -27,3 +27,6 @@ class CompositionRoot:
 
     def shutdown(self):
         self.__mesClient.kill()
+
+    def isConnected(self):
+        return self.__mesClient.isConnected()

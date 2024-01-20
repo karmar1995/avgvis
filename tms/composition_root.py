@@ -1,4 +1,4 @@
-import threading, time
+import threading, time, copy
 from dataclasses import dataclass
 from simulation.core.composition_root import CompositionRoot as SimulationRoot
 from simulation.simpy_adapter.composition_root import CompositionRoot as SimpyRoot
@@ -26,12 +26,12 @@ class TmsInitInfo:
 
 
 class QueueObservingThread:
-    def __init__(self, queue, executorsViews, queueObserver):
+    def __init__(self, queue, executorsManager, queueObserver):
         self.__working = False
         self.__thread = None
         self.__queue = queue
         self.__queueObserver = queueObserver
-        self.__executorsViews = executorsViews
+        self.__executorsManager = executorsManager
 
     def start(self):
         self.__working = True
@@ -46,9 +46,9 @@ class QueueObservingThread:
 
     def __observeQueue(self):
         timePoint = 0
-        interval = 0.1
+        interval = 1
         while self.__working:
-            self.__queueObserver.probeQueueState(self.__queue, self.__executorsViews, timePoint)
+            self.__queueObserver.probeQueueState(copy.deepcopy(self.__queue), self.__executorsManager.executorsViews(), timePoint)
             time.sleep(interval)
             timePoint += interval
 
@@ -79,7 +79,7 @@ class CompositionRoot:
             'tasksQueue': self.__simulationRoot.tasksQueue()
         })
         self.__mesRoot.initialize(mesInitInfo)
-        self.__queueObservingThread = QueueObservingThread(self.__simulationRoot.tasksScheduler().tasks(), self.__simulationRoot.executorsManager().executorsViews(), tmsInitInfo.queueObserver)
+        self.__queueObservingThread = QueueObservingThread(self.__simulationRoot.tasksScheduler().tasks(), self.__simulationRoot.executorsManager(), tmsInitInfo.queueObserver)
 
     def start(self):
         self.__mesRoot.start()
@@ -91,3 +91,9 @@ class CompositionRoot:
         self.__mesRoot.shutdown()
         self.__simulationRoot.shutdown()
         self.__queueObservingThread.shutdown()
+
+    def isMesConnected(self):
+        return self.__mesRoot.isConnected()
+
+    def isAgvHubConnected(self):
+        return self.__agvRoot.isConnected()

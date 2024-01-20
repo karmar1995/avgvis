@@ -31,6 +31,15 @@ class JobExecutor:
             return 0
         return len(self.__job) - self.__currentTask
 
+    def taskExecutorId(self):
+        return self.__taskExecutor.getId()
+
+    def job(self):
+        return self.__job
+
+    def currentTask(self):
+        return self.__currentTask
+
     def __executeJob(self):
         for i in range(0, len(self.__job)):
             self.__currentTask = i
@@ -51,3 +60,11 @@ class JobExecutorView:
     def tasksCount(self):
         return self.__executor.tasksCount()
 
+    def executorId(self):
+        return self.__executor.taskExecutorId()
+
+    def tasksSequence(self):
+        job = self.__executor.job()
+        if job is not None:
+            return job[self.__executor.currentTask():]
+        return []

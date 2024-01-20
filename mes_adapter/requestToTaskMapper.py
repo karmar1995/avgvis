@@ -2,7 +2,7 @@ from simulation.core.task import Task
 
 
 testRequest2TaskMapping = {
-    23: Task(0, 1)
+    23: Task(23, 0, 1)
 }
 
 
