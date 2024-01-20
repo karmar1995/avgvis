@@ -8,11 +8,13 @@ class JobExecutorsManager:
         self.__executors = dict()
         self.__taskExecutorsManager = taskExecutorsManager
         self.__tasksScheduler = None
+        self.__taskExecutorsManager.addTasksExecutorObserver(self)
 
     def setTasksScheduler(self, scheduler):
         self.__tasksScheduler = scheduler
 
     def createExecutors(self):
+        self.__executors = dict()
         for tasksExecutor in self.__taskExecutorsManager.tasksExecutors():
             self.__executors[tasksExecutor.getId()] = JobExecutor(tasksExecutor, self)
 
@@ -49,3 +51,6 @@ class JobExecutorsManager:
         for executorId in self.__executors:
             res.append(JobExecutorView(self.__executors[executorId]))
         return res
+
+    def onTasksExecutorsChanged(self):
+        self.createExecutors()

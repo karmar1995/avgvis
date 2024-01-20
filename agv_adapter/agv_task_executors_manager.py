@@ -1,3 +1,4 @@
+import time
 from simulation.core.tasks_executor_manager import TasksExecutorManager
 from agv_adapter.agv_task_executor import AgvTaskExecutor
 from agv_adapter.agv_controller_client import AgvControllerClient
@@ -5,12 +6,47 @@ from agv_adapter.agv_controller_client import AgvControllerClient
 
 class AgvTaskExecutorManager(TasksExecutorManager):
     def __init__(self, agvControllerIp, agvControllerPort):
-        self.__agvControllerClient = AgvControllerClient(agvControllerIp, agvControllerPort)
+        self.__agvTaskExecutors = dict()
+        self.__ip = agvControllerIp
+        self.__port = agvControllerPort
+        self.__agvControllerClient = None
+        self.__observers = dict()
+        self.__reconnect()
+
+    def tasksExecutors(self):
+        return list(self.__agvTaskExecutors.values())
+
+    def addTasksExecutorObserver(self, observer):
+        self.__observers[id(observer)] = observer
+
+    def removeTasksExecutorObserver(self, observer):
+        del self.__observers[id(observer)]
+
+    def onConnectionLost(self):
+        self.__reconnect()
+
+    def __isClientRunning(self):
+        return self.__agvControllerClient is not None and self.__agvControllerClient.connected()
+
+    def __broadcastExecutorsChanged(self):
+        for observerId in self.__observers:
+            self.__observers[observerId].onTasksExecutorsChanged()
+
+    def __createTasksExecutors(self):
         self.__agvTaskExecutors = dict()
         for agvId in self.__agvControllerClient.requestAgvsIds():
             agvStatus = self.__agvControllerClient.requestAgvStatus(agvId)
             if agvStatus.online:
                 self.__agvTaskExecutors[agvId] = AgvTaskExecutor(agvId, self.__agvControllerClient)
+        self.__broadcastExecutorsChanged()
 
-    def tasksExecutors(self):
-        return list(self.__agvTaskExecutors.values())
+    def __ensureClientRunning(self):
+        if not self.__isClientRunning():
+            self.__agvControllerClient = AgvControllerClient(self.__ip, self.__port, self)
+        if self.__isClientRunning():
+            self.__createTasksExecutors()
+
+    def __reconnect(self):
+        while not self.__isClientRunning():
+            self.__ensureClientRunning()
+            time.sleep(5)
