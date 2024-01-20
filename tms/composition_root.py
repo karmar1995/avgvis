@@ -87,6 +87,7 @@ class CompositionRoot:
         self.__simulationRoot.start()
 
     def shutdown(self):
+        self.__agvRoot.shutdown()
         self.__mesRoot.shutdown()
         self.__simulationRoot.shutdown()
         self.__queueObservingThread.shutdown()

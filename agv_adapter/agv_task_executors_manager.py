@@ -11,7 +11,8 @@ class AgvTaskExecutorManager(TasksExecutorManager):
         self.__port = agvControllerPort
         self.__agvControllerClient = None
         self.__observers = dict()
-        self.__reconnect()
+        self.__killed = False
+        self.__reconnect(retries=10)
 
     def tasksExecutors(self):
         return list(self.__agvTaskExecutors.values())
@@ -46,7 +47,16 @@ class AgvTaskExecutorManager(TasksExecutorManager):
         if self.__isClientRunning():
             self.__createTasksExecutors()
 
-    def __reconnect(self):
+    def __reconnect(self, retries = -1):
+        i = 0
         while not self.__isClientRunning():
             self.__ensureClientRunning()
             time.sleep(5)
+            i += 1
+            if 0 < retries < i:
+                break
+            if self.__killed:
+                break
+
+    def kill(self):
+        self.__killed = True

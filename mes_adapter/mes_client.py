@@ -20,6 +20,11 @@ class MesClient:
     def __pollMes(self):
         while self.__running:
             try:
+                while not self.__mesDataSource.isConnected():
+                    self.__mesDataSource.connect()
+                    time.sleep(5)
+                    if not self.__running: # TMS killed in the meantime
+                        break
                 data = self.__mesDataSource.readDataFromServer()
                 frame = self.__frameParser.onFrameReceived(data)
                 self.__tasksSource.handleRequest(frame.productionOrderId)

@@ -1,4 +1,4 @@
-import socket, select
+import socket, select, errno
 
 
 class TcpClient:
@@ -36,15 +36,27 @@ class TcpClient:
 
     def connect(self):
         try:
-            print("Connecting to {}:{}".format(self.__host, self.__port))
+            print("Connecting to {}:{}...".format(self.__host, self.__port), end='')
             self.__socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
             self.__socket.connect((self.__host, self.__port))
+            print("Connected")
         except ConnectionRefusedError:
             print("Cannot connect to: {}:{}".format(self.__host, self.__port))
             self.__socket = None
 
     def isConnected(self):
-        return self.__socket is not None
+        return self.__socket is not None and not self.connectionClosed()
+
+    def connectionClosed(self):
+        try:
+            buf = self.__socket.recv(1, socket.MSG_PEEK | socket.MSG_DONTWAIT)
+            if buf == b'':
+                return True
+        except BlockingIOError as exc:
+            if exc.errno != errno.EAGAIN:
+                # Raise on unknown exception
+                raise
+        return False
 
     def addConnectionObserver(self, observer):
         self.__connectionObservers[id(observer)] = observer

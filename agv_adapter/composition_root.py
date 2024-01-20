@@ -10,3 +10,6 @@ class CompositionRoot:
 
     def executorsManager(self):
         return self.__executorsManager
+
+    def shutdown(self):
+        self.__executorsManager.kill()
