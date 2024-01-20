@@ -12,10 +12,9 @@ class REQUESTS:
 
 
 class AgvControllerClient:
-    def __init__(self, agvControllerIp, agvControllerPort, agvExecutorsMananger):
+    def __init__(self, agvControllerIp, agvControllerPort):
         self.__tcpClient = TcpClient(agvControllerIp, agvControllerPort)
         self.__lock = threading.Lock()
-        self.__tcpClient.addConnectionObserver(agvExecutorsMananger)
 
     def requestAgvsIds(self):
         request = RequestBuilder().startRequest(REQUESTS.GET_AGVS_IDS).finalize()

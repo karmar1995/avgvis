@@ -1,4 +1,4 @@
-import time
+import time, threading
 from simulation.core.tasks_executor_manager import TasksExecutorManager
 from agv_adapter.agv_task_executor import AgvTaskExecutor
 from agv_adapter.agv_controller_client import AgvControllerClient
@@ -12,7 +12,9 @@ class AgvTaskExecutorManager(TasksExecutorManager):
         self.__agvControllerClient = None
         self.__observers = dict()
         self.__killed = False
-        self.__reconnect(retries=10)
+        self.__pollingThread = None
+        self.__ensureClientRunning()
+        self.__createRefreshThread()
 
     def tasksExecutors(self):
         return list(self.__agvTaskExecutors.values())
@@ -23,8 +25,8 @@ class AgvTaskExecutorManager(TasksExecutorManager):
     def removeTasksExecutorObserver(self, observer):
         del self.__observers[id(observer)]
 
-    def onConnectionLost(self):
-        self.__reconnect()
+    def kill(self):
+        self.__killed = True
 
     def __isClientRunning(self):
         return self.__agvControllerClient is not None and self.__agvControllerClient.connected()
@@ -43,20 +45,23 @@ class AgvTaskExecutorManager(TasksExecutorManager):
 
     def __ensureClientRunning(self):
         if not self.__isClientRunning():
-            self.__agvControllerClient = AgvControllerClient(self.__ip, self.__port, self)
+            self.__agvControllerClient = AgvControllerClient(self.__ip, self.__port)
         if self.__isClientRunning():
             self.__createTasksExecutors()
 
-    def __reconnect(self, retries = -1):
-        i = 0
+    def __reconnect(self):
         while not self.__isClientRunning():
             self.__ensureClientRunning()
             time.sleep(5)
-            i += 1
-            if 0 < retries < i:
-                break
             if self.__killed:
                 break
 
-    def kill(self):
-        self.__killed = True
+    def __createRefreshThread(self):
+        self.__pollingThread = threading.Thread(target=self.__refreshConnection)
+        self.__pollingThread.daemon = True
+        self.__pollingThread.start()
+
+    def __refreshConnection(self):
+        while not self.__killed:
+            time.sleep(5)
+            self.__reconnect()
