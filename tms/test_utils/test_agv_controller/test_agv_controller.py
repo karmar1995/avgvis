@@ -36,8 +36,8 @@ class AgvControllerServer:
         self.__workingThread = None
         self.agvs = {}
         self.addFakeAgv('agv1')
-#        self.addFakeAgv('agv2')
-#        self.addFakeAgv('agv3')
+        self.addFakeAgv('agv2')
+        self.addFakeAgv('agv3')
 
     def connect(self, host, port):
         self.socket.bind((host, port))
