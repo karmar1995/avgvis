@@ -14,5 +14,5 @@ class Task:
         return self.__taskNumber
 
     def __str__(self):
-        return "[{}, {}]".format(self.__source, self.__destination)
+        return "{}: [{}, {}]".format(self.__taskNumber, self.__source, self.__destination)
 

@@ -7,6 +7,7 @@ from agv_adapter.composition_root import CompositionRoot as AgvRoot
 from tms.topology_builder import TopologyBuilder
 from tcp_utils.client_utils import TcpClient
 from storage.graph_storage import GraphStorage
+from storage.mes_mapping_storage import MesMappingStorage
 
 
 class QueueObserver:
@@ -64,7 +65,9 @@ class CompositionRoot:
 
     def initialize(self, tmsInitInfo: TmsInitInfo):
         graphStorage = GraphStorage()
+        mesMappingStorage = MesMappingStorage()
         graphStorage.read(tmsInitInfo.topologyDescriptionPath)
+        mesMappingStorage.read(tmsInitInfo.mesTasksMappingPath)
         topologyBuilder = TopologyBuilder(self.__simpyRoot.simulation.env, graphStorage)
         self.__agvRoot.initialize(tmsInitInfo.agvControllerIp, tmsInitInfo.agvControllerPort)
 
@@ -74,9 +77,10 @@ class CompositionRoot:
             'taskExecutorsManager': self.__agvRoot.executorsManager()
         }
         self.__simulationRoot.initialize(dependencies, topologyBuilder)
-        mesInitInfo = MesCompositionRootInitInfo(tasksMapperConfigPath=tmsInitInfo.mesTasksMappingPath, dependencies={
+        mesInitInfo = MesCompositionRootInitInfo(dependencies={
             'mesDataSource': self.__networkSenderFactory(host=tmsInitInfo.mesIp, port=tmsInitInfo.mesPort),
-            'tasksQueue': self.__simulationRoot.tasksQueue()
+            'tasksQueue': self.__simulationRoot.tasksQueue(),
+            'configuration': mesMappingStorage
         })
         self.__mesRoot.initialize(mesInitInfo)
         self.__queueObservingThread = QueueObservingThread(self.__simulationRoot.tasksScheduler().tasks(), self.__simulationRoot.executorsManager(), tmsInitInfo.queueObserver)

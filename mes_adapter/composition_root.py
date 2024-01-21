@@ -6,7 +6,6 @@ from mes_adapter.requestToTaskMapper import RequestToTaskMapper
 
 @dataclass
 class MesCompositionRootInitInfo:
-    tasksMapperConfigPath: str
     dependencies: dict
 
 
@@ -17,7 +16,7 @@ class CompositionRoot:
         self.__requestMapper = None
 
     def initialize(self, initInfo: MesCompositionRootInitInfo):
-        self.__requestMapper = RequestToTaskMapper(initInfo.tasksMapperConfigPath)
+        self.__requestMapper = RequestToTaskMapper(initInfo.dependencies['configuration'])
         self.__tasksSource = MesTasksSource(self.__requestMapper)
         self.__mesClient = MesClient(initInfo.dependencies['mesDataSource'], self.__tasksSource)
         self.__tasksSource.setTasksQueue(initInfo.dependencies['tasksQueue'])
