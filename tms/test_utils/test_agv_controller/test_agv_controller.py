@@ -60,13 +60,16 @@ class AgvControllerServer:
     def processTmsRequest(self, request):
         print("processing request: {}".format(request))
         response = None
-        if request['id'] == 1:
+        if request['id'] == "GetAgvsIds":
             response = { 'agvs': list(self.agvs.keys()) }
-        if request['id'] == 2:
+        if request['id'] == "GetAgvStatus":
             response = self.agvs[request['agv_id']].status()
-        if request['id'] == 3:
+        if request['id'] == "GoToPoints":
             self.agvs[request['agv_id']].goToPoint(request['points'][-1])
             response = { 'accepted': True }
+        if request['id'] == "GoToPoint":
+            self.agvs[request['agv_id']].goToPoint(request['point'])
+            response = {'accepted': True}
         return json.dumps(response).encode('ASCII')
 
     def parseTmsRequest(self, receivedBytes):

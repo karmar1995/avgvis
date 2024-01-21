@@ -6,9 +6,10 @@ from agv_adapter.request_builder import RequestBuilder
 
 
 class REQUESTS:
-    GET_AGVS_IDS = 1
-    GET_AGV_STATUS = 2
-    GO_TO_POINTS = 3
+    GET_AGVS_IDS = "GetAgvsIds"
+    GET_AGV_STATUS = "GetAgvStatus"
+    GO_TO_POINT = "GoToPoint"
+    GO_TO_POINTS = "GoToPoints"
 
 
 class AgvControllerClient:
@@ -28,9 +29,16 @@ class AgvControllerClient:
         if response is not None:
             return agvStatusFromJson(response.decode('ASCII'))
 
-    def requestGoToPoints(self, agvId, points):
-        request = RequestBuilder().startRequest(REQUESTS.GO_TO_POINTS).withAgvId(agvId).withPoints(points).finalize()
+    def requestGoToPoint(self, agvId, point):
+        request = RequestBuilder().startRequest(REQUESTS.GO_TO_POINT).withAgvId(agvId).withPoint(point).finalize()
         self.__sendRequest(request)
+
+    def requestGoToPoints(self, agvId, points):
+        if len(points) == 1:
+            self.requestGoToPoint(agvId, points[0])
+        else:
+            request = RequestBuilder().startRequest(REQUESTS.GO_TO_POINTS).withAgvId(agvId).withPoints(points).finalize()
+            self.__sendRequest(request)
 
     def connected(self):
         return self.__tcpClient.isConnected()

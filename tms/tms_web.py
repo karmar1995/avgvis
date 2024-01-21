@@ -1,5 +1,5 @@
 import tempfile
-from flask import Flask, request, render_template, abort, send_file
+from flask import Flask, request, render_template, abort, send_file, redirect
 from dataclasses import dataclass
 from composition_root import CompositionRoot, TmsInitInfo, QueueObserver
 
@@ -80,8 +80,6 @@ def getFileFromRequest(request, filename, tmpFile):
 
 @app.route('/run', methods=['GET', 'POST'])
 def run():
-    mesConnectionString = ""
-    agvHubConnectionString = ""
     if request.method == 'POST':
         if request.form.get('Run') == 'Run':
             if not tms.isRunning():
@@ -96,9 +94,11 @@ def run():
                                               mesTasksMappingPath=mesMappingFile, queueObserver=tms.queueObserver)
                     tms.start(tmsInitInfo)
 
-    if tms.tmsInitInfo is not None:
-        mesConnectionString = "{}:{}".format(tms.tmsInitInfo.mesIp, tms.tmsInitInfo.mesPort)
-        agvHubConnectionString = "{}:{}".format(tms.tmsInitInfo.agvControllerIp, tms.tmsInitInfo.agvControllerPort)
+    if tms.tmsInitInfo is None:
+        return redirect('/')
+
+    mesConnectionString = "{}:{}".format(tms.tmsInitInfo.mesIp, tms.tmsInitInfo.mesPort)
+    agvHubConnectionString = "{}:{}".format(tms.tmsInitInfo.agvControllerIp, tms.tmsInitInfo.agvControllerPort)
 
     return render_template('tms.html',
                            mesStatus=tms.mesStatus(),

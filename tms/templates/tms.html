@@ -46,12 +46,15 @@
     <div class="container" id="agvs">
        <label class="form-label">AGVs:</label>
        {% for agv in agvs %}
-       <div class="row">
+       <div class="row" id="agvId">
             <div class="col-1">
                 <div class="d-grid">
                     <input class=agvButton type="button" name="{{agv.name}}" value="{{agv.name}}" disabled>
                 </div>
             </div>
+       </div>
+       <label for="tasksQueue">Points assigned to AGV:</label>
+       <div class="row" id="tasksQueue">
             {% for agvTask in agv.tasks %}
                 <div class="col-1">
                     <div class="d-grid">
@@ -59,8 +62,8 @@
                     </div>
                 </div>
            {% endfor %}
-<!--           <hr>-->
        </div>
+       <hr>
       {% endfor %}
     </div>
 
