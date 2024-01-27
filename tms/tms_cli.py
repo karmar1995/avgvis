@@ -47,7 +47,7 @@ qlensObserver = CliQueueObserver('qlens.csv')
 sigIntHandler = SignalHandler()
 logger.logLine("Starting TMS with MES: {}:{} and AGV controller: {}:{}".format(mesIp, mesPort, agvControllerIp, agvControllerPort))
 initInfo = TmsInitInfo(topologyDescriptionPath=sys.argv[3], mesIp=mesIp, mesPort=mesPort,
-                       mesTasksMappingPath='unused', agvControllerIp=agvControllerIp,
+                       mesTasksMappingPath=sys.argv[4], agvControllerIp=agvControllerIp,
                        agvControllerPort=agvControllerPort, queueObserver=qlensObserver)
 tmsRoot = CompositionRoot()
 tmsRoot.initialize(tmsInitInfo=initInfo)
