@@ -3,67 +3,78 @@ from simulation.simpy_adapter.timeout_utils import *
 
 class Agent:
 
-    def __init__(self, env, number, traverser):
+    def __init__(self, env, number, traverser, startingNode = None):
         self.env = env
         self.number = number
         self.traverser = traverser
-        self.currentNode = None
+        self.currentNode = startingNode
         self.nextNode = None
 
     def start(self):
         self.env.process(self.__run())
 
+
     def __run(self):
         startTime = self.env.now
 
-        path = self.traverser.path()
+        tasks = self.traverser.tasks()
         i = 1
-        collisions = 0
-        timeInQueue = 0
-        timeInPenalty = 0
-        timeInTransition = 0
-        while i < len(path):
-            self.currentNode = self.traverser.node(path[i-1])
-            self.nextNode = self.traverser.node(path[i])
+        while i <= len(tasks):
+            task = tasks[i-1]
 
-            enqueueTime = self.env.now
+#            if self.currentNode is not None:
+#                self.__performTransitionBetweenNodes(self.currentNode, task.source())
+
+            self.currentNode = self.traverser.node(task.source())
+            self.nextNode = self.traverser.node(task.destination())
+
+            currentNodeEnter = self.env.now
             self.currentNode.onEnqueue()
             with self.currentNode.executor.request() as request:
                 yield request
-                yield self.env.process(self.currentNode.process())
-
+                yield self.env.process(self.currentNode.startTask(task.taskNumber()))
             self.currentNode.onDeque()
-            dequeTime = self.env.now
-            timeInQueue += (dequeTime - enqueueTime)
+            currentNodeLeaving = self.env.now
+            currentNodeTime = currentNodeLeaving - currentNodeEnter
+
             self.currentNode.addAgentLeavingNode(self)
             agents = self.nextNode.getAgentsLeavingNode()
-            transitionTime = self.traverser.transitionTime(path[i-1], path[i])
             penaltyTime = 200
 
             for agentId in agents:
                 if agents[agentId].nextNode.index == self.currentNode.index:
-                    collisions += 1
-                    beforeCollisonTime = self.env.now
                     yield self.env.timeout(transitionTimeout(penaltyTime))
-                    timeInPenalty += self.env.now - beforeCollisonTime
                     break
 
-            timeBeforeTransition = self.env.now
-            yield self.env.timeout(transitionTimeout(transitionTime))
-            timeInTransition += self.env.now - timeBeforeTransition
             self.currentNode.removeAgentLeavingNode(self)
+            # end of - collisions
+
+            beforeTransit = self.env.now
+            path = self.traverser.pathBetweenNodes(self.currentNode, self.nextNode)
+            i = 1
+            while i < len(path):
+                transitionTime = self.traverser.transitionTime(path[i - 1], path[i])
+                yield self.env.timeout(transitionTimeout(transitionTime))
+                i += 1
+            afterTransit = self.env.now
+            timeInTransit = afterTransit - beforeTransit
+
+            nextNodeEnterTime = self.env.now
+            self.nextNode.onEnqueue()
+            with self.nextNode.executor.request() as request:
+                yield request
+                yield self.env.process(self.nextNode.startTask(task.taskNumber()))
+            self.nextNode.onDeque()
+            nextNodeLeaveTime = self.env.now
+            self.nextNodeLeaving = nextNodeLeaveTime - nextNodeEnterTime
+
+            self.currentNode = self.nextNode
 
             i += 1
-        self.currentNode = self.traverser.node(path[i - 1])
-        with self.nextNode.executor.request() as request:
-            yield request
-            processsingStartTime = self.env.now
-            yield self.env.process(self.currentNode.process())
-            timeInQueue += self.env.now - processsingStartTime
 
         self.currentNode = None
         self.nextNode = None
 
         endTime = self.env.now
-        pathCost = endTime - startTime
-        self.traverser.feedback(path, pathCost, collisions, timeInQueue, timeInPenalty, timeInTransition)
+        tasksCost = endTime - startTime
+        self.traverser.feedback(tasksCost, 0, 0, 0, 0)

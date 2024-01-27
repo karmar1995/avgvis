@@ -27,6 +27,26 @@ longServiceTimeWeightsManager = GraphNodesWeightsManager(1000, 1, 10)
 shortServiceTimeWeightsManager = GraphNodesWeightsManager(1000, 1, 10)
 
 
+class DebugGraphBuilder:
+
+    def __init__(self, nodesNumber):
+        self.__nodesNumber = nodesNumber
+        self.__env = None
+
+    def setEnvironment(self, env):
+        self.__env = env
+        return self
+
+    def build(self, systemBuilder):
+        n = self.__nodesNumber
+        for i in range(0, n):
+            systemBuilder.addVertex(Vertex(name="unused", node=Node(env=self.__env, serviceTime=i, index=i)))
+
+        for i in range(0, n):
+            for j in range(0, n):
+                systemBuilder.addEdge(Edge(name="unused", source=i, target=j, weight=i*10 + j))
+
+
 class VeryLongServiceTimeFullGraphBuilder:
 
     def __init__(self, nodesNumber):

@@ -3,41 +3,38 @@ from simulation.core.path import Path
 
 
 class TraverserBase:
-    def __init__(self, system, nodesToVisit):
+    def __init__(self, system):
         self.system = system
-        self._bestSequence = nodesToVisit
-        self._tasksSequence = nodesToVisit
-        self._bestPath = None
+        self._bestSequence = None
+        self._bestCost = 0
+        self._currentSequence = None
+        self._currentCost = 0
+        self._tmpSequence = None
 
-    def generatePathFromTasks(self, tasks):
-        path = []
-        k = 1
-        for i in range(0, len(tasks)):
-            partialPath = random.choice(self.system.graph.get_k_shortest_paths(tasks[i].source(), tasks[i].destination(), k))
-            if i > 0 and tasks[i-1].destination() == tasks[i].source():
-                partialPath.pop(0)
-            path.extend(partialPath)
-            if (i < len(tasks) - 1) and tasks[i].destination() != tasks[i+1].source():
-                partialPath = random.choice(self.system.graph.get_k_shortest_paths(tasks[i].destination(), tasks[i+1].source(), k))
-                partialPath.pop(0)
-                partialPath.pop()
-                path.extend(partialPath)
-        return self.__validatePath(path)
+    def assignSequence(self, sequence):
+        self._bestCost = 0
+        self._bestSequence = None
+        self._currentCost = 0
+        self._currentSequence = copy.deepcopy(sequence)
+        self._tmpSequence = copy.deepcopy(sequence)
 
-    def __validatePath(self, path):
-        for i in range(0, len(path) - 2):
-            if path[i] == path[i+1]:
-                raise Exception("Invalid path!")
-        return path
+    def feedback(self, cost, collisions, timeInQueue, timeInPenalty, timeInTransition):
+        self._currentCost += cost
 
-    def feedback(self, path, pathCost, collisions, timeInQueue, timeInPenalty, timeInTransition):
-        raise NotImplementedError("To be implemented in concrete traverser!")
+    def finished(self):
+        return len(self._tmpSequence) == 0
 
     def nextIteration(self):
         raise NotImplementedError("To be implemented in concrete traverser!")
 
-    def path(self):
-        return self.generatePathFromTasks(self._tasksSequence)
+    def tasks(self):
+        if len(self._tmpSequence) > 0:
+            t = self._tmpSequence.pop()
+            return [t]
+        return []
+
+    def pathBetweenNodes(self, source, destination):
+        return self.system.graph.get_k_shortest_paths(source.index, destination.index, 1)[0]
 
     def node(self, index):
         return self.system.node(index)
@@ -45,5 +42,8 @@ class TraverserBase:
     def transitionTime(self, nodeIndex1, nodeIndex2):
         return self.system.graph[nodeIndex1, nodeIndex2]
 
-    def bestPath(self):
-        return self._bestPath
+    def sequence(self):
+        return self._bestSequence
+
+    def cost(self):
+        return self._bestCost

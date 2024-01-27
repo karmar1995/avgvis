@@ -12,7 +12,10 @@ class Node:
         self.__queueLengths = list()
         self.__currentQueueLength = 0
 
-    def process(self):
+    def startTask(self, taskNumber):
+        yield self.env.timeout(timeoutFor(self.serviceTime))
+
+    def endTask(self, taskNumber):
         yield self.env.timeout(timeoutFor(self.serviceTime))
 
     def addAgentLeavingNode(self, agent):
