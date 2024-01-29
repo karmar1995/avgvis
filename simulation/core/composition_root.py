@@ -5,7 +5,7 @@ from simulation.core.tasks_queue import TasksQueue
 from simulation.core.tasks_scheduler import TasksScheduler
 from simulation.core.job_executors_manager import JobExecutorsManager
 from simulation.core.simulated_annealing_traverser2 import SimulatedAnnealingTraverser
-from simulation.core.genetic_algorithm_traverser import GeneticAlgorithmTraverser
+from simulation.core.genetic_algorithm_traverser2 import GeneticAlgorithmTraverser
 from simulation.core.queue_optimizer import QueueOptimizer
 
 

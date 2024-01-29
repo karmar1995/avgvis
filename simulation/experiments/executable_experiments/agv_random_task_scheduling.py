@@ -28,7 +28,7 @@ def prepareSeriesCollections(analyzer, traverserName, seriesCollection, labelsBy
 def run(tasksNumber, agvsNumber, stationsNumber, graphBuilderClass, subdirectory):
     traverserNames = [
         'simulatedAnnealing',
-#        'geneticAlgorithm'
+        'geneticAlgorithm'
     ]
     tasksQueue = generateTasksQueue(tasksNumber, stationsNumber)
     graphBuilder = graphBuilderClass(stationsNumber)
@@ -40,7 +40,7 @@ def run(tasksNumber, agvsNumber, stationsNumber, graphBuilderClass, subdirectory
         experimentCollector = ExperimentCollector(Logger())
         analyzerPerTraverser[traverserName] = ExperimentAnalyzer(experimentCollector)
 
-        for iterations in range(10, 810, 20):
+        for iterations in range(1, 3000, 200):
             experiment = RandomTasksScheduling(tasksQueue, agvsNumber, iterations, graphBuilder, traverserName)
             Runner(experiment, experimentCollector.getRetriesCollector(iterations)).run(times=5)
 
@@ -53,16 +53,16 @@ def run(tasksNumber, agvsNumber, stationsNumber, graphBuilderClass, subdirectory
         csvWriter = CsvWriter(os.path.join(resultsDir, traverserName), analyzerPerTraverser[traverserName])
         csvWriter.write('cost', 'iterations', legend)
         csvWriter.write('time', 'iterations', legend)
-#        csvWriter.write('collisions', 'iterations', legend)
-#        csvWriter.write('queueLength', 'iterations', legend)
-#        csvWriter.write('timeInQueue', 'iterations', legend)
-#        csvWriter.write('timeInPenalty', 'iterations', legend)
-#        csvWriter.write('timeInTransition', 'iterations', legend)
-#        stackedSeriesDict = {'Time in queue': analyzerPerTraverser[traverserName].analyze('timeInQueue')['mean'],
-#                             'Penalty time': analyzerPerTraverser[traverserName].analyze('timeInPenalty')['mean'],
-#                             'Time in transit': analyzerPerTraverser[traverserName].analyze('timeInTransition')['mean']
-#                             }
-#        plotStackedSeries(stackedSeriesDict, 'Time constituents - {}'.format(traversersLabels[traverserName]), os.path.join(resultsDir, '{}_timeComposition.png'.format(traverserName)))
+        csvWriter.write('collisions', 'iterations', legend)
+        csvWriter.write('queueLength', 'iterations', legend)
+        csvWriter.write('timeInQueue', 'iterations', legend)
+        csvWriter.write('timeInPenalty', 'iterations', legend)
+        csvWriter.write('timeInTransition', 'iterations', legend)
+        stackedSeriesDict = {'Time in queue': analyzerPerTraverser[traverserName].analyze('timeInQueue')['mean'],
+                             'Penalty time': analyzerPerTraverser[traverserName].analyze('timeInPenalty')['mean'],
+                             'Time in transit': analyzerPerTraverser[traverserName].analyze('timeInTransition')['mean']
+                             }
+        plotStackedSeries(stackedSeriesDict, 'Time constituents - {}'.format(traversersLabels[traverserName]), os.path.join(resultsDir, '{}_timeComposition.png'.format(traverserName)))
 
     costs = dict()
     collisions = dict()
@@ -76,20 +76,20 @@ def run(tasksNumber, agvsNumber, stationsNumber, graphBuilderClass, subdirectory
 
     for traverserName in traverserNames:
         prepareSeriesCollections(analyzerPerTraverser[traverserName], traverserName, costs, labelsBySeriesName, 'cost')
-#        prepareSeriesCollections(analyzerPerTraverser[traverserName], traverserName, collisions, labelsBySeriesName, 'collisions')
+        prepareSeriesCollections(analyzerPerTraverser[traverserName], traverserName, collisions, labelsBySeriesName, 'collisions')
         prepareSeriesCollections(analyzerPerTraverser[traverserName], traverserName, times, labelsBySeriesName, 'time')
-#        prepareSeriesCollections(analyzerPerTraverser[traverserName], traverserName, queueLengths, labelsBySeriesName, 'queueLength')
-#        prepareSeriesCollections(analyzerPerTraverser[traverserName], traverserName, timeInQueue, labelsBySeriesName, 'timeInQueue')
-#        prepareSeriesCollections(analyzerPerTraverser[traverserName], traverserName, timeInPenalty, labelsBySeriesName, 'timeInPenalty')
-#        prepareSeriesCollections(analyzerPerTraverser[traverserName], traverserName, timeInTransition, labelsBySeriesName, 'timeInTransition')
+        prepareSeriesCollections(analyzerPerTraverser[traverserName], traverserName, queueLengths, labelsBySeriesName, 'queueLength')
+        prepareSeriesCollections(analyzerPerTraverser[traverserName], traverserName, timeInQueue, labelsBySeriesName, 'timeInQueue')
+        prepareSeriesCollections(analyzerPerTraverser[traverserName], traverserName, timeInPenalty, labelsBySeriesName, 'timeInPenalty')
+        prepareSeriesCollections(analyzerPerTraverser[traverserName], traverserName, timeInTransition, labelsBySeriesName, 'timeInTransition')
 
     x_label = 'Calculation time [iterations]'
     plotSeries(costs, 'Average job cost', 'Cost', x_label, os.path.join(resultsDir, "cost.png"), labelsBySeriesName)
- #   plotSeries(collisions, 'Average collisions during job execution', 'Collisions', x_label, os.path.join(resultsDir, "collisions.png"), labelsBySeriesName)
-#    plotSeries(times, 'Calculation time', 'Time [s]', x_label, os.path.join(resultsDir, "time.png"), labelsBySeriesName)
-#    plotSeries(queueLengths, 'Average queue length', 'Queue length', x_label, os.path.join(resultsDir, "queueLength.png"), labelsBySeriesName)
-#    plotSeries(timeInQueue, 'Average time in queue', 'Time in queue', x_label, os.path.join(resultsDir, "timeInQueue.png"), labelsBySeriesName)
-#    plotSeries(timeInPenalty, 'Average time in penalty', 'Time in penalty', x_label, os.path.join(resultsDir, "timeInPenalty.png"), labelsBySeriesName)
-#    plotSeries(timeInTransition, 'Average time in transit', 'Time in transit', x_label, os.path.join(resultsDir, "timeInTransit.png"), labelsBySeriesName)
+    plotSeries(collisions, 'Average collisions during job execution', 'Collisions', x_label, os.path.join(resultsDir, "collisions.png"), labelsBySeriesName)
+    plotSeries(times, 'Calculation time', 'Time [s]', x_label, os.path.join(resultsDir, "time.png"), labelsBySeriesName)
+    plotSeries(queueLengths, 'Average queue length', 'Queue length', x_label, os.path.join(resultsDir, "queueLength.png"), labelsBySeriesName)
+    plotSeries(timeInQueue, 'Average time in queue', 'Time in queue', x_label, os.path.join(resultsDir, "timeInQueue.png"), labelsBySeriesName)
+    plotSeries(timeInPenalty, 'Average time in penalty', 'Time in penalty', x_label, os.path.join(resultsDir, "timeInPenalty.png"), labelsBySeriesName)
+    plotSeries(timeInTransition, 'Average time in transit', 'Time in transit', x_label, os.path.join(resultsDir, "timeInTransit.png"), labelsBySeriesName)
 
 

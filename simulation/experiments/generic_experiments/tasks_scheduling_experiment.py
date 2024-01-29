@@ -53,16 +53,17 @@ class RandomTasksScheduling:
         self.__coreRoot.initialize(dependencies, self.__testGraphBuilder, simulationInitInfo)
         self.__coreRoot.tasksQueue().batchEnqueue(copy.deepcopy(self.__tasksQueue))
         t1 = time.time()
-        queueView = self.__coreRoot.tasksScheduler().optimizeQueue(self.__iterations)
+        res = self.__coreRoot.tasksScheduler().optimizeQueue(self.__iterations)
         t2 = time.time()
         elapsedTime = t2-t1
         statisticsCollector.collect('time', elapsedTime)
-        statisticsCollector.collect('cost', queueView.cost)
-#        statisticsCollector.collect('collisions', path.collisions)
-#        statisticsCollector.collect('timeInQueue', path.timeInQueue)
-#        statisticsCollector.collect('timeInPenalty', path.timeInPenalty)
-#        statisticsCollector.collect('timeInTransition', path.timeInTransition)
+        statisticsCollector.collect('cost', res.queueView.cost)
+        statisticsCollector.collect('collisions', res.statistics.collisions)
+        statisticsCollector.collect('timeInQueue', res.statistics.timeInQueue)
+        statisticsCollector.collect('timeInPenalty', res.statistics.timeInPenalty)
+        statisticsCollector.collect('timeInTransition', res.statistics.timeInTransition)
 
-#        for i in range(0, self.__coreRoot.system().nodesCount()):
-#            tmp = self.__coreRoot.system().node(i).queueLengthHistory()
-#            statisticsCollector.collect('queueLength', sum(tmp) / len(tmp))
+        for i in range(0, self.__coreRoot.system().nodesCount()):
+            tmp = self.__coreRoot.system().node(i).queueLengthHistory()
+            if len(tmp) > 0:
+                statisticsCollector.collect('queueLength', sum(tmp) / len(tmp))
