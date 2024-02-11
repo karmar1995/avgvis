@@ -43,11 +43,17 @@ class AgvTaskExecutorManager(TasksExecutorManager):
                 self.__agvTaskExecutors[agvId] = AgvTaskExecutor(agvId, self.__agvControllerClient)
         self.__broadcastExecutorsChanged()
 
+    def __cleanupTasksExecutors(self):
+        self.__agvTaskExecutors = dict()
+        self.__broadcastExecutorsChanged()
+
     def __ensureClientRunning(self):
         if not self.isClientRunning():
             self.__agvControllerClient = AgvControllerClient(self.__ip, self.__port)
         if self.isClientRunning():
             self.__createTasksExecutors()
+        else:
+            self.__cleanupTasksExecutors()
 
     def __reconnect(self):
         while not self.isClientRunning():
