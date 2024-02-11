@@ -16,12 +16,18 @@ class TasksScheduler:
     def __processQueue(self):
         self.__started = True
         while not self.__killed:
-            self.optimizeQueue(iterations=100)  # todo: un-hardcode this stuff
+            self.optimizeQueue(iterations=1000)  # todo: un-hardcode this stuff
+            self.dispatchTasks()
             time.sleep(1)
 
     # public only for testing purposes
     def optimizeQueue(self, iterations):
         return self.__queueOptimizer.optimizeQueue(iterations)
+
+    def dispatchTasks(self):
+        for _ in range(0, self.__executorsManager.freeExecutorsNumber()):
+            if not self.__queueOptimizer.queue().empty():
+                self.__executorsManager.freeExecutor().executeJob(self.__queueOptimizer.queue().popTask().pointsSequence())
 
     # only for testing purposes
     def waitForQueueProcessed(self):

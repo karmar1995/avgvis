@@ -22,8 +22,8 @@ class TraverserBase:
         self._tmpSequence = None
 
     def assignSequence(self, sequence):
-        self._bestCost = 0
-        self._bestSequence = None
+        self._bestCost = -1
+        self._bestSequence = copy.deepcopy(sequence)
         self._currentCost = 0
         self._currentSequence = copy.deepcopy(sequence)
         self._tmpSequence = copy.deepcopy(sequence)
@@ -56,6 +56,9 @@ class TraverserBase:
 
     def node(self, index):
         return self.system.node(index)
+
+    def edgeAgents(self, source, destination):
+        return self.system.edgeAgents(source, destination)
 
     def transitionTime(self, nodeIndex1, nodeIndex2):
         return self.system.graph[nodeIndex1, nodeIndex2]

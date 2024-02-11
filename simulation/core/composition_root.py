@@ -44,8 +44,7 @@ class CompositionRoot:
                                                simulation=dependencies['simulation'],
                                                traverserFactory=TRAVERSERS[simulationInitInfo.traverserName],
                                                queue=self.__tasksQueue,
-                                               agentsNumber=self.__executorsManager.executorsNumber()
-                                               )
+                                               executorsManager=self.__executorsManager)
         self.__tasksScheduler = TasksScheduler(executorsManager=self.__executorsManager,
                                                queueOptimizer=self.__queueOptimizer)
 

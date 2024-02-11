@@ -32,7 +32,7 @@ class SimulatedAnnealingTraverser(TraverserBase):
         super().feedback(cost, collisions, timeInQueue, timeInPenalty, timeInTransition)
 
     def __performStateTransition(self):
-        if self._bestSequence is None:
+        if self._bestCost == -1:
             self._acceptCurrentSolution()
         else:
             if random.random() < self.__transitionProbability(currentEnergy=self._bestCost, newEnergy=self._currentCost):

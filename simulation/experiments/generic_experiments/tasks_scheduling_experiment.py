@@ -57,7 +57,7 @@ class RandomTasksScheduling:
         t2 = time.time()
         elapsedTime = t2-t1
         statisticsCollector.collect('time', elapsedTime)
-        statisticsCollector.collect('cost', res.queueView.cost)
+        statisticsCollector.collect('cost', res.queueView.cost())
         statisticsCollector.collect('collisions', res.statistics.collisions)
         statisticsCollector.collect('timeInQueue', res.statistics.timeInQueue)
         statisticsCollector.collect('timeInPenalty', res.statistics.timeInPenalty)

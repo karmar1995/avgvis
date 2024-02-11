@@ -56,6 +56,8 @@ class TcpClient:
             if exc.errno != errno.EAGAIN:
                 # Raise on unknown exception
                 raise
+        except OSError:
+            return True
         return False
 
     def addConnectionObserver(self, observer):

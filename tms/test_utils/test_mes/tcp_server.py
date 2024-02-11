@@ -1,4 +1,4 @@
-import threading, time, socket, sys
+import threading, time, socket, sys, random, select
 from mes_adapter.test_utils.test_data import getTestFrame
 
 
@@ -14,8 +14,6 @@ class TcpServer():
         self.__host = 'localhost'
         self.__interval = 1.0
         self.__killed = False
-        self.__workerThread = threading.Thread(target=self.__threadMain)
-        self.__workerThread.daemon = True
         self.__serverThread = threading.Thread(target=self.__serverMain)
         self.__serverThread.daemon = True
         self.__listener = listener
@@ -46,7 +44,6 @@ class TcpServer():
         return self.__interval
 
     def start(self):
-        self.__workerThread.start()
         self.__serverThread.start()
 
     def kill(self):
@@ -57,19 +54,27 @@ class TcpServer():
     def setSleepFunction(self, function):
         self.__sleepFunction = function
 
-    def __threadMain(self):
-        while not self.__killed:
-            global currentTask, sleeping
-            if len(self.__tasksLists) > 0 and currentTask == -1:
-                currentTask = self.__tasksLists.pop(0)
-                print("Sending task: {}".format(currentTask))
-                self.__listener.onMsg("Sending task: {}".format(currentTask))
-                sleeping = True
-                if self.__sleepFunction is None:
-                    time.sleep(self.__interval)
-                else:
-                    time.sleep(self.__sleepFunction(self.__interval))
-                sleeping = False
+    def __askForSend(self):
+        response = None
+        ready = select.select([self.__connection], [], [], 0)
+        if ready[0]:
+            response = self.__connection.recv(1024)
+
+        if response is not None:
+            decodedResponse = bytes.decode(response, encoding='ASCII')
+            return decodedResponse == "OK"
+        return False
+
+    def __askForAcceptedOrderId(self):
+        response = None
+        ready = select.select([self.__connection], [], [], 0)
+        if ready[0]:
+            response = self.__connection.recv(1024)
+
+        if response is not None:
+            decodedResponse = bytes.decode(response, encoding='ASCII')
+            return int(decodedResponse)
+        return -1
 
     def __serverMain(self):
         global currentTask, sleeping
@@ -80,13 +85,27 @@ class TcpServer():
             oldStdOut = sys.stdout
             sys.stdout = None
             try:
-                if not sleeping:
-                    self.__connection.sendall(getTestFrame())
-                    currentTask = -1
+                if len(self.__tasksLists) > 0:
+                    acceptedOrderId = -1
+                    orderId = random.choice(list(range(23, 32)))
+                    currentTask = self.__tasksLists.pop(0)
+                    readyToSend = self.__askForSend()
+                    while not readyToSend:
+                        readyToSend = self.__askForSend()
+                    oldStdOut.write("Sending task: {}\n".format(currentTask))
+                    frame = getTestFrame(orderId)
+                    self.__connection.send(frame)
+                    while acceptedOrderId != orderId:
+                        acceptedOrderId = self.__askForAcceptedOrderId()
+                        time.sleep(0.1)
+                    time.sleep(0.1)
                 else:
                     self.__connection.sendall(bytes())
                 sys.stdout = oldStdOut
-                time.sleep(0.5)
+                # if self.__sleepFunction is None:
+                #     time.sleep(self.__interval)
+                # else:
+                #     time.sleep(self.__sleepFunction(self.__interval))
             except Exception:
                 sys.stdout = oldStdOut
 

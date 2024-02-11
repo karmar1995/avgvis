@@ -23,36 +23,36 @@ class Agent:
         timeInQueue = 0
         timeInPenalty = 0
         timeInTransition = 0
+        penaltyTime = 200
         while i <= len(tasks):
             task = tasks[i-1]
 
             if self.currentNode is not None and self.currentNode.index != task.source():
-                # collisions
                 sourceNode = self.traverser.node(task.source())
-                self.currentNode.addAgentLeavingNode(self)
-                agents = sourceNode.getAgentsLeavingNode()
-                penaltyTime = 200
-
-                for agentId in agents:
-                    if agents[agentId].nextNode.index == self.currentNode.index:
-                        beforePenalty = self.env.now
-                        yield self.env.timeout(transitionTimeout(penaltyTime))
-                        collisions += 1
-                        timeInPenalty += (self.env.now - beforePenalty)
-                        break
-
-                self.currentNode.removeAgentLeavingNode(self)
-                # end of - collisions
 
                 beforeTransit = self.env.now
                 path = self.traverser.pathBetweenNodes(self.currentNode, sourceNode)
                 i = 1
+                transitCollisionTime = 0
                 while i < len(path):
                     transitionTime = self.traverser.transitionTime(path[i - 1], path[i])
+                    agents = self.traverser.edgeAgents(path[i - 1], path[i])
+                    agents[id(self)] = self
+                    for agentId in agents:
+                        if agentId != id(self):
+                            beforePenalty = self.env.now
+                            yield self.env.timeout(transitionTimeout(penaltyTime))
+                            collisions += 1
+                            timeInPenalty += (self.env.now - beforePenalty)
+                            transitCollisionTime += (self.env.now - beforePenalty)
+                            break
+
                     yield self.env.timeout(transitionTimeout(transitionTime))
+                    del agents[id(self)]
                     i += 1
+
                 afterTransit = self.env.now
-                timeInTransition += afterTransit - beforeTransit
+                timeInTransition += afterTransit - beforeTransit - transitCollisionTime
 
             self.currentNode = self.traverser.node(task.source())
             self.nextNode = self.traverser.node(task.destination())
@@ -66,31 +66,29 @@ class Agent:
             currentNodeLeaving = self.env.now
             timeInQueue += currentNodeLeaving - currentNodeEnter
 
-            # collisions
-            self.currentNode.addAgentLeavingNode(self)
-            agents = self.nextNode.getAgentsLeavingNode()
-            penaltyTime = 200
-
-            for agentId in agents:
-                if agents[agentId].nextNode.index == self.currentNode.index:
-                    beforePenalty = self.env.now
-                    yield self.env.timeout(transitionTimeout(penaltyTime))
-                    collisions += 1
-                    timeInPenalty += (self.env.now - beforePenalty)
-                    break
-
-            self.currentNode.removeAgentLeavingNode(self)
-            # end of - collisions
-
             beforeTransit = self.env.now
             path = self.traverser.pathBetweenNodes(self.currentNode, self.nextNode)
             i = 1
+            transitCollisionTime = 0
             while i < len(path):
                 transitionTime = self.traverser.transitionTime(path[i - 1], path[i])
+                agents = self.traverser.edgeAgents(path[i - 1], path[i])
+                agents[id(self)] = self
+                for agentId in agents:
+                    if agentId != id(self):
+                        beforePenalty = self.env.now
+                        yield self.env.timeout(transitionTimeout(penaltyTime))
+                        collisions += 1
+                        timeInPenalty += (self.env.now - beforePenalty)
+                        transitCollisionTime += (self.env.now - beforePenalty)
+                        break
+
                 yield self.env.timeout(transitionTimeout(transitionTime))
+                del agents[id(self)]
                 i += 1
+
             afterTransit = self.env.now
-            timeInTransition += afterTransit - beforeTransit
+            timeInTransition += afterTransit - beforeTransit - transitCollisionTime
 
             nextNodeEnterTime = self.env.now
             self.nextNode.onEnqueue()

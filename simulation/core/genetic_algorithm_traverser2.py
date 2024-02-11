@@ -1,14 +1,17 @@
 from simulation.core.traverser_base import *
 
 
-DEFAULT_POOL_SIZE = 80
+DEFAULT_POOL_SIZE = 120
 MUTATION_PROBABILITY = 0.15
 
 
 class Genome:
     def __init__(self, tasks):
         if tasks is None:
-            raise RuntimeError("Invalid tasks sequence")
+            raise RuntimeError("Invalid tasks sequence - None")
+        if len(tasks) == 0:
+            raise RuntimeError("Invalid tasks sequence - empty list")
+
         self.tasks = tasks
         self.cost = 0
 
@@ -51,18 +54,16 @@ class GeneticAlgorithmTraverser(TraverserBase):
         self.__generateGenes()
 
     def __calculatePoolSize(self, sequenceLength):
-        prefferedSize = int(sequenceLength / 2)
-        if prefferedSize % 4 == 0:
-            return max(DEFAULT_POOL_SIZE, prefferedSize)
         return DEFAULT_POOL_SIZE
 
     def __generateGenes(self):
-        for i in range(0, self.__genePoolSize):
+        self._genes.append(Genome(self._currentSequence))
+        for i in range(0, self.__genePoolSize-1):
             self._genes.append(Genome(random.sample(self._currentSequence, k=len(self._currentSequence))))
 
     def nextIteration(self):
         self._genes[self.__currentGene].cost = self._currentCost
-        if self._bestSequence is None or self._bestCost > self._currentCost:
+        if self._bestCost == -1 or self._bestCost > self._currentCost:
             self._acceptCurrentSolution()
 
         self.__currentGene += 1
@@ -73,7 +74,7 @@ class GeneticAlgorithmTraverser(TraverserBase):
             self.__crossover()
             l2 = len(self._genes)
             if l1 != l2:
-                raise Exception("Genes bool broken")
+                raise Exception("Genes pool broken")
             self.__currentGene = 0
 
         self._currentSequence = self._genes[self.__currentGene].tasks

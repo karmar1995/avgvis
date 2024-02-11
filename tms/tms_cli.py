@@ -11,10 +11,7 @@ class CliQueueObserver(QueueObserver):
 
     def probeQueueState(self, queue, executorsViews, timePoint):
         global logger
-        tasksInProgress = 0
-        for executorView in executorsViews:
-            tasksInProgress += (executorView.tasksCount() / 2)
-        qlen = len(queue) + tasksInProgress
+        qlen = len(queue.tasksList()) + len(queue.pendingTasksList())
         self.__qlens.append({'time': round(timePoint, 2), 'qlen': qlen})
         if len(self.__qlens) > 100:
             self.save()
