@@ -16,3 +16,5 @@ class Task:
     def __str__(self):
         return "{}: [{}, {}]".format(self.__taskNumber, self.__source, self.__destination)
 
+    def pointsSequence(self):
+        return [self.source(), self.destination()]

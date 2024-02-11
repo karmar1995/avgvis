@@ -15,5 +15,9 @@ class System:
     def edgeWeight(self, source, destination):
         return self.graph[source, destination]
 
+    def edgeAgents(self, source, destination):
+        edge = self.graph.es[self.graph.get_eid(source, destination)]
+        return edge['agents']
+
     def nodesCount(self):
         return len(self.graph.vs)

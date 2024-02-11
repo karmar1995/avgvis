@@ -18,7 +18,7 @@ class FakeAgv:
 
     def __processingThread(self):
         print("AGV: {} heading to: {}".format(self.agvId, self.__headingToLocation))
-        time.sleep(1)
+        time.sleep(random.gauss(10))
         self.location = self.__headingToLocation
         self.__workingThread = None
 

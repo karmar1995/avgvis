@@ -7,7 +7,7 @@ def generateRandomTask(nodesNumber):
     n2 = random.randint(0, nodesNumber - 1)
     while n1 == n2:
         n2 = random.randint(0, nodesNumber - 1)
-    return Task(source=n1, destination=n2)
+    return Task(source=n1, destination=n2, taskNumber=1)
 
 
 def generateTasksQueue(len, nodesNumber):

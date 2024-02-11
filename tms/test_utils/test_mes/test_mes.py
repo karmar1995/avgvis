@@ -67,6 +67,7 @@ class TestMes:
         self.__startServer(None)
         while len(self.__server.tasks()) > 0:
             time.sleep(1)
+        time.sleep(10)
 
 
     def __exit(self, args):

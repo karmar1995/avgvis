@@ -7,11 +7,7 @@ class JobExecutorsManager:
     def __init__(self, taskExecutorsManager : TasksExecutorManager):
         self.__executors = dict()
         self.__taskExecutorsManager = taskExecutorsManager
-        self.__tasksScheduler = None
         self.__taskExecutorsManager.addTasksExecutorObserver(self)
-
-    def setTasksScheduler(self, scheduler):
-        self.__tasksScheduler = scheduler
 
     def createExecutors(self):
         self.__executors = dict()

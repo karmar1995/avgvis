@@ -20,6 +20,7 @@ class MesFrameParser:
             frameData = genericFrameParser.parse(self.__data).data
             return FrameParser(Frame5000Description()).parse(frameData)
         except Exception as e:
+            print(e)
             return Frame().addField('productionOrderId', -1)
 
     def __validate(self, totalLength):

@@ -12,8 +12,7 @@ class AgvTaskExecutor(TaskExecutor):
     def execute(self, task):
         print("Requesting: {} go to point: {}".format(self.__agvId, task))
         self.__agvControllerClient.requestGoToPoints(self.__agvId, [task])
-        agvLoc = self.__agvControllerClient.requestAgvStatus(self.__agvId).location
-        while agvLoc != str(task):
+        while self.__agvControllerClient.requestAgvStatus(self.__agvId).location != str(task):
             time.sleep(1)
 
     def getId(self):

@@ -8,19 +8,40 @@ class AGV:
     name: str
     tasks: list
 
+@dataclass
+class TaskView:
+    number: str
+    state: str
+
 
 class WebQueueObserver(QueueObserver):
     def __init__(self):
         self.agvs = []
         self.tasks = []
+        self.pendingTasks = []
+        self.cost = 0
+        self.length = 0
 
     def probeQueueState(self, queue, executorsViews, timePoint):
-        self.tasks = []
-        self.agvs = []
+        self.reset()
+        if queue.cost() != -1:
+            self.cost = str(round(queue.cost()))
+        else:
+            self.cost = "Never"
         for executorView in executorsViews:
             self.agvs.append(AGV(executorView.executorId(), executorView.tasksSequence()))
-        for task in queue:
-            self.tasks.append(task.taskNumber())
+        for task in queue.tasksList():
+            self.tasks.append(TaskView(task.taskNumber(), "optimized"))
+        for task in queue.pendingTasksList():
+            self.tasks.append(TaskView(task.taskNumber(), "pending"))
+        self.length = len(self.tasks)
+
+    def reset(self):
+        self.agvs = []
+        self.tasks = []
+        self.pendingTasks = []
+        self.cost = 0
+        self.length = 0
 
 
 class WebTms:
@@ -106,4 +127,6 @@ def run():
                            mesConnectionString=mesConnectionString,
                            agvHubConnectionString=agvHubConnectionString,
                            tasksQueue=tms.queueObserver.tasks,
-                           agvs=tms.queueObserver.agvs)
+                           agvs=tms.queueObserver.agvs,
+                           cost=tms.queueObserver.cost,
+                           length=tms.queueObserver.length)

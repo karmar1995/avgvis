@@ -1,6 +1,6 @@
 import threading, time, copy
 from dataclasses import dataclass
-from simulation.core.composition_root import CompositionRoot as SimulationRoot
+from simulation.core.composition_root import CompositionRoot as SimulationRoot, SimulationInitInfo
 from simulation.simpy_adapter.composition_root import CompositionRoot as SimpyRoot
 from mes_adapter.composition_root import CompositionRoot as MesRoot, MesCompositionRootInitInfo
 from agv_adapter.composition_root import CompositionRoot as AgvRoot
@@ -27,10 +27,10 @@ class TmsInitInfo:
 
 
 class QueueObservingThread:
-    def __init__(self, queue, executorsManager, queueObserver):
+    def __init__(self, queueView, executorsManager, queueObserver):
         self.__working = False
         self.__thread = None
-        self.__queue = queue
+        self.__queueView = queueView
         self.__queueObserver = queueObserver
         self.__executorsManager = executorsManager
 
@@ -49,7 +49,7 @@ class QueueObservingThread:
         timePoint = 0
         interval = 1
         while self.__working:
-            self.__queueObserver.probeQueueState(copy.deepcopy(self.__queue), self.__executorsManager.executorsViews(), timePoint)
+            self.__queueObserver.probeQueueState(self.__queueView, self.__executorsManager.executorsViews(), timePoint)
             time.sleep(interval)
             timePoint += interval
 
@@ -76,14 +76,15 @@ class CompositionRoot:
             'simulation': self.__simpyRoot.simulation,
             'taskExecutorsManager': self.__agvRoot.executorsManager()
         }
-        self.__simulationRoot.initialize(dependencies, topologyBuilder)
+        simulationInitInfo = SimulationInitInfo(traverserName='geneticAlgorithm')
+        self.__simulationRoot.initialize(dependencies, topologyBuilder, simulationInitInfo)
         mesInitInfo = MesCompositionRootInitInfo(dependencies={
             'mesDataSource': self.__networkSenderFactory(host=tmsInitInfo.mesIp, port=tmsInitInfo.mesPort),
             'tasksQueue': self.__simulationRoot.tasksQueue(),
             'configuration': mesMappingStorage
         })
         self.__mesRoot.initialize(mesInitInfo)
-        self.__queueObservingThread = QueueObservingThread(self.__simulationRoot.tasksScheduler().tasks(), self.__simulationRoot.executorsManager(), tmsInitInfo.queueObserver)
+        self.__queueObservingThread = QueueObservingThread(self.__simulationRoot.tasksQueue().queueView(), self.__simulationRoot.executorsManager(), tmsInitInfo.queueObserver)
 
     def start(self):
         self.__mesRoot.start()
