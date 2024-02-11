@@ -37,15 +37,24 @@ class SignalHandler:
 logger = Logger("tms_log.txt")
 mesConnectionString = sys.argv[1].split(':')
 mesIp, mesPort = mesConnectionString[0], int(mesConnectionString[1])
-agvControllerConnectionString = sys.argv[2].split(':')
+simulationMesConnectionString = sys.argv[2].split(':')
+simulationMesIp, simulationMesPort = simulationMesConnectionString[0], int(simulationMesConnectionString[1])
+agvControllerConnectionString = sys.argv[3].split(':')
 agvControllerIp, agvControllerPort = agvControllerConnectionString[0], int(agvControllerConnectionString[1])
 
 qlensObserver = CliQueueObserver('qlens.csv')
 sigIntHandler = SignalHandler()
-logger.logLine("Starting TMS with MES: {}:{} and AGV controller: {}:{}".format(mesIp, mesPort, agvControllerIp, agvControllerPort))
-initInfo = TmsInitInfo(topologyDescriptionPath=sys.argv[3], mesIp=mesIp, mesPort=mesPort,
-                       mesTasksMappingPath=sys.argv[4], agvControllerIp=agvControllerIp,
-                       agvControllerPort=agvControllerPort, queueObserver=qlensObserver)
+logger.logLine("Starting TMS with MES: {}:{}, simulation MES: {}:{} and AGV controller: {}:{}".format(
+    mesIp,
+    mesPort,
+    simulationMesIp,
+    simulationMesPort,
+    agvControllerIp,
+    agvControllerPort))
+initInfo = TmsInitInfo(topologyDescriptionPath=sys.argv[4], mesIp=mesIp, mesPort=mesPort,
+                       mesTasksMappingPath=sys.argv[5], agvControllerIp=agvControllerIp,
+                       agvControllerPort=agvControllerPort, queueObserver=qlensObserver,
+                       simulationMesIp=simulationMesIp, simulationMesPort=simulationMesPort)
 tmsRoot = CompositionRoot()
 tmsRoot.initialize(tmsInitInfo=initInfo)
 tmsRoot.start()

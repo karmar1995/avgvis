@@ -1,15 +1,16 @@
 import threading, time
+from mes_adapter.request_parser import *
 from mes_adapter.frame_parser import MesFrameParser
 from mes_adapter.tasks_source import MesTasksSource
 
 
 class MesClient:
 
-    def __init__(self, mesDataSource, tasksSource: MesTasksSource):
+    def __init__(self, mesDataSource, tasksSource: MesTasksSource, dataParser: RequestParser):
         self.__mesDataSource = mesDataSource
-        self.__frameParser = MesFrameParser()
         self.__pollingThread = None
         self.__running = True
+        self.__requestParser = dataParser
         self.__tasksSource = tasksSource
         self.__createThread()
 
@@ -25,12 +26,13 @@ class MesClient:
                     time.sleep(5)
                     if not self.__running: # TMS killed in the meantime
                         break
-                self.__mesDataSource.sendDataToServer(bytes("OK",encoding='ASCII'))
+                self.__mesDataSource.sendDataToServer(bytes("OK", encoding='ASCII'))
                 data = self.__mesDataSource.readDataFromServer()
                 if data is not None:
-                    frame = self.__frameParser.onFrameReceived(data)
-                    self.__tasksSource.handleRequest(frame.productionOrderId)
-                    confirmation = bytes(str(frame.productionOrderId),encoding='ASCII')
+                    productionOrderId = self.__requestParser.parse(data).orderId
+                    print("Received: {}".format(productionOrderId))
+                    self.__tasksSource.handleRequest(productionOrderId)
+                    confirmation = bytes(str(productionOrderId), encoding='ASCII')
                     self.__mesDataSource.sendDataToServer(confirmation)
                 time.sleep(1)
             except ConnectionRefusedError as e:

@@ -1,4 +1,5 @@
 from frames_utils.frame import *
+from mes_adapter.request_parser import *
 
 
 class MesFrameBuilder(FrameBuilder):
@@ -6,22 +7,23 @@ class MesFrameBuilder(FrameBuilder):
         super().__init__(GenericFrameDescription())
 
 
-class MesFrameParser:
+class MesFrameParser(RequestParser):
     def __init__(self):
         self.__data = None
 
-    def onFrameReceived(self, frame):
-        self.__data = frame
+    def parse(self, data):
+        self.__data = data
         return self.__parse()
 
     def __parse(self):
         try:
             genericFrameParser = FrameParser(GenericFrameDescription())
             frameData = genericFrameParser.parse(self.__data).data
-            return FrameParser(Frame5000Description()).parse(frameData)
+            frame = FrameParser(Frame5000Description()).parse(frameData)
+            return MesRequest(orderId=frame.productionOrderId)
         except Exception as e:
             print(e)
-            return Frame().addField('productionOrderId', -1)
+            return MesRequest(orderId=-1)
 
     def __validate(self, totalLength):
         pass

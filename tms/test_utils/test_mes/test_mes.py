@@ -3,6 +3,7 @@ from tms.test_utils.test_mes.utils import MES_PROMPT
 from tms.test_utils.test_mes.tcp_server import TcpServer
 from tms.test_utils.logger import Logger
 from tms.test_utils.sleepTimeFunction import sleepFunction
+from tms.test_utils.test_mes.data_formatters import *
 
 
 class ServerListener:
@@ -53,7 +54,7 @@ class TestMes:
                 if cmd == 'monitor':
                     self.__serverListener.activate()
 
-    def runBatchMode(self, connectionString, interval, tasksNumber):
+    def runBatchMode(self, connectionString, interval, tasksNumber, mode):
         self.__serverListener.logger.logLine("Running batch mode on : {} with interval: {} and tasksNumber: {}".format(connectionString, interval, tasksNumber))
         self.__batchMode = True
         self.__serverListener.activate()
@@ -64,6 +65,12 @@ class TestMes:
         self.__server.setPort(int(tmp[1]))
         self.__server.setInterval(float(interval))
         self.__server.addTasks(list(range(0, int(tasksNumber))))
+        if mode == 'binary':
+            self.__server.setDataFormatter(BinaryFormatter())
+        elif mode == 'json':
+            self.__server.setDataFormatter(JsonFormatter())
+        else:
+            raise Exception("Unknown mode!: {}, use either: {} or {}".format(mode, 'binary', 'json'))
         self.__startServer(None)
         while len(self.__server.tasks()) > 0:
             time.sleep(1)
@@ -105,4 +112,8 @@ mes = TestMes()
 if len(sys.argv) == 1:
     mes.run()
 else:
-    mes.runBatchMode(sys.argv[1], sys.argv[2], sys.argv[3])
+    if len(sys.argv) > 4:
+        mode = sys.argv[4]
+    else:
+        mode = 'binary'
+    mes.runBatchMode(sys.argv[1], sys.argv[2], sys.argv[3], mode)

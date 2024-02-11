@@ -1,5 +1,4 @@
 import threading, time, socket, sys, random, select
-from mes_adapter.test_utils.test_data import getTestFrame
 
 
 currentTask = -2
@@ -21,6 +20,10 @@ class TcpServer():
         self.__sleepFunction = None
         self.__socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         self.__connection = None
+        self.__dataFormatter = None
+
+    def setDataFormatter(self, formatter):
+        self.__dataFormatter = formatter
 
     def tasks(self):
         return self.__tasksLists
@@ -93,7 +96,8 @@ class TcpServer():
                     while not readyToSend:
                         readyToSend = self.__askForSend()
                     oldStdOut.write("Sending task: {}\n".format(currentTask))
-                    frame = getTestFrame(orderId)
+                    frame = self.__dataFormatter.getDataToSend(orderId)
+                    oldStdOut.write("{}\n".format(frame))
                     self.__connection.send(frame)
                     while acceptedOrderId != orderId:
                         acceptedOrderId = self.__askForAcceptedOrderId()
@@ -106,6 +110,7 @@ class TcpServer():
                 #     time.sleep(self.__interval)
                 # else:
                 #     time.sleep(self.__sleepFunction(self.__interval))
-            except Exception:
+            except Exception as e:
                 sys.stdout = oldStdOut
+                print(str(e))
 

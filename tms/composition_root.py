@@ -18,6 +18,8 @@ class QueueObserver:
 @dataclass
 class TmsInitInfo:
     topologyDescriptionPath: str
+    simulationMesIp: str
+    simulationMesPort: int
     mesIp: str
     mesPort: int
     mesTasksMappingPath: str
@@ -80,6 +82,7 @@ class CompositionRoot:
         self.__simulationRoot.initialize(dependencies, topologyBuilder, simulationInitInfo)
         mesInitInfo = MesCompositionRootInitInfo(dependencies={
             'mesDataSource': self.__networkSenderFactory(host=tmsInitInfo.mesIp, port=tmsInitInfo.mesPort),
+            'simulationDataSource': self.__networkSenderFactory(host=tmsInitInfo.simulationMesIp, port=tmsInitInfo.simulationMesPort),
             'tasksQueue': self.__simulationRoot.tasksQueue(),
             'configuration': mesMappingStorage
         })
@@ -98,7 +101,10 @@ class CompositionRoot:
         self.__queueObservingThread.shutdown()
 
     def isMesConnected(self):
-        return self.__mesRoot.isConnected()
+        return self.__mesRoot.isMesConnected()
+
+    def isSimulationMesConnected(self):
+        return self.__mesRoot.isSimulationMesConnected()
 
     def isAgvHubConnected(self):
         return self.__agvRoot.isConnected()

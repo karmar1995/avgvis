@@ -72,6 +72,14 @@ class WebTms:
             return "Connected"
         return "Disconnected"
 
+    def simulationMesStatus(self):
+        connected = False
+        if self.__tms:
+            connected = self.__tms.isSimulationMesConnected()
+        if connected:
+            return "Connected"
+        return "Disconnected"
+
     def agvHubStatus(self):
         if self.__tms and self.__tms.isAgvHubConnected():
             return "Connected"
@@ -108,11 +116,13 @@ def run():
                     topologyDescriptionFile = getFileFromRequest(request, 'graphDescription', graphFile)
                     mesMappingFile = getFileFromRequest(request, 'mesMappingFile', mesMappingFile)
                     mesConnectionString = request.form.get('mesConnectionString').split(':')
+                    simulationMesConnectionString = request.form.get('simulationMesConnectionString').split(':')
                     agvHubConnectionString = request.form.get('agvHubConnectionString').split(':')
                     tmsInitInfo = TmsInitInfo(topologyDescriptionPath=topologyDescriptionFile,
                                               mesIp=mesConnectionString[0], mesPort=int(mesConnectionString[1]),
                                               agvControllerIp=agvHubConnectionString[0], agvControllerPort=int(agvHubConnectionString[1]),
-                                              mesTasksMappingPath=mesMappingFile, queueObserver=tms.queueObserver)
+                                              mesTasksMappingPath=mesMappingFile, queueObserver=tms.queueObserver,
+                                              simulationMesIp=simulationMesConnectionString[0], simulationMesPort=int(simulationMesConnectionString[1]),)
                     tms.start(tmsInitInfo)
 
     if tms.tmsInitInfo is None:
@@ -120,12 +130,15 @@ def run():
 
     mesConnectionString = "{}:{}".format(tms.tmsInitInfo.mesIp, tms.tmsInitInfo.mesPort)
     agvHubConnectionString = "{}:{}".format(tms.tmsInitInfo.agvControllerIp, tms.tmsInitInfo.agvControllerPort)
+    simulationMesConnectionString = "{}:{}".format(tms.tmsInitInfo.simulationMesIp, tms.tmsInitInfo.simulationMesPort)
 
     return render_template('tms.html',
                            mesStatus=tms.mesStatus(),
+                           simulationMesStatus=tms.simulationMesStatus(),
                            agvHubStatus=tms.agvHubStatus(),
                            mesConnectionString=mesConnectionString,
                            agvHubConnectionString=agvHubConnectionString,
+                           simulationMesConnectionString=simulationMesConnectionString,
                            tasksQueue=tms.queueObserver.tasks,
                            agvs=tms.queueObserver.agvs,
                            cost=tms.queueObserver.cost,
