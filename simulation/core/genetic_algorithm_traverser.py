@@ -1,8 +1,19 @@
 from simulation.core.traverser_base import *
+from simulation.core.task import Task
 
 
 DEFAULT_POOL_SIZE = 120
 MUTATION_PROBABILITY = 0.15
+
+
+def sequenceHistogram(sequence):
+    res = {}
+    for task in sequence:
+        if task.taskNumber() in res:
+            res[task.taskNumber()] += 1
+        else:
+            res[task.taskNumber()] = 1
+    return res
 
 
 class Genome:
@@ -16,26 +27,70 @@ class Genome:
         self.cost = 0
 
     def crossover(self, other):
-        l1 = int(len(self.tasks) / 2)
-        l2 = int(len(other.tasks) / 2)
-        selfLowerHalf = copy.deepcopy(self.tasks[0: l1])
-        selfUpperHalf = copy.deepcopy(self.tasks[l1:])
-        otherLowerHalf = copy.deepcopy(other.tasks[0: l2])
-        otherUpperHalf = copy.deepcopy(other.tasks[l2:])
+        return self.__davisCrossover(other), other.__davisCrossover(self)
 
-        selfLowerHalf.extend(otherUpperHalf)
-        otherLowerHalf.extend(selfUpperHalf)
-        return Genome(selfLowerHalf), Genome(otherLowerHalf)
+    def __davisCrossover(self, other):
+        p1 = random.randint(0, len(self.tasks)-1)
+        p2 = random.randint(0, len(self.tasks)-1)
+        if p1 > p2:
+            p1, p2 = p2, p1
 
-    def mutate(self):
+        child = []
+        for i in range(0, len(self.tasks)):
+            child.append(Task(-1, -1, -1))
+
+        for i in range(p1, p2):
+            child[i] = self.tasks[i]
+
+        originalHistogram = sequenceHistogram(self.tasks)
+
+        def processSecondParentElementsForRange(start, stop):
+            for i in range(start, stop):
+                currentChildHistogram = sequenceHistogram(child)
+                for j in range(0, len(other.tasks)):
+                    index = i + j
+                    if index >= len(other.tasks):
+                        index -= len(other.tasks)
+                    t = other.tasks[index]
+                    if t.taskNumber() in currentChildHistogram and originalHistogram[t.taskNumber()] == currentChildHistogram[t.taskNumber()]:
+                        continue
+                    else:
+                        child[i] = t
+                        break
+
+        processSecondParentElementsForRange(p2, len(child))
+        processSecondParentElementsForRange(0, p1)
+        return Genome(child)
+
+    def mutate(self, sequence):
         if random.random() < MUTATION_PROBABILITY:
+            self.validate(sequence)
             self.tasks = copy.deepcopy(self.tasks)
             pos1 = random.randint(0, len(self.tasks)-1)
             pos2 = random.randint(0, len(self.tasks)-1)
             self.tasks[pos1], self.tasks[pos2] = self.tasks[pos2], self.tasks[pos1]
+            self.validate(sequence)
 
     def reset(self):
         self.cost = 0
+
+    def size(self):
+        return len(self.tasks)
+
+    def validate(self, sequence):
+        tmp = copy.deepcopy(sequence)
+        if self.size() != len(sequence):
+            raise Exception("Broken genome! Size: {}, expected size: {}".format(self.size(), len(sequence)))
+        for task in self.tasks:
+            index = -1
+            for i in range(0, len(tmp)):
+                if task.taskNumber() == tmp[i].taskNumber():
+                    index = i
+                    break
+            if index == -1:
+                raise Exception("Broken genome! Missing item: {}".format(task.taskNumber()))
+            else:
+                tmp.pop(index)
 
     def __lt__(self, other):
         return self.cost < other.cost
@@ -52,14 +107,19 @@ class GeneticAlgorithmTraverser(TraverserBase):
         super().assignSequence(sequence)
         self.__genePoolSize = self.__calculatePoolSize(len(sequence))
         self.__generateGenes()
+        self.__currentGene = 0
 
     def __calculatePoolSize(self, sequenceLength):
         return DEFAULT_POOL_SIZE
 
     def __generateGenes(self):
-        self._genes.append(Genome(self._currentSequence))
+        g = Genome(self._currentSequence)
+        self._genes.append(g)
+        g.validate(self._initialSequence)
         for i in range(0, self.__genePoolSize-1):
-            self._genes.append(Genome(random.sample(self._currentSequence, k=len(self._currentSequence))))
+            g = Genome(random.sample(self._currentSequence, k=len(self._currentSequence)))
+            g.validate(self._initialSequence)
+            self._genes.append(g)
 
     def nextIteration(self):
         self._genes[self.__currentGene].cost = self._currentCost
@@ -94,6 +154,10 @@ class GeneticAlgorithmTraverser(TraverserBase):
             newGenom1, newGenom2 = genom1.crossover(genom2)
             genom1.reset()
             genom2.reset()
+            newGenom1.validate(self._initialSequence)
+            newGenom2.validate(self._initialSequence)
+            genom1.validate(self._initialSequence)
+            genom2.validate(self._initialSequence)
             newGenes.append(newGenom1)
             newGenes.append(newGenom2)
             newGenes.append(genom1)
@@ -102,7 +166,7 @@ class GeneticAlgorithmTraverser(TraverserBase):
 
     def __mutate(self):
         for genome in self._genes:
-            genome.mutate()
+            genome.mutate(self._initialSequence)
 
     def __depopulate(self):
         self.__validatePool()

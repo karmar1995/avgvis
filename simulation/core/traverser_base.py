@@ -20,6 +20,7 @@ class TraverserBase:
         self._currentCost = 0
         self._currentStatistics = None
         self._tmpSequence = None
+        self._initialSequence = []
 
     def assignSequence(self, sequence):
         self._bestCost = -1
@@ -28,6 +29,7 @@ class TraverserBase:
         self._currentSequence = copy.deepcopy(sequence)
         self._tmpSequence = copy.deepcopy(sequence)
         self._currentStatistics = TraverserStatistics(0, 0, 0, 0)
+        self._initialSequence = copy.deepcopy(sequence)
 
     def feedback(self, cost, collisions, timeInQueue, timeInPenalty, timeInTransition):
         self._currentCost += cost
@@ -70,6 +72,8 @@ class TraverserBase:
         return self._bestCost
 
     def _acceptCurrentSolution(self):
+        if len(self._currentSequence) != len(self._initialSequence):
+            raise Exception("Accept current solution breaks queue, old: {}, new: {}".format(len(self._initialSequence), len(self._currentSequence)))
         self._bestCost = self._currentCost
         self._bestSequence = copy.deepcopy(self._currentSequence)
         self._bestStatistics = copy.deepcopy(self._currentStatistics)

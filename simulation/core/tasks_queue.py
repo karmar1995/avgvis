@@ -21,45 +21,44 @@ class TasksQueue:
         self.__pendingTasks = list()
         self.__cost = -1
         self.__lock = threading.Lock()
-        self.__pendingLock = threading.Lock()
 
     def enqueue(self, task):
-        if self.__lock.acquire(blocking=False):
-            print("Enqueue: {}".format(task))
-            self.__queue.append(task)
-            self.__lock.release()
-        else:
-            self.__pendingLock.acquire()
+        with self.__lock:
             print("Enqueue pending: {}".format(task))
             self.__pendingTasks.append(task)
-            self.__pendingLock.release()
 
     def batchEnqueue(self, tasks):
-        if self.__lock.acquire(blocking=False):
-            print("Enqueue: {}".format(tasks))
-            self.__queue.extend(tasks)
-            self.__lock.release()
-        else:
+        with self.__lock:
             print("Enqueue pending: {}".format(tasks))
-            self.__pendingLock.acquire()
             self.__pendingTasks.extend(tasks)
-            self.__pendingLock.release()
 
     def onOptimizationStart(self):
-        self.__lock.acquire()
-        print("Optimizing queue start")
+        with self.__lock:
+            self.__queue.extend(self.__pendingTasks)
+            self.__pendingTasks = list()
 
     def onOptimizationFeedback(self, newSequence, cost):
+        self.__validateNewSequence(newSequence)
         self.__queue = newSequence
         self.__cost = cost
 
     def onOptimizationFinished(self):
-        self.__pendingLock.acquire()
-        self.__queue.extend(self.__pendingTasks)
-        self.__pendingTasks = list()
-        self.__pendingLock.release()
-        self.__lock.release()
         print("Optimizing queue finished")
+
+    def __validateNewSequence(self, newSequence):
+        if len(newSequence) != len(self.__queue):
+            raise Exception("Queue corruption during optimization, old: {}, new: {}".format(len(self.__queue), len(newSequence)))
+        tmp = copy.deepcopy(newSequence)
+        for task in self.__queue:
+            index = -1
+            for i in range(0, len(tmp)):
+                if task.taskNumber() == tmp[i].taskNumber():
+                    index = i
+                    break
+            if index == -1:
+                raise Exception("Queue corruption during optimization, missing item: {}".format(task.taskNumber()))
+            else:
+                tmp.pop(index)
 
     def tasksList(self):
         return copy.deepcopy(self.__queue)

@@ -84,13 +84,16 @@ class TcpServer():
         self.__socket.bind((self.__host, self.__port))
         self.__socket.listen(1)
         self.__connection, _ = self.__socket.accept()
+        tmp = []
         while not self.__killed:
             oldStdOut = sys.stdout
             sys.stdout = None
             try:
+                if len(tmp) == 0:
+                    tmp = list(range(23, 32))
                 if len(self.__tasksLists) > 0:
                     acceptedOrderId = -1
-                    orderId = random.choice(list(range(23, 32)))
+                    orderId = tmp.pop(0)
                     currentTask = self.__tasksLists.pop(0)
                     readyToSend = self.__askForSend()
                     while not readyToSend:
