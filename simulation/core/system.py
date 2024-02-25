@@ -1,7 +1,7 @@
 try:
     from igraph import Graph
 except ModuleNotFoundError:
-    print("Using graph mock")
+    print("Please install igraph module: python -m pip install igraph")
     from graph.graph import Graph
 
 
