@@ -103,7 +103,9 @@ def getFileFromRequest(request, filename, tmpFile):
     if file.filename == '':
         return ''
     tmpFileName = tmpFile.name
-    file.save(tmpFileName)
+    content = file.stream.read()
+    tmpFile.write(content)
+    tmpFile.flush()
     return tmpFileName
 
 
