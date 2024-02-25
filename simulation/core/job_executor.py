@@ -1,5 +1,5 @@
 from simulation.core.task_executor import TaskExecutor
-import threading
+import threading, time
 
 
 class JobExecutor:
@@ -43,7 +43,11 @@ class JobExecutor:
     def __executeJob(self):
         for i in range(0, len(self.__job)):
             self.__currentTask = i
-            self.__taskExecutor.execute(self.__job[self.__currentTask])
+            points = self.__job[self.__currentTask].pointsSequence()
+            path = self.__waitForFreePath(points[0], points[1])
+            for point in path:
+                self.__taskExecutor.execute(point)
+            self.__owner.trafficController().revokePath(path, self)
         self.__onJobFinished()
 
     def __onJobFinished(self):
@@ -52,6 +56,12 @@ class JobExecutor:
         self.__currentTask = 0
         self.__owner.onExecutorFinished()
 
+    def __waitForFreePath(self, source, destination):
+        path = self.__owner.trafficController().requestPath(source, destination, self)
+        while path is None:
+            path = self.__owner.trafficController().requestPath(source, destination, self)
+            time.sleep(1)
+        return path
 
 class JobExecutorView:
     def __init__(self, jobExecutor: JobExecutor):

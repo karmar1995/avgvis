@@ -6,6 +6,7 @@ from simulation.core.job_executors_manager import JobExecutorsManager
 from simulation.core.simulated_annealing_traverser import SimulatedAnnealingTraverser
 from simulation.core.genetic_algorithm_traverser import GeneticAlgorithmTraverser
 from simulation.core.queue_optimizer import QueueOptimizer
+from simulation.core.traffic_controller import TrafficController
 
 
 TRAVERSERS = {
@@ -27,13 +28,15 @@ class CompositionRoot:
         self.__tasksScheduler = None
         self.__executorsManager = None
         self.__queueOptimizer = None
+        self.__trafficController = None
 
     def initialize(self, dependencies, topologyBuilder, simulationInitInfo):
         systemBuilder = SystemBuilder()
         self.__tasksQueue = TasksQueue()
         topologyBuilder.build(systemBuilder)
         self.__system = systemBuilder.system()
-        self.__executorsManager = JobExecutorsManager(taskExecutorsManager=dependencies['taskExecutorsManager'])
+        self.__trafficController = TrafficController(self.__system)
+        self.__executorsManager = JobExecutorsManager(taskExecutorsManager=dependencies['taskExecutorsManager'], trafficController=self.__trafficController)
         self.__executorsManager.createExecutors()
         self.__queueOptimizer = QueueOptimizer(system=self.__system,
                                                agentsFactory=dependencies['agentsFactory'],
