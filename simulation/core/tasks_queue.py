@@ -24,12 +24,10 @@ class TasksQueue:
 
     def enqueue(self, task):
         with self.__lock:
-            print("Enqueue pending: {}".format(task))
             self.__pendingTasks.append(task)
 
     def batchEnqueue(self, tasks):
         with self.__lock:
-            print("Enqueue pending: {}".format(tasks))
             self.__pendingTasks.extend(tasks)
 
     def onOptimizationStart(self):
@@ -43,7 +41,7 @@ class TasksQueue:
         self.__cost = cost
 
     def onOptimizationFinished(self):
-        print("Optimizing queue finished")
+        pass
 
     def __validateNewSequence(self, newSequence):
         if len(newSequence) != len(self.__queue):

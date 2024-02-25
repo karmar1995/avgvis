@@ -37,9 +37,10 @@ class TcpClient:
     def connect(self):
         try:
             print("Connecting to {}:{}...".format(self.__host, self.__port), end='')
-            self.__socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-            self.__socket.connect((self.__host, self.__port))
+            tempSocket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+            tempSocket.connect((self.__host, self.__port))
             print("Connected")
+            self.__socket = tempSocket
         except ConnectionRefusedError:
             print("Cannot connect to: {}:{}".format(self.__host, self.__port))
             self.__socket = None
@@ -49,7 +50,8 @@ class TcpClient:
 
     def connectionClosed(self):
         try:
-            buf = self.__socket.recv(1, socket.MSG_PEEK | socket.MSG_DONTWAIT)
+            self.__socket.setblocking(False)
+            buf = self.__socket.recv(1, socket.MSG_PEEK)
             if buf == b'':
                 return True
         except BlockingIOError as exc:
@@ -58,6 +60,8 @@ class TcpClient:
                 raise
         except OSError:
             return True
+        finally:
+            self.__socket.setblocking(True)
         return False
 
     def addConnectionObserver(self, observer):
