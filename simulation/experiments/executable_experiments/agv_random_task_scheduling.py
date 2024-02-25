@@ -35,14 +35,14 @@ def run(tasksNumber, agvsNumber, stationsNumber, graphBuilderClass, subdirectory
 
     analyzerPerTraverser = dict()
 
-    resultsDir = '/home/kmarszal/Documents/dev/avgvis/simulation/experiments/results_tmp2/agv_random_task_scheduling/{}'.format(subdirectory)
+    resultsDir = '/home/kmarszal/Documents/dev/avgvis/simulation/experiments/results_tmp1/agv_random_task_scheduling/{}'.format(subdirectory)
     for traverserName in traverserNames:
         experimentCollector = ExperimentCollector(Logger())
         analyzerPerTraverser[traverserName] = ExperimentAnalyzer(experimentCollector)
 
         for iterations in range(1, 3000, 1000):
             experiment = RandomTasksScheduling(tasksQueue, agvsNumber, iterations, graphBuilder, traverserName)
-            Runner(experiment, experimentCollector.getRetriesCollector(iterations)).run(times=1)
+            Runner(experiment, experimentCollector.getRetriesCollector(iterations)).run(times=2)
 
         legend = {
             'Tasks number': tasksNumber,

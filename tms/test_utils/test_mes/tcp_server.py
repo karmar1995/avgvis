@@ -91,6 +91,7 @@ class TcpServer():
             try:
                 if len(tmp) == 0:
                     tmp = list(range(23, 32))
+                    random.shuffle(tmp)
                 if len(self.__tasksLists) > 0:
                     acceptedOrderId = -1
                     orderId = tmp.pop(0)

@@ -107,6 +107,61 @@ class ShortServiceTimeFullGraphBuilder:
                 systemBuilder.addEdge(Edge(name="unused", source=i, target=j, weight=random.uniform(10, 100)))
 
 
+class GraphWithIntermediatePointsBuilderBase:
+    def __init__(self, nodesNumber):
+        self._nodesNumber = nodesNumber
+        self._env = None
+        self._globalIndex = 0
+
+    def setEnvironment(self, env):
+        self._env = env
+        return self
+
+    def buildConnectionBetweenStations(self, systemBuilder, source, target, branches, branchLengthGenerator):
+        def intermediateEdgesWeight():
+            return 1
+        for _ in range(0, branches):
+            self.buildSingleBranchBetweenStations(systemBuilder, source, target, branchLengthGenerator(), intermediateEdgesWeight)
+
+    def buildSingleBranchBetweenStations(self, systemBuilder, source, target, branchLength, intermediateEdgesWeightGenerator):
+        i = 0
+        currentIndex = source
+        while i < branchLength:
+            systemBuilder.addVertex(Vertex(name="unused", node=Node(env=self._env, serviceTime=0, index=self._globalIndex)))
+            systemBuilder.addEdge(Edge(name="unused", source=currentIndex, target=self._globalIndex, weight=intermediateEdgesWeightGenerator()))
+            currentIndex = self._globalIndex
+            self._globalIndex += 1
+            i += 1
+        systemBuilder.addEdge(Edge(name="unused", source=currentIndex, target=target, weight=random.uniform(10, 100)))
+
+
+class ShortServiceTimeFullGraphWithBranchesBuilder(GraphWithIntermediatePointsBuilderBase):
+    branches = 3
+
+    def build(self, systemBuilder):
+        self._globalIndex = 0
+
+        def branchLengthGenerator():
+            return random.randint(3, 5)
+
+        n = self._nodesNumber
+        indices = []
+        for i in range(0, n):
+            systemBuilder.addVertex(Vertex(name="unused", node=Node(env=self._env, serviceTime=shortServiceTimeWeightsManager.getWeight(i), index=self._globalIndex)))
+            indices.append(self._globalIndex)
+            self._globalIndex += 1
+
+        connections = []
+        for i in indices:
+            for j in indices:
+                if j > i:
+                    connections.append((i, j))
+
+        for connection in connections:
+            self.buildConnectionBetweenStations(systemBuilder, connection[0], connection[1], ShortServiceTimeFullGraphWithBranchesBuilder.branches, branchLengthGenerator)
+
+
+
 class TreeGraphBuilder:
 
     def __init__(self, switches, hostsPerSwitch):
