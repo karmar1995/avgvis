@@ -54,7 +54,7 @@ class TraverserBase:
         return []
 
     def pathBetweenNodes(self, source, destination):
-        possiblePaths = self.system.graph.get_k_shortest_paths(source.index, destination.index, k=1)
+        possiblePaths = self.system.graph.get_k_shortest_paths(source.index, destination.index, k=3)
         return random.sample(possiblePaths, 1)[0]
 
     def node(self, index):
