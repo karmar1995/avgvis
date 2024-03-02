@@ -12,7 +12,7 @@ class FrameField:
 
 
 dataLengthByFrameId = {
-    5000: 32,
+    5000: 48,
     6000: 188,
     6100: 134
 }
@@ -55,6 +55,40 @@ class DtlDateTime:
         res.extend(self.second.to_bytes(1, byteorder))
         res.extend(self.millisecond.to_bytes(4, byteorder))
         return bytes(res)
+
+
+class ProductionOrderId:
+    def __init__(self, orderType,
+                 transportedGood,
+                 customerId,
+                 sourcePoint,
+                 destinationPoint,
+                 dayOfGeneration,
+                 monthOfGeneration,
+                 yearOfGeneration
+                 ):
+        self.orderType = orderType
+        self.transportedGood = transportedGood
+        self.customerId = customerId
+        self.sourcePoint = sourcePoint
+        self.destinationPoint = destinationPoint
+        self.dayOfGeneration = dayOfGeneration
+        self.monthOfGeneration = monthOfGeneration
+        self.yearOfGeneration = yearOfGeneration
+
+    @staticmethod
+    def from_bytes(_bytes, byteorder):
+        orderType = int.from_bytes(_bytes[0: 2], byteorder)
+        transportedGood = int.from_bytes(_bytes[2: 4], byteorder)
+        customerId = int.from_bytes(_bytes[4: 6], byteorder)
+        sourcePoint = int.from_bytes(_bytes[6: 8], byteorder)
+        destinationPoint = int.from_bytes(_bytes[8: 10], byteorder)
+        dayOfGeneration = int.from_bytes(_bytes[10:12], byteorder)
+        monthOfGeneration = int.from_bytes(_bytes[12:14], byteorder)
+        yearOfGeneration = int.from_bytes(_bytes[14:16], byteorder)
+        return ProductionOrderId(orderType, transportedGood, customerId, sourcePoint, destinationPoint,
+                           dayOfGeneration, monthOfGeneration, yearOfGeneration)
+
 
 
 class Frame:
@@ -149,7 +183,7 @@ class GenericFrameDescription(FrameDescription):
     numberField = FrameField(startingByte=20, length=2, type=int, endianStyle='big', name='number')
     versionField = FrameField(startingByte=22, length=2, type=int, endianStyle='big', name='version')
     lengthField = FrameField(startingByte=24, length=2, type=int, endianStyle='big', name='length')
-    dataField = FrameField(startingByte=28, length=VARIABLE_LENGTH_MARK, type=bytes, endianStyle='big', name='data')
+    dataField = FrameField(startingByte=26, length=VARIABLE_LENGTH_MARK, type=bytes, endianStyle='big', name='data')
     endingField = FrameField(startingByte=VARIABLE_LENGTH_MARK, length=3, type=int, endianStyle='big', name='ending')
 
     def __init__(self):
@@ -159,11 +193,11 @@ class GenericFrameDescription(FrameDescription):
 # communication direction: MES -> TMS
 class Frame5000Description(FrameDescription):
     timestampField = FrameField(startingByte=0, length=12, type=DtlDateTime, endianStyle='big', name='timestamp')
-    productionOrderIdField = FrameField(startingByte=12, length=2, type=int, endianStyle='big', name='productionOrderId')
-    orderPriorityField = FrameField(startingByte=14, length=2, type=int, endianStyle='big', name='orderPriority')
-    sourcePointIdField = FrameField(startingByte=16, length=2, type=int, endianStyle='big', name='sourcePointId')
-    destinationPointIdField = FrameField(startingByte=18, length=2, type=int, endianStyle='big', name='destinationPointId')
-    requiredOutputTimeField = FrameField(startingByte=20, length=12, type=DtlDateTime, endianStyle='big', name='requiredOutputTime')
+    productionOrderIdField = FrameField(startingByte=12, length=16, type=ProductionOrderId, endianStyle='big', name='productionOrderId')
+    orderPriorityField = FrameField(startingByte=28, length=2, type=int, endianStyle='big', name='orderPriority')
+    sourcePointIdField = FrameField(startingByte=30, length=2, type=int, endianStyle='big', name='sourcePointId')
+    destinationPointIdField = FrameField(startingByte=32, length=2, type=int, endianStyle='big', name='destinationPointId')
+    requiredOutputTimeField = FrameField(startingByte=34, length=12, type=DtlDateTime, endianStyle='big', name='requiredOutputTime')
 
     def __init__(self):
         super().__init__()

@@ -26,14 +26,13 @@ class MesClient:
                     time.sleep(5)
                     if not self.__running: # TMS killed in the meantime
                         break
-                self.__mesDataSource.sendDataToServer(bytes("OK", encoding='ASCII'))
+                self.__mesDataSource.sendDataToServer(bytes("TMS_READY", encoding='ASCII'))
+                print("Sending TMS Ready")
                 data = self.__mesDataSource.readDataFromServer()
                 if data is not None:
                     productionOrderId = self.__requestParser.parse(data).orderId
                     print("Received: {}".format(productionOrderId))
                     self.__tasksSource.handleRequest(productionOrderId)
-                    confirmation = bytes(str(productionOrderId), encoding='ASCII')
-                    self.__mesDataSource.sendDataToServer(confirmation)
                 time.sleep(1)
             except ConnectionRefusedError as e:
                 pass

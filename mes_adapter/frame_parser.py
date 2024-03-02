@@ -20,7 +20,7 @@ class MesFrameParser(RequestParser):
             genericFrameParser = FrameParser(GenericFrameDescription())
             frameData = genericFrameParser.parse(self.__data).data
             frame = FrameParser(Frame5000Description()).parse(frameData)
-            return MesRequest(orderId=frame.productionOrderId)
+            return MesRequest(orderId=frame.productionOrderId.orderType)
         except Exception as e:
             print(e)
             return MesRequest(orderId=-1)
