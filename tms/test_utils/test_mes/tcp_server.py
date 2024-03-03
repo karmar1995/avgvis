@@ -65,7 +65,7 @@ class TcpServer():
 
         if response is not None:
             decodedResponse = bytes.decode(response, encoding='ASCII')
-            return decodedResponse == "OK"
+            return decodedResponse == "TMS_READY"
         return False
 
     def __askForAcceptedOrderId(self):

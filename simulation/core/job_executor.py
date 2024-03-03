@@ -64,6 +64,7 @@ class JobExecutor:
     def __onJobFinished(self):
         self.__job = None
         self.__busy = False
+        self.__path = None
         self.__state = "idle"
         self.__currentTask = 0
         self.__owner.onExecutorFinished()

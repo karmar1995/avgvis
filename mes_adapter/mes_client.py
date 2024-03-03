@@ -33,6 +33,8 @@ class MesClient:
                     productionOrderId = self.__requestParser.parse(data).orderId
                     print("Received: {}".format(productionOrderId))
                     self.__tasksSource.handleRequest(productionOrderId)
+                    confirmation = bytes(str(productionOrderId), encoding='ASCII')
+                    self.__mesDataSource.sendDataToServer(confirmation)
                 time.sleep(1)
             except ConnectionRefusedError as e:
                 pass
