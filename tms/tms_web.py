@@ -7,6 +7,7 @@ from composition_root import CompositionRoot, TmsInitInfo, QueueObserver
 class AGV:
     name: str
     tasks: list
+    state: str
 
 @dataclass
 class TaskView:
@@ -29,7 +30,7 @@ class WebQueueObserver(QueueObserver):
         else:
             self.cost = "Never"
         for executorView in executorsViews:
-            self.agvs.append(AGV(executorView.executorId(), executorView.tasksSequence()))
+            self.agvs.append(AGV(executorView.executorId(), executorView.assignedPath(), executorView.state()))
         for task in queue.tasksList():
             self.tasks.append(TaskView(task.taskNumber(), "optimized"))
         for task in queue.pendingTasksList():

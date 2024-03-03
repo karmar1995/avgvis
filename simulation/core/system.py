@@ -19,5 +19,9 @@ class System:
         edge = self.graph.es[self.graph.get_eid(source, destination)]
         return edge['agents']
 
+    def edgeExecutors(self, source, destination):
+        edge = self.graph.es[self.graph.get_eid(source, destination)]
+        return edge['executors']
+
     def nodesCount(self):
         return len(self.graph.vs)
