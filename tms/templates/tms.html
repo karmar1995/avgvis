@@ -15,10 +15,22 @@
     </script>
     <style>
         .taskButton_optimized {
-            background-color: #22AA22;
+            background-color: #33AA33;
         }
         .taskButton_pending {
-            background-color: #2222AA;
+            background-color: #3333AA;
+        }
+        .agvButton_idle {
+            background-color: #333333;
+        }
+        .agvButton_assigned {
+            background-color: #3333AA;
+        }
+        .agvButton_waiting_for_path {
+            background-color: #F5CE42;
+        }
+        .agvButton_running {
+            background-color: #33AA33;
         }
     </style>
 </head>
@@ -61,7 +73,7 @@
        <div class="row" id="agvId">
             <div class="col-1">
                 <div class="d-grid">
-                    <input class=agvButton type="button" name="{{agv.name}}" value="{{agv.name}}" disabled>
+                    <input class=agvButton_{{agv.state}} type="button" name="{{agv.name}}" value="{{agv.name}}" disabled>
                 </div>
             </div>
        </div>

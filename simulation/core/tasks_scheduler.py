@@ -27,7 +27,7 @@ class TasksScheduler:
     def dispatchTasks(self):
         for _ in range(0, self.__executorsManager.freeExecutorsNumber()):
             if not self.__queueOptimizer.queue().empty():
-                self.__executorsManager.freeExecutor().executeJob(self.__queueOptimizer.queue().popTask().pointsSequence())
+                self.__executorsManager.freeExecutor().executeJob([self.__queueOptimizer.queue().popTask()])
 
     # only for testing purposes
     def waitForQueueProcessed(self):

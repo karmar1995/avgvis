@@ -4,10 +4,11 @@ from simulation.core.tasks_executor_manager import TasksExecutorManager
 
 
 class JobExecutorsManager:
-    def __init__(self, taskExecutorsManager : TasksExecutorManager):
+    def __init__(self, taskExecutorsManager : TasksExecutorManager, trafficController):
         self.__executors = dict()
         self.__taskExecutorsManager = taskExecutorsManager
         self.__taskExecutorsManager.addTasksExecutorObserver(self)
+        self.__trafficController = trafficController
 
     def createExecutors(self):
         self.__executors = dict()
@@ -50,3 +51,6 @@ class JobExecutorsManager:
 
     def onTasksExecutorsChanged(self):
         self.createExecutors()
+
+    def trafficController(self):
+        return self.__trafficController
