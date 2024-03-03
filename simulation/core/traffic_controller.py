@@ -24,7 +24,6 @@ class TrafficController:
 
     def __freePath(self, path):
         i = 1
-        print("Checking path: ", str(path))
         while i < len(path):
             executors = self.__system.edgeExecutors(path[i - 1], path[i])
             if len(executors) > 0:
@@ -33,12 +32,10 @@ class TrafficController:
         return True
 
     def __assignPath(self, path, executor):
-        print("Assigning path: ", str(path))
         i = 1
         while i < len(path):
             self.__system.edgeExecutors(path[i - 1], path[i])[id(executor)] = executor
             i += 1
-        print("Path assigned: ", str(path))
 
     def __unassignPath(self, path, executor):
         i = 1
