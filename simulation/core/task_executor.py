@@ -5,3 +5,9 @@ class TaskExecutor:
 
     def getId(self):
         raise NotImplementedError()
+
+    def getLocation(self):
+        raise NotImplementedError()
+
+    def isOnline(self):
+        raise NotImplementedError()

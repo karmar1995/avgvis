@@ -4,9 +4,9 @@ from tms.test_utils.logger import Logger
 
 
 class FakeAgv:
-    def __init__(self, agvId):
+    def __init__(self, agvId, online = True):
         self.agvId = agvId
-        self.online = True
+        self.online = online
         self.location = "-1"
         self.__workingThread = None
         self.__headingToLocation = ""
@@ -35,9 +35,10 @@ class AgvControllerServer:
         self.connection = None
         self.__workingThread = None
         self.agvs = {}
-        self.addFakeAgv('agv1')
-        self.addFakeAgv('agv2')
-        self.addFakeAgv('agv3')
+        self.addFakeAgv('agv1', online=True)
+        self.addFakeAgv('agv2', online=True)
+        self.addFakeAgv('agv3', online=True)
+        self.addFakeAgv('agv4', online=False)
 
     def connect(self, host, port):
         self.socket.bind((host, port))
@@ -77,8 +78,8 @@ class AgvControllerServer:
         print("Processing request: {}".format(request))
         return json.loads(request)
 
-    def addFakeAgv(self, agvId):
-        self.agvs[agvId] = FakeAgv(agvId)
+    def addFakeAgv(self, agvId, online = True):
+        self.agvs[agvId] = FakeAgv(agvId, online)
 
 def onSigInt(signum, frame):
     global executedTasks, logger

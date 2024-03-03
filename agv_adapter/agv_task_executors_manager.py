@@ -39,8 +39,7 @@ class AgvTaskExecutorManager(TasksExecutorManager):
         self.__agvTaskExecutors = dict()
         for agvId in self.__agvControllerClient.requestAgvsIds():
             agvStatus = self.__agvControllerClient.requestAgvStatus(agvId)
-            if agvStatus.online:
-                self.__agvTaskExecutors[agvId] = AgvTaskExecutor(agvId, self.__agvControllerClient)
+            self.__agvTaskExecutors[agvId] = AgvTaskExecutor(agvId, self.__agvControllerClient, agvStatus)
         self.__broadcastExecutorsChanged()
 
     def __cleanupTasksExecutors(self):

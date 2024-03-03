@@ -18,14 +18,14 @@ class JobExecutorsManager:
     def freeExecutors(self):
         res = []
         for executorId in self.__executors:
-            if not self.__executors[executorId].busy():
+            if self.__executors[executorId].availableForJobs():
                 res.append(self.__executors[executorId])
         return res
 
     def freeExecutorsNumber(self):
         res = 0
         for executorId in self.__executors:
-            if not self.__executors[executorId].busy():
+            if self.__executors[executorId].availableForJobs():
                 res += 1
         return res
 
@@ -33,7 +33,7 @@ class JobExecutorsManager:
         executor = None
         while executor is None:
             executorId = random.choice(list(self.__executors.keys()))
-            if not self.__executors[executorId].busy():
+            if self.__executors[executorId].availableForJobs():
                 executor = self.__executors[executorId]
         return executor
 
@@ -42,6 +42,13 @@ class JobExecutorsManager:
 
     def executorsNumber(self):
         return len(self.__executors)
+
+    def onlineExecutorsNumber(self):
+        res = 0
+        for executorId in self.__executors:
+            if self.__executors[executorId].online():
+                res += 1
+        return res
 
     def executorsViews(self):
         res = list()

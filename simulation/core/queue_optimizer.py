@@ -21,7 +21,7 @@ class QueueOptimizer:
         self.__executorsManager = executorsManager
 
     def optimizeQueue(self, iterations) -> OptimizationResult:
-        executorsNumber = self.__executorsManager.executorsNumber()
+        executorsNumber = self.__executorsManager.onlineExecutorsNumber()
         self.__traverser = self.__traverserFactory(self.__system)
         if executorsNumber > 0:
             self.__queue.onOptimizationStart()
@@ -31,7 +31,7 @@ class QueueOptimizer:
                 self.__traverser.assignSequence(sequence=tasksToOptimize)
                 for i in range(0, iterations):
                     agents = list()
-                    for agentId in range(0, self.__executorsManager.executorsNumber()):
+                    for agentId in range(0, self.__executorsManager.onlineExecutorsNumber()):
                         agent = self.__createAgent(self.__traverser)
                         agents.append(agent)
 

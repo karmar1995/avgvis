@@ -7,6 +7,7 @@ class JobExecutor:
         self.__job = None
         self.__taskExecutor = actualExecutor
         self.__currentTask = 0
+        self.__pathPoint = 0
         self.__busy = False
         self.__owner = owner
         self.__thread = None
@@ -15,6 +16,12 @@ class JobExecutor:
 
     def busy(self):
         return self.__busy
+
+    def online(self):
+        return self.__taskExecutor.isOnline()
+
+    def availableForJobs(self):
+        return self.online() and not self.busy()
 
     def executeJob(self, job):
         self.__busy = True
@@ -47,16 +54,23 @@ class JobExecutor:
         return self.__path
 
     def state(self):
+        if not self.online():
+            return "offline"
         return self.__state
+
+    def pathPoint(self):
+        return self.__pathPoint
 
     def __executeJob(self):
         for i in range(0, len(self.__job)):
             self.__currentTask = i
             points = self.__job[self.__currentTask].pointsSequence()
             self.__path = self.__waitForFreePath(points[0], points[1])
+            self.__pathPoint = 0
             self.__state = "running"
             for point in self.__path:
                 self.__taskExecutor.execute(point)
+                self.__pathPoint += 1
             self.__owner.trafficController().revokePath(self.__path, self)
         self.__onJobFinished()
 
@@ -65,6 +79,7 @@ class JobExecutor:
         self.__job = None
         self.__busy = False
         self.__path = None
+        self.__pathPoint = 0
         self.__state = "idle"
         self.__currentTask = 0
         self.__owner.onExecutorFinished()
@@ -99,6 +114,9 @@ class JobExecutorView:
         if path is not None:
             return path
         return []
+
+    def pathPoint(self):
+        return self.__executor.pathPoint()
 
     def state(self):
         return self.__executor.state()
