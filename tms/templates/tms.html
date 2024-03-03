@@ -44,6 +44,21 @@
             color: #000000;
             border-color: #000000;
         }
+        .agvTaskButton_waiting {
+            background-color: #8888FF;
+            color: #000000;
+            border-color: #000000;
+        }
+        .agvTaskButton_executing {
+            background-color: #F5CE42;
+            color: #000000;
+            border-color: #000000;
+        }
+        .agvTaskButton_executed {
+            background-color: #33AA33;
+            color: #000000;
+            border-color: #000000;
+        }
     </style>
 </head>
 <body>
@@ -94,7 +109,7 @@
             {% for agvTask in agv.tasks %}
                 <div class="col-1">
                     <div class="d-grid">
-                            <input class=agvTaskButton type="button" name="{{agvTask}}" value="{{agvTask}}" disabled>
+                            <input class=agvTaskButton_{{agvTask.state}} type="button" name="{{agvTask.id}}" value="{{agvTask.id}}" disabled>
                     </div>
                 </div>
            {% endfor %}

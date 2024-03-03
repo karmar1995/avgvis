@@ -10,6 +10,11 @@ class AGV:
     state: str
 
 @dataclass
+class AGVTask:
+    id: str
+    state: str
+
+@dataclass
 class TaskView:
     number: str
     state: str
@@ -30,7 +35,17 @@ class WebQueueObserver(QueueObserver):
         else:
             self.cost = "Never"
         for executorView in executorsViews:
-            self.agvs.append(AGV(executorView.executorId(), executorView.assignedPath(), executorView.state()))
+            agvTasks = []
+            pathPoint = executorView.pathPoint()
+            assignedPath = executorView.assignedPath()
+            for i in range(0, len(assignedPath)):
+                state = 'waiting'
+                if i == pathPoint:
+                    state = 'executing'
+                if i < pathPoint:
+                    state = 'executed'
+                agvTasks.append(AGVTask(id=assignedPath[i], state=state))
+            self.agvs.append(AGV(executorView.executorId(), agvTasks, executorView.state()))
         for task in queue.tasksList():
             self.tasks.append(TaskView(task.taskNumber(), "optimized"))
         for task in queue.pendingTasksList():
