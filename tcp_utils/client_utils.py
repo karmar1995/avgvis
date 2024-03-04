@@ -55,9 +55,10 @@ class TcpClient:
             if buf == b'':
                 return True
         except BlockingIOError as exc:
-            if exc.errno != errno.EAGAIN:
-                # Raise on unknown exception
-                raise
+            return False
+#            if exc.errno != errno.EAGAIN:
+#                # Raise on unknown exception
+#                raise
         except OSError:
             return True
         finally:
