@@ -18,11 +18,12 @@ class ConfigBuilder:
 
 
 class ConfigurationInJson:
-    def __init__(self):
+    def __init__(self, filesystem):
         super().__init__()
         self.__data = None
         self.__filename = ""
         self.__builder = ConfigBuilder()
+        self.__fs = filesystem
 
     def fileExists(self, filename):
         return exists(filename)
@@ -32,8 +33,7 @@ class ConfigurationInJson:
 
     def read(self, filename):
         self.__filename = filename
-        with open(filename, 'r') as f:
-            self.__data = json.load(f)
+        self.__data = json.loads(self.__fs.readFile(self.__filename))
 
     def hasMapData(self):
         try:

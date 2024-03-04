@@ -8,6 +8,7 @@ from tms.topology_builder import TopologyBuilder
 from tcp_utils.client_utils import TcpClient
 from storage.graph_storage import GraphStorage
 from storage.mes_mapping_storage import MesMappingStorage
+from storage.filesystem import Filesystem
 
 
 class QueueObserver:
@@ -64,10 +65,15 @@ class CompositionRoot:
         self.__agvRoot = AgvRoot()
         self.__networkSenderFactory = networkSenderFactory
         self.__queueObservingThread = None
+        self.__fs = Filesystem()
+        self.__running = False
+
+    def registerFile(self, file):
+        self.__fs.addFile(file.name, file)
 
     def initialize(self, tmsInitInfo: TmsInitInfo):
-        graphStorage = GraphStorage()
-        mesMappingStorage = MesMappingStorage()
+        graphStorage = GraphStorage(self.__fs)
+        mesMappingStorage = MesMappingStorage(self.__fs)
         graphStorage.read(tmsInitInfo.topologyDescriptionPath)
         mesMappingStorage.read(tmsInitInfo.mesTasksMappingPath)
         topologyBuilder = TopologyBuilder(self.__simpyRoot.simulation.env, graphStorage)
@@ -90,6 +96,7 @@ class CompositionRoot:
         self.__queueObservingThread = QueueObservingThread(self.__simulationRoot.tasksQueue().queueView(), self.__simulationRoot.executorsManager(), tmsInitInfo.queueObserver)
 
     def start(self):
+        self.__running = True
         self.__mesRoot.start()
         self.__queueObservingThread.start()
         self.__simulationRoot.start()
@@ -99,6 +106,7 @@ class CompositionRoot:
         self.__mesRoot.shutdown()
         self.__simulationRoot.shutdown()
         self.__queueObservingThread.shutdown()
+        self.__running = False
 
     def isMesConnected(self):
         return self.__mesRoot.isMesConnected()
@@ -108,3 +116,6 @@ class CompositionRoot:
 
     def isAgvHubConnected(self):
         return self.__agvRoot.isConnected()
+
+    def isRunning(self):
+        return self.__running

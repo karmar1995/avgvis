@@ -62,14 +62,13 @@ class WebQueueObserver(QueueObserver):
 
 class WebTms:
     def __init__(self):
-        self.__tms = None
+        self.__tms = CompositionRoot()
         self.queueObserver = WebQueueObserver()
         self.tmsInitInfo = None
 
     def start(self, initInfo : TmsInitInfo):
         if not self.isRunning():
             self.tmsInitInfo = initInfo
-            self.__tms = CompositionRoot()
             self.__tms.initialize(self.tmsInitInfo)
             self.__tms.start()
 
@@ -78,7 +77,8 @@ class WebTms:
         self.__tms = None
 
     def isRunning(self):
-        return self.__tms is not None
+        print(self.__tms.isRunning())
+        return self.__tms is not None and self.__tms.isRunning()
 
     def mesStatus(self):
         connected = False
@@ -101,6 +101,10 @@ class WebTms:
             return "Connected"
         return "Disconnected"
 
+    def addFile(self, file):
+        self.__tms.registerFile(file)
+
+
 app = Flask(__name__)
 tms = WebTms()
 
@@ -112,17 +116,13 @@ def index():
 
     return render_template('index.html', runDisabledTag=disabledTag)
 
-def getFileFromRequest(request, filename, tmpFile):
+def getFileFromRequest(request, filename):
     if filename not in request.files:
         return ''
     file = request.files[filename]
     if file.filename == '':
         return ''
-    tmpFileName = tmpFile.name
-    content = file.stream.read()
-    tmpFile.write(content)
-    tmpFile.flush()
-    return tmpFileName
+    return file
 
 
 @app.route('/run', methods=['GET', 'POST'])
@@ -130,18 +130,22 @@ def run():
     if request.method == 'POST':
         if request.form.get('Run') == 'Run':
             if not tms.isRunning():
-                with tempfile.NamedTemporaryFile() as graphFile, tempfile.NamedTemporaryFile() as mesMappingFile:
-                    topologyDescriptionFile = getFileFromRequest(request, 'graphDescription', graphFile)
-                    mesMappingFile = getFileFromRequest(request, 'mesMappingFile', mesMappingFile)
-                    mesConnectionString = request.form.get('mesConnectionString').split(':')
-                    simulationMesConnectionString = request.form.get('simulationMesConnectionString').split(':')
-                    agvHubConnectionString = request.form.get('agvHubConnectionString').split(':')
-                    tmsInitInfo = TmsInitInfo(topologyDescriptionPath=topologyDescriptionFile,
-                                              mesIp=mesConnectionString[0], mesPort=int(mesConnectionString[1]),
-                                              agvControllerIp=agvHubConnectionString[0], agvControllerPort=int(agvHubConnectionString[1]),
-                                              mesTasksMappingPath=mesMappingFile, queueObserver=tms.queueObserver,
-                                              simulationMesIp=simulationMesConnectionString[0], simulationMesPort=int(simulationMesConnectionString[1]),)
-                    tms.start(tmsInitInfo)
+                topologyDescriptionFile = getFileFromRequest(request, 'graphDescription')
+                mesMappingFile = getFileFromRequest(request, 'mesMappingFile')
+                tms.addFile(topologyDescriptionFile)
+                tms.addFile(mesMappingFile)
+                topologyDescriptionFile = topologyDescriptionFile.name
+                mesMappingFile = mesMappingFile.name
+
+                mesConnectionString = request.form.get('mesConnectionString').split(':')
+                simulationMesConnectionString = request.form.get('simulationMesConnectionString').split(':')
+                agvHubConnectionString = request.form.get('agvHubConnectionString').split(':')
+                tmsInitInfo = TmsInitInfo(topologyDescriptionPath=topologyDescriptionFile,
+                                          mesIp=mesConnectionString[0], mesPort=int(mesConnectionString[1]),
+                                          agvControllerIp=agvHubConnectionString[0], agvControllerPort=int(agvHubConnectionString[1]),
+                                          mesTasksMappingPath=mesMappingFile, queueObserver=tms.queueObserver,
+                                          simulationMesIp=simulationMesConnectionString[0], simulationMesPort=int(simulationMesConnectionString[1]),)
+                tms.start(tmsInitInfo)
 
     if tms.tmsInitInfo is None:
         return redirect('/')

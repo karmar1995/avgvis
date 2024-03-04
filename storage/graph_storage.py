@@ -16,14 +16,14 @@ class EdgeInfo:
 
 
 class GraphStorage:
-    def __init__(self):
+    def __init__(self, filesystem):
         self.__data = None
         self.__filename = ""
+        self.__fs = filesystem
 
     def read(self, filename):
         self.__filename = filename
-        with open(filename, 'r') as f:
-            self.__data = json.load(f)
+        self.__data = json.loads(self.__fs.readFile(self.__filename))
 
     def nodesDescriptions(self):
         nodes = list()
