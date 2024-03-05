@@ -71,6 +71,7 @@ class JobExecutor:
             for point in self.__path:
                 self.__taskExecutor.execute(point)
                 self.__pathPoint += 1
+                self.__waitForFreeSegment(self.__path, self.__pathPoint)
             self.__owner.trafficController().revokePath(self.__path, self)
         self.__onJobFinished()
 
@@ -91,6 +92,11 @@ class JobExecutor:
             path = self.__owner.trafficController().requestPath(source, destination, self)
             time.sleep(1)
         return path
+
+    def __waitForFreeSegment(self, path, startingPoint):
+        self.__state = "waiting_for_path"
+        while not self.__owner.trafficController().requestNextSegment(path, self, startingPoint):
+            time.sleep(1)
 
 
 class JobExecutorView:

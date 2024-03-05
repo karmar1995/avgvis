@@ -1,6 +1,9 @@
 import threading
 
 
+LOCK_RANGE = 5
+
+
 class TrafficController:
     def __init__(self, system):
         self.__system = system
@@ -12,15 +15,37 @@ class TrafficController:
         destinationNode = self.__system.node(destination)
         with self.__lock:
             paths = self.__system.graph.get_k_shortest_paths(sourceNode.index, destinationNode.index, k=k)
-            for path in paths:
-                if self.__freePath(path):
-                    self.__assignPath(path, executor)
-                    return path
+            path = self.__pickFreePath(paths)
+            if path is None:
+                path = self.__pickPartiallyFreePath(paths)
+            if path is not None:
+                self.__assignSegment(path, executor, 0, LOCK_RANGE)
+                return path
         return None
+
+    def requestNextSegment(self, path, executor, startingPoint):
+        with self.__lock:
+            self.__unassignSegment(path, executor, startingPoint - 1, LOCK_RANGE)
+            if self.__segmentFree(path, startingPoint, LOCK_RANGE):
+                self.__assignSegment(path, executor, startingPoint, LOCK_RANGE)
+                return True
+        return False
 
     def revokePath(self, path, executor):
         with self.__lock:
-            self.__unassignPath(path, executor)
+            self.__unassignSegment(path, executor, 0, len(path))
+
+    def __pickFreePath(self, paths):
+        for path in paths:
+            if self.__freePath(path):
+                return path
+        return None
+
+    def __pickPartiallyFreePath(self, paths):
+        for path in paths:
+            if self.__partiallyFreePath(path):
+                return path
+        return None
 
     def __freePath(self, path):
         i = 1
@@ -31,14 +56,37 @@ class TrafficController:
             i += 1
         return True
 
-    def __assignPath(self, path, executor):
-        i = 1
-        while i < len(path):
-            self.__system.edgeExecutors(path[i - 1], path[i])[id(executor)] = executor
-            i += 1
+    def __partiallyFreePath(self, path):
+        return self.__segmentFree(path, 0, LOCK_RANGE)
 
-    def __unassignPath(self, path, executor):
-        i = 1
+    def __segmentFree(self, path, startingPoint, endingPoint):
+        i = startingPoint + 1
         while i < len(path):
-            del self.__system.edgeExecutors(path[i - 1], path[i])[id(executor)]
+            executors = self.__system.edgeExecutors(path[i - 1], path[i])
+            if len(executors) > 0:
+                return False
+            if (i - startingPoint - 1) == endingPoint:
+                break
             i += 1
+        return True
+
+    def __assignSegment(self, path, executor, startingPoint, endingPoint):
+        i = startingPoint + 1
+        while i < len(path):
+            segmentExecutors = self.__system.edgeExecutors(path[i - 1], path[i])
+            if len(segmentExecutors) > 1:
+                raise Exception("Segment assigned to multiple agents!")
+            segmentExecutors[id(executor)] = executor
+            i += 1
+            if (i - startingPoint - 1) == endingPoint:
+                break
+
+    def __unassignSegment(self, path, executor, startingPoint, endingPoint):
+        i = startingPoint + 1
+        while i < len(path):
+            segmentExecutors = self.__system.edgeExecutors(path[i - 1], path[i])
+            if id(executor) in segmentExecutors:
+                del segmentExecutors[id(executor)]
+            i += 1
+            if (i - startingPoint - 1) == endingPoint:
+                break
