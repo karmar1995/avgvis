@@ -17,6 +17,7 @@ class FakeAgv:
         self.__taskId = -1
         self.faulty = faulty
         self.dead = False
+        self.__status = "idle"
 
     def goToPoint(self, newLocation, taskId):
         self.__headingToLocation = newLocation
@@ -25,9 +26,14 @@ class FakeAgv:
         self.__workingThread.start()
 
     def __processingThread(self):
+        self.__status = "running"
         print("AGV: {} heading to: {}, task id: {}".format(self.agvId, self.__headingToLocation, self.__taskId))
         time.sleep(random.gauss(10))
         self.location = self.__headingToLocation
+        self.__status = "busy"
+        time.sleep(random.gauss(10))
+        self.__status = "idle"
+
         if self.faulty:
             if random.random() < FAILURE_PROBABILITY:
                 self.online = False
@@ -51,7 +57,7 @@ class FakeAgv:
         return self.__workingThread is not None
 
     def status(self):
-        return {'agvId': self.agvId, 'online': self.online, 'location': self.location}
+        return {'agvId': self.agvId, 'online': self.online, 'location': self.location, 'status': self.__status}
 
 
 class AgvControllerServer:

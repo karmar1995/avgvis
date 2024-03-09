@@ -53,7 +53,6 @@ class JobExecutorsManager:
         return res
 
     def onTasksExecutorsChanged(self):
-        print("Executors changed")
         self.__unregisterUnavailableExecutors()
         self.__refreshAvailableExecutors()
 

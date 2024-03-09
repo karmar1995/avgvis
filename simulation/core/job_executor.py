@@ -41,7 +41,6 @@ class JobExecutor:
     def kill(self):
         self.__killed = True
         if threading.current_thread() == self.__thread:
-            print("Kill from current thread!")
             return
         if self.__thread is not None:
             self.__thread.join()
@@ -101,7 +100,6 @@ class JobExecutor:
                 self.__owner.trafficController().revokePath(self.__path, self)
             self.__onJobFinished()
         except JobExecutorException:
-            print("Handling kill")
             return
         finally:
             if self.__path is not None:
@@ -113,7 +111,6 @@ class JobExecutor:
         self.__owner.onExecutorFinished()
 
     def __unassignJob(self):
-        print("Unassign job")
         self.__state = "idle"
         self.__job = None
         self.__busy = False

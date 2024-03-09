@@ -11,6 +11,7 @@ class AgvTaskExecutor(TaskExecutor):
         self.__location = initialStatus.location
         self.__online = initialStatus.online
         self.__statusObserver = statusObserver
+        self.__status = ""
 
     def initialize(self):
         self.__requestStatus()
@@ -19,14 +20,15 @@ class AgvTaskExecutor(TaskExecutor):
         print("Requesting: {} go to point: {}".format(self.__agvId, task))
         self.__agvControllerClient.requestGoToPoints(self.__agvId, [task], taskId)
 
-        retries = 10
-        while self.getLocation() != str(task):
-            if retries == 0:
-                self.assumeOffline()
-                return
-            if not self.__requestStatus():
-                retries -= 1
-            time.sleep(1)
+        def locationPredicate():
+            return self.getLocation() == str(task)
+
+        def statusPredicate():
+            print("Waiting for status not busy, current: {}".format(self.__status))
+            return self.__status != 'busy'
+
+        self.__waitFor(locationPredicate)
+        self.__waitFor(statusPredicate)
 
     def updateStatus(self, status):
         if status is None:
@@ -35,6 +37,7 @@ class AgvTaskExecutor(TaskExecutor):
 
         onlineStatusChanged = self.__online != status.online
         self.__online = status.online
+        self.__status = status.status
 
         if onlineStatusChanged:
             self.__statusObserver.onExecutorChanged()
@@ -57,3 +60,13 @@ class AgvTaskExecutor(TaskExecutor):
         if status is not None:
             self.updateStatus(status)
         return status is not None
+
+    def __waitFor(self, predicate):
+        retries = 10
+        while not predicate():
+            if retries == 0:
+                self.assumeOffline()
+                return
+            if not self.__requestStatus():
+                retries -= 1
+            time.sleep(1)

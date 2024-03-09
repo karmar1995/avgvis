@@ -61,13 +61,10 @@ class AgvControllerClient:
             if self.__lastLockedThread == threading.current_thread():
                 raise Exception("Double-locked by the same thread!")
 
-            print("Locking agv client... {}".format(threading.current_thread().name))
             with self.__lock:
                 self.__lastLockedThread = threading.current_thread()
-                print("locked")
                 self.__tcpClient.sendDataToServer(request.encode('ASCII'))
                 response = self.__waitForResponse()
-                print("unlocking agv client")
                 self.__lastLockedThread = None
                 return response
         return None

@@ -36,18 +36,13 @@ class AgvTaskExecutorManager(TasksExecutorManager):
         self.__broadcastExecutorsChanged()
 
     def __broadcastExecutorsChanged(self):
-        curframe = inspect.currentframe()
-        calframe = inspect.getouterframes(curframe, 2)
-        print('Broadcast caller name:', calframe[1][3])
         for observerId in self.__observers:
             self.__observers[observerId].onTasksExecutorsChanged()
 
     def refreshTasksExecutors(self):
-        print("Trying to refresh executors")
         if self.__agvControllerClient.busy() or not self.isClientRunning():
             return
         if self.__refreshCounter > 2:
-            print("Refreshing executors")
             self.__refreshCounter = 0
             newAvailableAgvIds = self.__agvControllerClient.requestAgvsIds()
             if newAvailableAgvIds is not None and newAvailableAgvIds != self.__availableAgvs():
@@ -55,7 +50,6 @@ class AgvTaskExecutorManager(TasksExecutorManager):
                 self.__registerNewAvailableExecutors(newAvailableAgvIds)
                 self.__broadcastExecutorsChanged()
             self.__refreshExecutors()
-            print("Refreshed executors")
         else:
             self.__refreshCounter += 1
 
