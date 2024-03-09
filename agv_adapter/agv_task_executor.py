@@ -18,7 +18,8 @@ class AgvTaskExecutor(TaskExecutor):
     def execute(self, task):
         print("Requesting: {} go to point: {}".format(self.__agvId, task))
         self.__agvControllerClient.requestGoToPoints(self.__agvId, [task])
-        while self.__requestStatus().location != str(task):
+        while self.getLocation() != str(task):
+            self.__requestStatus()
             time.sleep(1)
 
     def updateStatus(self, status):
@@ -41,7 +42,5 @@ class AgvTaskExecutor(TaskExecutor):
 
     def __requestStatus(self):
         status = self.__agvControllerClient.requestAgvStatus(self.__agvId)
-        if status is None:
-            raise Exception("No response!")
-        self.updateStatus(status)
-        return status
+        if status is not None:
+            self.updateStatus(status)
