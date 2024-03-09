@@ -3,7 +3,8 @@ import socket, sys, time, signal, select, json, threading
 from tms.test_utils.logger import Logger
 
 
-FAILURE_PROBABILITY = 0.5
+FAILURE_PROBABILITY = 0.1
+EMERGENCY_PROBABILITY = 0.1
 
 
 class FakeAgv:
@@ -14,6 +15,7 @@ class FakeAgv:
         self.__workingThread = None
         self.__headingToLocation = ""
         self.faulty = faulty
+        self.dead = False
 
     def goToPoint(self, newLocation):
         self.__headingToLocation = newLocation
@@ -31,6 +33,16 @@ class FakeAgv:
                 time.sleep(random.gauss(10))
                 self.online = True
                 print("Faulty AGV going online")
+            else:
+                if random.random() < EMERGENCY_PROBABILITY:
+                    self.online = False
+                    self.dead = True
+                    print("Faulty AGV going dead")
+                    time.sleep(random.gauss(10))
+                    self.dead = False
+                    self.online = True
+                    print("Faulty AGV going dead")
+
         self.__workingThread = None
 
     def busy(self):
@@ -73,7 +85,11 @@ class AgvControllerServer:
         print("processing request: {}".format(request))
         response = None
         if request['id'] == "GetAgvsIds":
-            response = { 'agvs': list(self.agvs.keys()) }
+            agvs = []
+            for agvId in self.agvs:
+                if not self.agvs[agvId].dead:
+                    agvs.append(agvId)
+            response = { 'agvs': agvs }
         if request['id'] == "GetAgvStatus":
             response = self.agvs[request['agv_id']].status()
         if request['id'] == "GoToPoints":

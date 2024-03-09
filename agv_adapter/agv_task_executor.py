@@ -18,8 +18,14 @@ class AgvTaskExecutor(TaskExecutor):
     def execute(self, task):
         print("Requesting: {} go to point: {}".format(self.__agvId, task))
         self.__agvControllerClient.requestGoToPoints(self.__agvId, [task])
+
+        retries = 10
         while self.getLocation() != str(task):
-            self.__requestStatus()
+            if retries == 0:
+                self.assumeOffline()
+                return
+            if not self.__requestStatus():
+                retries -= 1
             time.sleep(1)
 
     def updateStatus(self, status):
@@ -32,6 +38,10 @@ class AgvTaskExecutor(TaskExecutor):
 
         if onlineStatusChanged:
             self.__statusObserver.onExecutorChanged()
+
+    def assumeOffline(self):
+        self.__online = False
+        self.__statusObserver.onExecutorChanged()
 
     def getId(self):
         return self.__agvId
@@ -46,3 +56,4 @@ class AgvTaskExecutor(TaskExecutor):
         status = self.__agvControllerClient.requestAgvStatus(self.__agvId)
         if status is not None:
             self.updateStatus(status)
+        return status is not None
