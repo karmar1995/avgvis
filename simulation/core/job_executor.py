@@ -88,9 +88,9 @@ class JobExecutor:
                 points = self.__job[self.__currentTask].pointsSequence()
                 self.__path = self.__waitForFreePath(points[0], points[1])
                 self.__pathPoint = 0
-                self.__state = "running"
 
                 for point in self.__path:
+                    self.__state = "running"
                     self.__taskExecutor.execute(point)
                     if self.__killed:
                         raise JobExecutorException()
