@@ -30,15 +30,15 @@ class AgvControllerClient:
         if response is not None:
             return agvStatusFromJson(response.decode('ASCII'))
 
-    def requestGoToPoint(self, agvId, point):
-        request = RequestBuilder().startRequest(REQUESTS.GO_TO_POINT).withAgvId(agvId).withPoint(point).finalize()
+    def requestGoToPoint(self, agvId, point, taskId):
+        request = RequestBuilder().startRequest(REQUESTS.GO_TO_POINT).withAgvId(agvId).withPoint(point).withTaskId(taskId).finalize()
         self.__sendRequest(request)
 
-    def requestGoToPoints(self, agvId, points):
+    def requestGoToPoints(self, agvId, points, taskId):
         if len(points) == 1:
-            self.requestGoToPoint(agvId, points[0])
+            self.requestGoToPoint(agvId, points[0], taskId)
         else:
-            request = RequestBuilder().startRequest(REQUESTS.GO_TO_POINTS).withAgvId(agvId).withPoints(points).finalize()
+            request = RequestBuilder().startRequest(REQUESTS.GO_TO_POINTS).withAgvId(agvId).withPoints(points).withTaskId(taskId).finalize()
             self.__sendRequest(request)
 
     def connected(self):

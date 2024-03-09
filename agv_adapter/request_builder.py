@@ -6,6 +6,7 @@ class REQUESTS_KEYS:
     AGV_ID = "agv_id"
     POINTS = "points"
     POINT = "point"
+    TASK_ID = "task_id"
 
 
 class RequestBuilder:
@@ -26,6 +27,10 @@ class RequestBuilder:
 
     def withPoint(self, point):
         self.__request[REQUESTS_KEYS.POINT] = point
+        return self
+
+    def withTaskId(self, taskId):
+        self.__request[REQUESTS_KEYS.TASK_ID] = taskId
         return self
 
     def finalize(self):

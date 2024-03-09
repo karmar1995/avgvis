@@ -1,6 +1,6 @@
 class TaskExecutor:
 
-    def execute(self, task):
+    def execute(self, task, taskId):
         raise NotImplementedError()
 
     def getId(self):

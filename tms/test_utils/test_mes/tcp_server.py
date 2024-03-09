@@ -3,6 +3,7 @@ import threading, time, socket, sys, random, select
 
 currentTask = -2
 sleeping = False
+sentTasksCount = 0
 
 
 class TcpServer():
@@ -80,7 +81,7 @@ class TcpServer():
         return -1
 
     def __serverMain(self):
-        global currentTask, sleeping
+        global currentTask, sleeping, sentTasksCount
         self.__socket.bind((self.__host, self.__port))
         self.__socket.listen(1)
         self.__connection, _ = self.__socket.accept()
@@ -99,8 +100,9 @@ class TcpServer():
                     readyToSend = self.__askForSend()
                     while not readyToSend:
                         readyToSend = self.__askForSend()
+                    sentTasksCount += 1
                     oldStdOut.write("Sending task: {}\n".format(currentTask))
-                    frame = self.__dataFormatter.getDataToSend(orderId)
+                    frame = self.__dataFormatter.getDataToSend(orderId, sentTasksCount)
                     oldStdOut.write("{}\n".format(frame))
                     self.__connection.send(frame)
                     while acceptedOrderId != orderId:

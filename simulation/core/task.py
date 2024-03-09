@@ -1,8 +1,12 @@
 class Task:
-    def __init__(self, taskNumber, source, destination):
+    def __init__(self, taskNumber, source, destination, taskId = -1):
         self.__taskNumber = taskNumber
         self.__source = source
         self.__destination = destination
+        self.__taskId = taskId
+
+    def setTaskId(self, taskId):
+        self.__taskId = taskId
 
     def source(self):
         return self.__source
@@ -18,3 +22,6 @@ class Task:
 
     def pointsSequence(self):
         return [self.source(), self.destination()]
+
+    def taskId(self):
+        return self.__taskId

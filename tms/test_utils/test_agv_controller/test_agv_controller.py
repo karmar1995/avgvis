@@ -4,7 +4,7 @@ from tms.test_utils.logger import Logger
 
 
 FAILURE_PROBABILITY = 0.1
-EMERGENCY_PROBABILITY = 0.1
+EMERGENCY_PROBABILITY = 0.0
 
 
 class FakeAgv:
@@ -14,16 +14,18 @@ class FakeAgv:
         self.location = "-1"
         self.__workingThread = None
         self.__headingToLocation = ""
+        self.__taskId = -1
         self.faulty = faulty
         self.dead = False
 
-    def goToPoint(self, newLocation):
+    def goToPoint(self, newLocation, taskId):
         self.__headingToLocation = newLocation
+        self.__taskId = taskId
         self.__workingThread = threading.Thread(target=self.__processingThread)
         self.__workingThread.start()
 
     def __processingThread(self):
-        print("AGV: {} heading to: {}".format(self.agvId, self.__headingToLocation))
+        print("AGV: {} heading to: {}, task id: {}".format(self.agvId, self.__headingToLocation, self.__taskId))
         time.sleep(random.gauss(10))
         self.location = self.__headingToLocation
         if self.faulty:
@@ -93,10 +95,10 @@ class AgvControllerServer:
         if request['id'] == "GetAgvStatus":
             response = self.agvs[request['agv_id']].status()
         if request['id'] == "GoToPoints":
-            self.agvs[request['agv_id']].goToPoint(request['points'][-1])
+            self.agvs[request['agv_id']].goToPoint(request['points'][-1], request['task_id'])
             response = { 'accepted': True }
         if request['id'] == "GoToPoint":
-            self.agvs[request['agv_id']].goToPoint(request['point'])
+            self.agvs[request['agv_id']].goToPoint(request['point'], request['task_id'])
             response = {'accepted': True}
         return json.dumps(response).encode('ASCII')
 

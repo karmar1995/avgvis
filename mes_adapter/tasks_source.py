@@ -12,9 +12,9 @@ class MesTasksSource(TasksSource):
     def setTasksQueue(self, queue: TasksQueue):
         self.__tasksQueue = queue
 
-    def handleRequest(self, requestId):
+    def handleRequest(self, requestId, taskId):
         with self.__lock:
-            task = self.__requestMapper.getTaskFromId(requestId)
+            task = self.__requestMapper.getTaskFromId(requestId, taskId)
             if task is not None:
                 if self.__tasksQueue is not None:
                     self.__tasksQueue.enqueue(task)

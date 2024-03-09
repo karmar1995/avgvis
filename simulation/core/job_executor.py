@@ -91,7 +91,7 @@ class JobExecutor:
 
                 for point in self.__path:
                     self.__state = "running"
-                    self.__taskExecutor.execute(point)
+                    self.__taskExecutor.execute(point, self.__job[self.__currentTask].taskId())
                     if self.__killed:
                         raise JobExecutorException()
 

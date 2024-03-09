@@ -30,9 +30,11 @@ class MesClient:
                 print("Sending TMS Ready")
                 data = self.__mesDataSource.readDataFromServer()
                 if data is not None:
-                    productionOrderId = self.__requestParser.parse(data).orderId
+                    parsed = self.__requestParser.parse(data)
+                    productionOrderId = parsed.orderId
+                    taskId = parsed.uniqueId
                     print("Received: {}".format(productionOrderId))
-                    self.__tasksSource.handleRequest(productionOrderId)
+                    self.__tasksSource.handleRequest(productionOrderId, taskId)
                     confirmation = bytes(str(productionOrderId), encoding='ASCII')
                     self.__mesDataSource.sendDataToServer(confirmation)
                 time.sleep(1)

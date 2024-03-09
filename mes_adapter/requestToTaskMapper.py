@@ -1,3 +1,4 @@
+import copy
 from simulation.core.task import Task
 
 
@@ -11,9 +12,11 @@ class RequestToTaskMapper:
         self.__mapping = dict()
         self.__createMapping(configuration)
 
-    def getTaskFromId(self, id):
+    def getTaskFromId(self, id, taskId):
         try:
-            return self.__mapping[id]
+            task = copy.deepcopy(self.__mapping[id])
+            task.setTaskId(taskId)
+            return task
         except KeyError:
             return None
 
