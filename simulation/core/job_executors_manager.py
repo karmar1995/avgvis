@@ -4,16 +4,12 @@ from simulation.core.tasks_executor_manager import TasksExecutorManager
 
 
 class JobExecutorsManager:
-    def __init__(self, taskExecutorsManager : TasksExecutorManager, trafficController):
+    def __init__(self, taskExecutorsManager : TasksExecutorManager, trafficController, queue):
         self.__executors = dict()
         self.__taskExecutorsManager = taskExecutorsManager
         self.__taskExecutorsManager.addTasksExecutorObserver(self)
         self.__trafficController = trafficController
-
-    def createExecutors(self):
-        self.__executors = dict()
-        for tasksExecutor in self.__taskExecutorsManager.tasksExecutors():
-            self.__executors[tasksExecutor.getId()] = JobExecutor(tasksExecutor, self)
+        self.__queue = queue
 
     def freeExecutors(self):
         res = []
@@ -57,7 +53,36 @@ class JobExecutorsManager:
         return res
 
     def onTasksExecutorsChanged(self):
-        self.createExecutors()
+        self.__unregisterUnavailableExecutors()
+        self.__refreshAvailableExecutors()
 
     def trafficController(self):
         return self.__trafficController
+
+    def __unregisterUnavailableExecutors(self):
+        executorsToCleanup = []
+        for executorId in self.__executors:
+            found = False
+            for tasksExecutor in self.__taskExecutorsManager.tasksExecutors():
+                if tasksExecutor.getId() == executorId:
+                    found = True
+                    break
+            if not found:
+                executorsToCleanup.append(executorId)
+
+        for executorId in executorsToCleanup:
+            self.__revokeJobFromUnavailableExecutor(self.__executors[executorId])
+            del self.__executors[executorId]
+
+    def __revokeJobFromUnavailableExecutor(self, executor):
+        self.__queue.batchEnqueue(executor.remainingJob())
+        executor.kill()
+
+    def __refreshAvailableExecutors(self):
+        for tasksExecutor in self.__taskExecutorsManager.tasksExecutors():
+            executorId = tasksExecutor.getId()
+            if executorId not in self.__executors:
+                self.__executors[executorId] = JobExecutor(tasksExecutor, self)
+            else:
+                if not tasksExecutor.isOnline() and self.__executors[executorId].busy():
+                    self.__revokeJobFromUnavailableExecutor(self.__executors[executorId])

@@ -31,16 +31,35 @@ class AgvTaskExecutorManager(TasksExecutorManager):
     def isClientRunning(self):
         return self.__agvControllerClient is not None and self.__agvControllerClient.connected()
 
+    def onExecutorChanged(self):
+        self.__broadcastExecutorsChanged()
+
     def __broadcastExecutorsChanged(self):
         for observerId in self.__observers:
             self.__observers[observerId].onTasksExecutorsChanged()
 
-    def __createTasksExecutors(self):
-        self.__agvTaskExecutors = dict()
-        for agvId in self.__agvControllerClient.requestAgvsIds():
-            agvStatus = self.__agvControllerClient.requestAgvStatus(agvId)
-            self.__agvTaskExecutors[agvId] = AgvTaskExecutor(agvId, self.__agvControllerClient, agvStatus)
+    def refreshTasksExecutors(self):
+        availableAgvIds = self.__agvControllerClient.requestAgvsIds()
+        self.__unregisterUnavailableExecutors(availableAgvIds)
+        self.__refreshAvailableExecutors(availableAgvIds)
         self.__broadcastExecutorsChanged()
+
+    def __unregisterUnavailableExecutors(self, availableAgvIds):
+        executorsToCleanup = []
+        for agvId in self.__agvTaskExecutors:
+            if agvId not in availableAgvIds:
+                executorsToCleanup.append(agvId)
+
+        for agvId in executorsToCleanup:
+            del self.__agvTaskExecutors[agvId]
+
+    def __refreshAvailableExecutors(self, availableAgvIds):
+        for agvId in availableAgvIds:
+            agvStatus = self.__agvControllerClient.requestAgvStatus(agvId)
+            if agvId not in self.__agvTaskExecutors:
+                self.__agvTaskExecutors[agvId] = AgvTaskExecutor(agvId, self.__agvControllerClient, agvStatus, self)
+            else:
+                self.__agvTaskExecutors[agvId].updateStatus(agvStatus)
 
     def __cleanupTasksExecutors(self):
         self.__agvTaskExecutors = dict()
@@ -50,7 +69,7 @@ class AgvTaskExecutorManager(TasksExecutorManager):
         if not self.isClientRunning():
             self.__agvControllerClient = AgvControllerClient(self.__ip, self.__port)
         if self.isClientRunning():
-            self.__createTasksExecutors()
+            self.refreshTasksExecutors()
         else:
             self.__cleanupTasksExecutors()
 

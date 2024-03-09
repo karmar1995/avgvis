@@ -5,22 +5,30 @@ from agv_adapter.agv_controller_client import AgvControllerClient
 
 class AgvTaskExecutor(TaskExecutor):
 
-    def __init__(self, agvId, agvControllerClient: AgvControllerClient, initialStatus):
+    def __init__(self, agvId, agvControllerClient: AgvControllerClient, initialStatus, statusObserver):
         self.__agvId = agvId
         self.__agvControllerClient = agvControllerClient
         self.__location = initialStatus.location
         self.__online = initialStatus.online
+        self.__statusObserver = statusObserver
 
     def initialize(self):
-        status = self.__agvControllerClient.requestAgvStatus(self.__agvId)
-        self.__location = status.location
-        self.__online = status.online
+        self.__requestStatus()
 
     def execute(self, task):
         print("Requesting: {} go to point: {}".format(self.__agvId, task))
         self.__agvControllerClient.requestGoToPoints(self.__agvId, [task])
-        while self.__agvControllerClient.requestAgvStatus(self.__agvId).location != str(task):
+        while self.__requestStatus().location != str(task):
             time.sleep(1)
+
+    def updateStatus(self, status):
+        self.__location = status.location
+
+        onlineStatusChanged = self.__online != status.online
+        self.__online = status.online
+
+        if onlineStatusChanged:
+            self.__statusObserver.onExecutorChanged()
 
     def getId(self):
         return self.__agvId
@@ -30,3 +38,8 @@ class AgvTaskExecutor(TaskExecutor):
 
     def isOnline(self):
         return self.__online
+
+    def __requestStatus(self):
+        status = self.__agvControllerClient.requestAgvStatus(self.__agvId)
+        self.updateStatus(status)
+        return status
