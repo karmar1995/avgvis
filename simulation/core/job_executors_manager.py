@@ -53,8 +53,12 @@ class JobExecutorsManager:
         return res
 
     def onTasksExecutorsChanged(self):
+        print("Executors changed")
         self.__unregisterUnavailableExecutors()
         self.__refreshAvailableExecutors()
+
+    def refreshExecutors(self):
+        self.__taskExecutorsManager.refreshTasksExecutors()
 
     def trafficController(self):
         return self.__trafficController

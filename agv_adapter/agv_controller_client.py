@@ -16,6 +16,7 @@ class AgvControllerClient:
     def __init__(self, agvControllerIp, agvControllerPort):
         self.__tcpClient = TcpClient(agvControllerIp, agvControllerPort)
         self.__lock = threading.Lock()
+        self.__lastLockedThread = None
 
     def requestAgvsIds(self):
         request = RequestBuilder().startRequest(REQUESTS.GET_AGVS_IDS).finalize()
@@ -43,14 +44,30 @@ class AgvControllerClient:
     def connected(self):
         return self.__tcpClient.isConnected()
 
+    def busy(self):
+        return self.__lock.locked()
+
     def __waitForResponse(self):
         response = self.__tcpClient.readDataFromServer()
         while response is None:
+            if not self.connected():
+                return None
             time.sleep(0.1)
             response = self.__tcpClient.readDataFromServer()
         return response
 
     def __sendRequest(self, request):
-        with self.__lock:
-            self.__tcpClient.sendDataToServer(request.encode('ASCII'))
-            return self.__waitForResponse()
+        if self.connected():
+            if self.__lastLockedThread == threading.current_thread():
+                raise Exception("Double-locked by the same thread!")
+
+            print("Locking agv client... {}".format(threading.current_thread().name))
+            with self.__lock:
+                self.__lastLockedThread = threading.current_thread()
+                print("locked")
+                self.__tcpClient.sendDataToServer(request.encode('ASCII'))
+                response = self.__waitForResponse()
+                print("unlocking agv client")
+                self.__lastLockedThread = None
+                return response
+        return None

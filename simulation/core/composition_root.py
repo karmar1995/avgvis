@@ -37,7 +37,6 @@ class CompositionRoot:
         self.__system = systemBuilder.system()
         self.__trafficController = TrafficController(self.__system)
         self.__executorsManager = JobExecutorsManager(taskExecutorsManager=dependencies['taskExecutorsManager'], trafficController=self.__trafficController, queue=self.__tasksQueue)
-#        self.__executorsManager.createExecutors()
         self.__queueOptimizer = QueueOptimizer(system=self.__system,
                                                agentsFactory=dependencies['agentsFactory'],
                                                simulation=dependencies['simulation'],

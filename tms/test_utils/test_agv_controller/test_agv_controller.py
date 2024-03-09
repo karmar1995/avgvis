@@ -3,13 +3,17 @@ import socket, sys, time, signal, select, json, threading
 from tms.test_utils.logger import Logger
 
 
+FAILURE_PROBABILITY = 0.5
+
+
 class FakeAgv:
-    def __init__(self, agvId, online = True):
+    def __init__(self, agvId, online = True, faulty = False):
         self.agvId = agvId
         self.online = online
         self.location = "-1"
         self.__workingThread = None
         self.__headingToLocation = ""
+        self.faulty = faulty
 
     def goToPoint(self, newLocation):
         self.__headingToLocation = newLocation
@@ -20,6 +24,13 @@ class FakeAgv:
         print("AGV: {} heading to: {}".format(self.agvId, self.__headingToLocation))
         time.sleep(random.gauss(10))
         self.location = self.__headingToLocation
+        if self.faulty:
+            if random.random() < FAILURE_PROBABILITY:
+                self.online = False
+                print("Faulty AGV going offline")
+                time.sleep(random.gauss(10))
+                self.online = True
+                print("Faulty AGV going online")
         self.__workingThread = None
 
     def busy(self):
@@ -35,9 +46,9 @@ class AgvControllerServer:
         self.connection = None
         self.__workingThread = None
         self.agvs = {}
-        self.addFakeAgv('agv1', online=True)
-        self.addFakeAgv('agv2', online=True)
-        self.addFakeAgv('agv3', online=True)
+        self.addFakeAgv('agv1', online=True, faulty=True)
+        self.addFakeAgv('agv2', online=True, faulty=True)
+        self.addFakeAgv('agv3', online=True, faulty=True)
         self.addFakeAgv('agv4', online=False)
 
     def connect(self, host, port):
@@ -78,8 +89,8 @@ class AgvControllerServer:
         print("Processing request: {}".format(request))
         return json.loads(request)
 
-    def addFakeAgv(self, agvId, online = True):
-        self.agvs[agvId] = FakeAgv(agvId, online)
+    def addFakeAgv(self, agvId, online = True, faulty = False):
+        self.agvs[agvId] = FakeAgv(agvId, online, faulty)
 
 def onSigInt(signum, frame):
     global executedTasks, logger

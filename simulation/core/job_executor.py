@@ -40,9 +40,13 @@ class JobExecutor:
 
     def kill(self):
         self.__killed = True
-        self.__thread.join()
-        self.__thread = None
-        self.__unassignJob()
+        if threading.current_thread() == self.__thread:
+            print("Kill from current thread!")
+            return
+        if self.__thread is not None:
+            self.__thread.join()
+            self.__thread = None
+            self.__unassignJob()
 
     def tasksCount(self):
         if self.__job is None:
@@ -85,23 +89,31 @@ class JobExecutor:
                 self.__path = self.__waitForFreePath(points[0], points[1])
                 self.__pathPoint = 0
                 self.__state = "running"
+
                 for point in self.__path:
                     self.__taskExecutor.execute(point)
+                    if self.__killed:
+                        raise JobExecutorException()
+
                     self.__pathPoint += 1
                     self.__waitForFreeSegment(self.__path, self.__pathPoint)
+
                 self.__owner.trafficController().revokePath(self.__path, self)
             self.__onJobFinished()
         except JobExecutorException:
+            print("Handling kill")
             return
         finally:
             if self.__path is not None:
                 self.__owner.trafficController().revokePath(self.__path, self)
+            self.__unassignJob()
 
     def __onJobFinished(self):
         self.__unassignJob()
         self.__owner.onExecutorFinished()
 
     def __unassignJob(self):
+        print("Unassign job")
         self.__state = "idle"
         self.__job = None
         self.__busy = False
@@ -113,9 +125,6 @@ class JobExecutor:
         self.__state = "waiting_for_path"
         path = self.__owner.trafficController().requestPath(source, destination, self)
         while path is None:
-            if self.__killed:
-                raise JobExecutorException()
-
             path = self.__owner.trafficController().requestPath(source, destination, self)
             time.sleep(1)
         return path
@@ -123,9 +132,6 @@ class JobExecutor:
     def __waitForFreeSegment(self, path, startingPoint):
         self.__state = "waiting_for_path"
         while not self.__owner.trafficController().requestNextSegment(path, self, startingPoint):
-            if self.__killed:
-                raise JobExecutorException()
-
             time.sleep(1)
 
 

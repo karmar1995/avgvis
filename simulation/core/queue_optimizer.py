@@ -31,9 +31,12 @@ class QueueOptimizer:
                 self.__traverser.assignSequence(sequence=tasksToOptimize)
                 for i in range(0, iterations):
                     agents = list()
-                    for agentId in range(0, self.__executorsManager.onlineExecutorsNumber()):
+                    for agentId in range(0, executorsNumber):
                         agent = self.__createAgent(self.__traverser)
                         agents.append(agent)
+
+                    if len(agents) == 0:
+                        raise Exception("Empty agents to optimize queue!")
 
                     while not self.__traverser.finished():
                         for agent in agents:

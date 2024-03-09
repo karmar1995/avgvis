@@ -41,5 +41,7 @@ class AgvTaskExecutor(TaskExecutor):
 
     def __requestStatus(self):
         status = self.__agvControllerClient.requestAgvStatus(self.__agvId)
+        if status is None:
+            raise Exception("No response!")
         self.updateStatus(status)
         return status

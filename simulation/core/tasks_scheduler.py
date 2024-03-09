@@ -16,7 +16,11 @@ class TasksScheduler:
     def __processQueue(self):
         self.__started = True
         while not self.__killed:
+            print("Refreshing executors - TS")
+            self.__executorsManager.refreshExecutors()
+            print("Optimizing queue - TS")
             self.optimizeQueue(iterations=1000)  # todo: un-hardcode this stuff
+            print("Dispatching queue - TS")
             self.dispatchTasks()
             time.sleep(1)
 

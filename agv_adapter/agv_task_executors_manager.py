@@ -1,4 +1,4 @@
-import time, threading
+import time, threading, inspect
 from simulation.core.tasks_executor_manager import TasksExecutorManager
 from agv_adapter.agv_task_executor import AgvTaskExecutor
 from agv_adapter.agv_controller_client import AgvControllerClient
@@ -15,6 +15,7 @@ class AgvTaskExecutorManager(TasksExecutorManager):
         self.__pollingThread = None
         self.__ensureClientRunning()
         self.__createRefreshThread()
+        self.__refreshCounter = 0
 
     def tasksExecutors(self):
         return list(self.__agvTaskExecutors.values())
@@ -35,14 +36,28 @@ class AgvTaskExecutorManager(TasksExecutorManager):
         self.__broadcastExecutorsChanged()
 
     def __broadcastExecutorsChanged(self):
+        curframe = inspect.currentframe()
+        calframe = inspect.getouterframes(curframe, 2)
+        print('Broadcast caller name:', calframe[1][3])
         for observerId in self.__observers:
             self.__observers[observerId].onTasksExecutorsChanged()
 
     def refreshTasksExecutors(self):
-        availableAgvIds = self.__agvControllerClient.requestAgvsIds()
-        self.__unregisterUnavailableExecutors(availableAgvIds)
-        self.__refreshAvailableExecutors(availableAgvIds)
-        self.__broadcastExecutorsChanged()
+        print("Trying to refresh executors")
+        if self.__agvControllerClient.busy() or not self.isClientRunning():
+            return
+        if self.__refreshCounter > 2:
+            print("Refreshing executors")
+            self.__refreshCounter = 0
+            newAvailableAgvIds = self.__agvControllerClient.requestAgvsIds()
+            if newAvailableAgvIds is not None and newAvailableAgvIds != self.__availableAgvs():
+                self.__unregisterUnavailableExecutors(newAvailableAgvIds)
+                self.__registerNewAvailableExecutors(newAvailableAgvIds)
+                self.__broadcastExecutorsChanged()
+            self.__refreshExecutors()
+            print("Refreshed executors")
+        else:
+            self.__refreshCounter += 1
 
     def __unregisterUnavailableExecutors(self, availableAgvIds):
         executorsToCleanup = []
@@ -53,17 +68,26 @@ class AgvTaskExecutorManager(TasksExecutorManager):
         for agvId in executorsToCleanup:
             del self.__agvTaskExecutors[agvId]
 
-    def __refreshAvailableExecutors(self, availableAgvIds):
+    def __registerNewAvailableExecutors(self, availableAgvIds):
         for agvId in availableAgvIds:
             agvStatus = self.__agvControllerClient.requestAgvStatus(agvId)
+            if agvStatus is None:
+                raise Exception("No response!")
+
             if agvId not in self.__agvTaskExecutors:
                 self.__agvTaskExecutors[agvId] = AgvTaskExecutor(agvId, self.__agvControllerClient, agvStatus, self)
-            else:
-                self.__agvTaskExecutors[agvId].updateStatus(agvStatus)
+
+    def __refreshExecutors(self):
+        for agvId in self.__agvTaskExecutors:
+            self.__agvTaskExecutors[agvId].updateStatus(self.__agvControllerClient.requestAgvStatus(agvId))
+
+    def __availableAgvs(self):
+        return list(self.__agvTaskExecutors.keys())
 
     def __cleanupTasksExecutors(self):
-        self.__agvTaskExecutors = dict()
-        self.__broadcastExecutorsChanged()
+        if len(self.__availableAgvs()) > 0:
+            self.__agvTaskExecutors = dict()
+            self.__broadcastExecutorsChanged()
 
     def __ensureClientRunning(self):
         if not self.isClientRunning():
