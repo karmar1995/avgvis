@@ -23,6 +23,8 @@ class AgvTaskExecutor(TaskExecutor):
             time.sleep(1)
 
     def updateStatus(self, status):
+        if status is None:
+            return
         self.__location = status.location
 
         onlineStatusChanged = self.__online != status.online
