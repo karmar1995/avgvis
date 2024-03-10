@@ -101,7 +101,7 @@ class AgvControllerServer:
         if request['id'] == "GetAgvStatus":
             response = self.agvs[request['agv_id']].status()
         if request['id'] == "GoToPoints":
-            self.agvs[request['agv_id']].goToPoint(request['points'][-1], request['task_id'])
+            self.agvs[request['agv_id']].goToPoint(request['points'][0], request['task_id'])
             response = { 'accepted': True }
         if request['id'] == "GoToPoint":
             self.agvs[request['agv_id']].goToPoint(request['point'], request['task_id'])

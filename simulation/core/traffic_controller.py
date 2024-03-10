@@ -31,6 +31,9 @@ class TrafficController:
                 return True
         return False
 
+    def segmentNodes(self, path, startingPoint):
+        return self.__segmentNodes(path, startingPoint, LOCK_RANGE)
+
     def revokePath(self, path, executor):
         with self.__lock:
             self.__unassignSegment(path, executor, 0, len(path))
@@ -69,6 +72,15 @@ class TrafficController:
                 break
             i += 1
         return True
+    def __segmentNodes(self, path, startingPoint, endingPoint):
+        i = startingPoint
+        segmentNodes = []
+        while i < len(path):
+            segmentNodes.append(path[i])
+            i += 1
+            if (i - startingPoint) == endingPoint:
+                break
+        return segmentNodes
 
     def __assignSegment(self, path, executor, startingPoint, endingPoint):
         i = startingPoint + 1

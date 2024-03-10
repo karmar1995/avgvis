@@ -88,9 +88,9 @@ class JobExecutor:
                 self.__path = self.__waitForFreePath(points[0], points[1])
                 self.__pathPoint = 0
 
-                for point in self.__path:
+                for _ in self.__path:
                     self.__state = "running"
-                    self.__taskExecutor.execute(point, self.__job[self.__currentTask].taskId())
+                    self.__taskExecutor.execute(self.__currentSegmentNodes(), self.__job[self.__currentTask].taskId())
                     if self.__killed:
                         raise JobExecutorException()
 
@@ -130,6 +130,9 @@ class JobExecutor:
         self.__state = "waiting_for_path"
         while not self.__owner.trafficController().requestNextSegment(path, self, startingPoint):
             time.sleep(1)
+
+    def __currentSegmentNodes(self):
+        return self.__owner.trafficController().segmentNodes(self.__path, self.__pathPoint)
 
 
 class JobExecutorView:

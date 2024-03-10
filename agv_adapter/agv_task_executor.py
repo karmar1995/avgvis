@@ -18,10 +18,10 @@ class AgvTaskExecutor(TaskExecutor):
 
     def execute(self, task, taskId):
         print("Requesting: {} go to point: {}".format(self.__agvId, task))
-        self.__agvControllerClient.requestGoToPoints(self.__agvId, [task], taskId)
+        self.__agvControllerClient.requestGoToPoints(self.__agvId, task, taskId)
 
         def locationPredicate():
-            return self.getLocation() == str(task)
+            return self.getLocation() == str(task[0])
 
         def statusPredicate():
             print("Waiting for status not busy, current: {}".format(self.__status))
