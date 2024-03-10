@@ -1,4 +1,4 @@
-from simulation.core.task_executor import TaskExecutor
+from simulation.core.task_executor import TaskExecutor, TaskExecutorException
 import threading, time
 
 
@@ -18,6 +18,7 @@ class JobExecutor:
         self.__state = "idle"
         self.__path = None
         self.__killed = False
+        self.__remainingJob = None
 
     def busy(self):
         return self.__busy
@@ -73,6 +74,8 @@ class JobExecutor:
         return self.__pathPoint
 
     def remainingJob(self):
+        if self.__remainingJob is not None:
+            return self.__remainingJob
         if self.__job is not None:
             return self.__job[self.currentTask():]
         return []
@@ -99,6 +102,9 @@ class JobExecutor:
 
                 self.__owner.trafficController().revokePath(self.__path, self)
             self.__onJobFinished()
+        except TaskExecutorException:
+            self.__backupRemainingJob()
+            return
         except JobExecutorException:
             return
         finally:
@@ -133,6 +139,9 @@ class JobExecutor:
 
     def __currentSegmentNodes(self):
         return self.__owner.trafficController().segmentNodes(self.__path, self.__pathPoint)
+
+    def __backupRemainingJob(self):
+        self.__remainingJob = self.remainingJob()
 
 
 class JobExecutorView:

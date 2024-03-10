@@ -49,9 +49,9 @@ class AgvTaskExecutorManager(TasksExecutorManager):
                 self.__unregisterUnavailableExecutors(newAvailableAgvIds)
                 self.__registerNewAvailableExecutors(newAvailableAgvIds)
                 self.__broadcastExecutorsChanged()
-            self.__refreshExecutors()
         else:
             self.__refreshCounter += 1
+        self.__refreshExecutors()
 
     def __unregisterUnavailableExecutors(self, availableAgvIds):
         executorsToCleanup = []
@@ -75,11 +75,19 @@ class AgvTaskExecutorManager(TasksExecutorManager):
         for agvId in self.__agvTaskExecutors:
             self.__agvTaskExecutors[agvId].updateStatus(self.__agvControllerClient.requestAgvStatus(agvId))
 
+    def __refreshOfflineExecutors(self):
+        for agvId in self.__agvTaskExecutors:
+            if not self.__agvTaskExecutors[agvId].isOnline:
+                self.__agvTaskExecutors[agvId].updateStatus(self.__agvControllerClient.requestAgvStatus(agvId))
+
     def __availableAgvs(self):
         return list(self.__agvTaskExecutors.keys())
 
     def __cleanupTasksExecutors(self):
         if len(self.__availableAgvs()) > 0:
+            for agvId in self.__agvTaskExecutors:
+                self.__agvTaskExecutors[agvId].kill()
+
             self.__agvTaskExecutors = dict()
             self.__broadcastExecutorsChanged()
 

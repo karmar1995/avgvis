@@ -1,6 +1,9 @@
-import time
-from simulation.core.task_executor import TaskExecutor
+import time, random
+from simulation.core.task_executor import TaskExecutor, TaskExecutorException
 from agv_adapter.agv_controller_client import AgvControllerClient
+
+
+BASE_POLLING_PROBABILITY = 0.1
 
 
 class AgvTaskExecutor(TaskExecutor):
@@ -12,6 +15,7 @@ class AgvTaskExecutor(TaskExecutor):
         self.__online = initialStatus.online
         self.__statusObserver = statusObserver
         self.__status = ""
+        self.__killed = False
 
     def initialize(self):
         self.__requestStatus()
@@ -55,6 +59,9 @@ class AgvTaskExecutor(TaskExecutor):
     def isOnline(self):
         return self.__online
 
+    def kill(self):
+        self.__killed = True
+
     def __requestStatus(self):
         status = self.__agvControllerClient.requestAgvStatus(self.__agvId)
         if status is not None:
@@ -62,11 +69,18 @@ class AgvTaskExecutor(TaskExecutor):
         return status is not None
 
     def __waitFor(self, predicate):
+        pollingProbability = BASE_POLLING_PROBABILITY
         retries = 10
+        sleepTime = 0.5
         while not predicate():
+            if self.__killed:
+                raise TaskExecutorException()
+
             if retries == 0:
                 self.assumeOffline()
                 return
-            if not self.__requestStatus():
-                retries -= 1
-            time.sleep(1)
+            if random.random() < pollingProbability:
+                pollingProbability += BASE_POLLING_PROBABILITY
+                if not self.__requestStatus():
+                    retries -= 1
+            time.sleep(random.uniform(sleepTime * 0.5, sleepTime * 1.5))
