@@ -80,6 +80,9 @@ class JobExecutor:
             return self.__job[self.currentTask():]
         return []
 
+    def location(self):
+        return self.__taskExecutor.getLocation()
+
     def __executeJob(self):
         try:
             for i in range(0, len(self.__job)):

@@ -11,7 +11,7 @@ class FakeAgv:
     def __init__(self, agvId, online = True, faulty = False):
         self.agvId = agvId
         self.online = online
-        self.location = "-1"
+        self.location = random.choice(["0", "1", "2", "3"])
         self.__workingThread = None
         self.__headingToLocation = ""
         self.__taskId = -1

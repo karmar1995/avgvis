@@ -38,6 +38,16 @@ class TrafficController:
         with self.__lock:
             self.__unassignSegment(path, executor, 0, len(path))
 
+    def lowestCost(self, source, destination):
+        path = self.__system.graph.get_k_shortest_paths(source, destination, k=1)[0]
+        cost = 0
+        i = 1
+        while i < len(path):
+            cost += self.__system.graph[path[i - 1], path[i]]
+            i += 1
+        return cost
+
+
     def __pickFreePath(self, paths):
         for path in paths:
             if self.__freePath(path):

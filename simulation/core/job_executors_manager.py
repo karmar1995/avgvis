@@ -33,6 +33,19 @@ class JobExecutorsManager:
                 executor = self.__executors[executorId]
         return executor
 
+    def closestFreeExecutor(self, task):
+        candidates = self.freeExecutors()
+        closestCost = None
+        closestExecutor = None
+        for executor in candidates:
+            source = int(executor.location())
+            destination = task.source()
+            transitCost = self.trafficController().lowestCost(source, destination)
+            if closestCost is None or closestCost > transitCost:
+                closestCost = transitCost
+                closestExecutor = executor
+        return closestExecutor
+
     def onExecutorFinished(self):
         pass
 
