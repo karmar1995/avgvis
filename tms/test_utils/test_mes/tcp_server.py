@@ -91,7 +91,7 @@ class TcpServer():
             sys.stdout = None
             try:
                 if len(tmp) == 0:
-                    tmp = list(range(23, 32))
+                    tmp = list(range(23, 36))
                     random.shuffle(tmp)
                 if len(self.__tasksLists) > 0:
                     acceptedOrderId = -1
