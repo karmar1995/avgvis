@@ -1,3 +1,5 @@
+import copy
+from simulation.core.task import Task
 from simulation.core.task_executor import TaskExecutor, TaskExecutorException
 import threading, time
 
@@ -7,7 +9,7 @@ class JobExecutorException(Exception):
 
 
 class JobExecutor:
-    def  __init__(self, actualExecutor: TaskExecutor, owner):
+    def __init__(self, actualExecutor: TaskExecutor, owner):
         self.__job = None
         self.__taskExecutor = actualExecutor
         self.__currentTask = 0
@@ -81,29 +83,14 @@ class JobExecutor:
         return []
 
     def location(self):
-        return self.__taskExecutor.getLocation()
+        return int(self.__taskExecutor.getLocation())
 
     def __executeJob(self):
         try:
+            self.__goToSourceLocation()
             for i in range(0, len(self.__job)):
-                if self.__killed:
-                    raise JobExecutorException()
-
                 self.__currentTask = i
-                points = self.__job[self.__currentTask].pointsSequence()
-                self.__path = self.__waitForFreePath(points[0], points[1])
-                self.__pathPoint = 0
-
-                for _ in self.__path:
-                    self.__state = "running"
-                    self.__taskExecutor.execute(self.__currentSegmentNodes(), self.__job[self.__currentTask].taskId())
-                    if self.__killed:
-                        raise JobExecutorException()
-
-                    self.__pathPoint += 1
-                    self.__waitForFreeSegment(self.__path, self.__pathPoint)
-
-                self.__owner.trafficController().revokePath(self.__path, self)
+                self.__executeTask(self.__job[self.__currentTask])
             self.__onJobFinished()
         except TaskExecutorException:
             self.__backupRemainingJob()
@@ -114,6 +101,30 @@ class JobExecutor:
             if self.__path is not None:
                 self.__owner.trafficController().revokePath(self.__path, self)
             self.__unassignJob()
+
+    def __executeTask(self, task):
+        if self.__killed:
+            raise JobExecutorException()
+
+        points = task.pointsSequence()
+        self.__path = self.__waitForFreePath(points[0], points[1])
+        self.__pathPoint = 0
+
+        for _ in self.__path:
+            self.__state = "running"
+            self.__taskExecutor.execute(self.__currentSegmentNodes(), task.taskId())
+            if self.__killed:
+                raise JobExecutorException()
+
+            self.__pathPoint += 1
+            self.__waitForFreeSegment(self.__path, self.__pathPoint)
+
+        self.__owner.trafficController().revokePath(self.__path, self)
+
+    def __goToSourceLocation(self):
+        if self.location() != self.__job[0].source():
+            dummyTaskId = -1
+            self.__executeTask(Task(dummyTaskId, self.location(), self.__job[0].source(), self.__job[0].taskId()))
 
     def __onJobFinished(self):
         self.__unassignJob()
