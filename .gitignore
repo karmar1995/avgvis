@@ -66,6 +66,10 @@ db.sqlite3-journal
 instance/
 .webassets-cache
 
+# Tms stuff
+*mes*log*
+*agv*log*
+
 # Scrapy stuff:
 .scrapy
 
