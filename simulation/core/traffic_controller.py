@@ -47,6 +47,8 @@ class TrafficController:
             i += 1
         return cost
 
+    def isValidLocation(self, location):
+        return location in self.__system.graph.vs.indices
 
     def __pickFreePath(self, paths):
         for path in paths:

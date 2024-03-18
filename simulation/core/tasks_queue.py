@@ -73,6 +73,9 @@ class TasksQueue:
     def popTask(self):
         return self.__queue.pop(0)
 
+    def nextTask(self):
+        return self.__queue[0]
+
     def empty(self):
         return len(self.__queue) == 0
 

@@ -28,8 +28,10 @@ class TasksScheduler:
     def dispatchTasks(self):
         for _ in range(0, self.__executorsManager.freeExecutorsNumber()):
             if not self.__queueOptimizer.queue().empty():
-                task = self.__queueOptimizer.queue().popTask()
-                self.__executorsManager.closestFreeExecutor(task).executeJob([task])
+                task = self.__queueOptimizer.queue().nextTask()
+                executor = self.__executorsManager.closestFreeExecutor(task)
+                if executor is not None:
+                    executor.executeJob([self.__queueOptimizer.queue().popTask()])
 
     # only for testing purposes
     def waitForQueueProcessed(self):

@@ -38,10 +38,11 @@ class JobExecutorsManager:
         closestCost = None
         closestExecutor = None
         for executor in candidates:
-            transitCost = self.trafficController().lowestCost(executor.location(), task.source())
-            if closestCost is None or closestCost > transitCost:
-                closestCost = transitCost
-                closestExecutor = executor
+            if self.trafficController().isValidLocation(executor.location()):
+                transitCost = self.trafficController().lowestCost(executor.location(), task.source())
+                if closestCost is None or closestCost > transitCost:
+                    closestCost = transitCost
+                    closestExecutor = executor
         return closestExecutor
 
     def onExecutorFinished(self):
