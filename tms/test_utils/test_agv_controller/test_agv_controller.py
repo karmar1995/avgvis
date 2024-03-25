@@ -3,8 +3,9 @@ import socket, sys, time, signal, select, json, threading
 from tms.test_utils.logger import Logger
 
 
-FAILURE_PROBABILITY = 0.1
+FAILURE_PROBABILITY = 0.15
 EMERGENCY_PROBABILITY = 0.0
+AGV_NUMBER = 5
 
 
 class FakeAgv:
@@ -37,19 +38,19 @@ class FakeAgv:
         if self.faulty:
             if random.random() < FAILURE_PROBABILITY:
                 self.online = False
-                print("Faulty AGV going offline")
+                print("Faulty AGV going offline: {}".format(self.agvId))
                 time.sleep(random.gauss(10))
                 self.online = True
-                print("Faulty AGV going online")
+                print("Faulty AGV going online: {}".format(self.agvId))
             else:
                 if random.random() < EMERGENCY_PROBABILITY:
                     self.online = False
                     self.dead = True
-                    print("Faulty AGV going dead")
+                    print("Faulty AGV going dead: {}".format(self.agvId))
                     time.sleep(random.gauss(10))
                     self.dead = False
                     self.online = True
-                    print("Faulty AGV going dead")
+                    print("Faulty AGV going dead: {}".format(self.agvId))
 
         self.__workingThread = None
 
@@ -61,20 +62,29 @@ class FakeAgv:
 
 
 class AgvControllerServer:
-    def __init__(self):
-        self.socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+    def __init__(self, host, port):
+        self.host = host
+        self.port = port
+        self.socket = None
         self.connection = None
         self.__workingThread = None
         self.agvs = {}
-        self.addFakeAgv('agv1', online=True, faulty=True)
-        self.addFakeAgv('agv2', online=True, faulty=True)
-        self.addFakeAgv('agv3', online=True, faulty=True)
-        self.addFakeAgv('agv4', online=False)
 
-    def connect(self, host, port):
-        self.socket.bind((host, port))
-        self.socket.listen(1)
-        self.connection, _ = self.socket.accept()
+        for i in range(1, AGV_NUMBER+1):
+            self.addFakeAgv('agv{}'.format(i), online=True, faulty=True)
+#        self.addFakeAgv('agv_offline', online=False)
+
+    def connect(self):
+        try:
+            tempSocket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+            tempSocket.bind((self.host, self.port))
+            tempSocket.listen(1)
+            self.socket = tempSocket
+            self.connection, _ = self.socket.accept()
+            print("Connected")
+        except OSError:
+            self.socket = None
+            self.connection = None
 
     def run(self):
         while True:
@@ -129,6 +139,9 @@ s2 = signal.signal(signal.SIGTERM, onSigInt)
 logger = Logger("test_agv_log_{}.txt".format(host).replace('.', '_'))
 logger.logLine("Starting test agv on: {}:{}".format(host, port))
 
-agvServer = AgvControllerServer()
-agvServer.connect(host, port)
-agvServer.run()
+agvServer = AgvControllerServer(host, port)
+agvServer.connect()
+if agvServer.socket is not None:
+    agvServer.run()
+else:
+    print("Cannot open socket")

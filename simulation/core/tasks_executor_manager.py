@@ -6,6 +6,9 @@ class TasksExecutorManager:
     def refreshTasksExecutors(self):
         raise NotImplementedError()
 
+    def performRequests(self):
+        raise NotImplementedError()
+
     def addTasksExecutorObserver(self, observer):
         raise NotImplementedError()
 

@@ -49,22 +49,24 @@ class AgvControllerClient:
 
     def __waitForResponse(self):
         response = self.__tcpClient.readDataFromServer()
-        while response is None:
+        for i in range(0, 100):
             if not self.connected():
                 return None
             time.sleep(0.1)
             response = self.__tcpClient.readDataFromServer()
+            if response is not None:
+                return response
         return response
 
     def __sendRequest(self, request):
         if self.connected():
-            if self.__lastLockedThread == threading.current_thread():
+            if self.__lastLockedThread == threading.current_thread().name:
                 raise Exception("Double-locked by the same thread!")
 
             with self.__lock:
-                self.__lastLockedThread = threading.current_thread()
+                self.__lastLockedThread = threading.current_thread().name
                 self.__tcpClient.sendDataToServer(request.encode('ASCII'))
                 response = self.__waitForResponse()
-                self.__lastLockedThread = None
+                self.__lastLockedThread = ""
                 return response
         return None

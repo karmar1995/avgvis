@@ -2,6 +2,8 @@ import time, threading, inspect
 from simulation.core.tasks_executor_manager import TasksExecutorManager
 from agv_adapter.agv_task_executor import AgvTaskExecutor
 from agv_adapter.agv_controller_client import AgvControllerClient
+from agv_adapter.agv_state_cache import AgvStateCache
+from agv_adapter.agv_requestor import AgvRequestor
 
 
 class AgvTaskExecutorManager(TasksExecutorManager):
@@ -13,9 +15,11 @@ class AgvTaskExecutorManager(TasksExecutorManager):
         self.__observers = dict()
         self.__killed = False
         self.__pollingThread = None
+        self.__refreshCounter = 0
+        self.__agvCache = AgvStateCache()
+        self.__agvRequestor = AgvRequestor()
         self.__ensureClientRunning()
         self.__createRefreshThread()
-        self.__refreshCounter = 0
 
     def tasksExecutors(self):
         return list(self.__agvTaskExecutors.values())
@@ -39,19 +43,25 @@ class AgvTaskExecutorManager(TasksExecutorManager):
         for observerId in self.__observers:
             self.__observers[observerId].onTasksExecutorsChanged()
 
+    def performRequests(self):
+        self.__agvRequestor.processRequests()
+
     def refreshTasksExecutors(self):
         if self.__agvControllerClient.busy() or not self.isClientRunning():
             return
-        if self.__refreshCounter > 2:
+        if self.__refreshCounter > 3:
             self.__refreshCounter = 0
-            newAvailableAgvIds = self.__agvControllerClient.requestAgvsIds()
-            if newAvailableAgvIds is not None and newAvailableAgvIds != self.__availableAgvs():
-                self.__unregisterUnavailableExecutors(newAvailableAgvIds)
-                self.__registerNewAvailableExecutors(newAvailableAgvIds)
-                self.__broadcastExecutorsChanged()
+            self.__updateAvailableAgvs()
+            self.__refreshExecutorsStatus()
         else:
             self.__refreshCounter += 1
-        self.__refreshExecutors()
+
+    def __updateAvailableAgvs(self):
+        newAvailableAgvIds = self.__agvControllerClient.requestAgvsIds()
+        if newAvailableAgvIds is not None and newAvailableAgvIds != self.__availableAgvs():
+            self.__unregisterUnavailableExecutors(newAvailableAgvIds)
+            self.__registerNewAvailableExecutors(newAvailableAgvIds)
+            self.__broadcastExecutorsChanged()
 
     def __unregisterUnavailableExecutors(self, availableAgvIds):
         executorsToCleanup = []
@@ -61,24 +71,23 @@ class AgvTaskExecutorManager(TasksExecutorManager):
 
         for agvId in executorsToCleanup:
             del self.__agvTaskExecutors[agvId]
+            self.__agvCache.cleanupAgvState(agvId)
 
     def __registerNewAvailableExecutors(self, availableAgvIds):
         for agvId in availableAgvIds:
-            agvStatus = self.__agvControllerClient.requestAgvStatus(agvId)
-            if agvStatus is None:
-                raise Exception("No response!")
+            agvStatus = self.__agvCache.updateAgvState(agvId)
+            if agvStatus is not None:
+                if agvId not in self.__agvTaskExecutors:
+                    self.__agvTaskExecutors[agvId] = AgvTaskExecutor(agvId, self.__agvCache, self.__agvRequestor, self, agvStatus)
 
-            if agvId not in self.__agvTaskExecutors:
-                self.__agvTaskExecutors[agvId] = AgvTaskExecutor(agvId, self.__agvControllerClient, agvStatus, self)
-
-    def __refreshExecutors(self):
+    def __refreshExecutorsStatus(self):
         for agvId in self.__agvTaskExecutors:
-            self.__agvTaskExecutors[agvId].updateStatus(self.__agvControllerClient.requestAgvStatus(agvId))
+            self.__agvTaskExecutors[agvId].updateStatus(self.__agvCache.updateAgvState(agvId))
 
     def __refreshOfflineExecutors(self):
         for agvId in self.__agvTaskExecutors:
             if not self.__agvTaskExecutors[agvId].isOnline:
-                self.__agvTaskExecutors[agvId].updateStatus(self.__agvControllerClient.requestAgvStatus(agvId))
+                self.__agvTaskExecutors[agvId].updateStatus(self.__agvCache.updateAgvState(agvId))
 
     def __availableAgvs(self):
         return list(self.__agvTaskExecutors.keys())
@@ -92,12 +101,23 @@ class AgvTaskExecutorManager(TasksExecutorManager):
             self.__broadcastExecutorsChanged()
 
     def __ensureClientRunning(self):
+        print("Connecting to AGV Hub...")
         if not self.isClientRunning():
-            self.__agvControllerClient = AgvControllerClient(self.__ip, self.__port)
-        if self.isClientRunning():
-            self.refreshTasksExecutors()
-        else:
+            self.__setupAgvClient()
+        if not self.isClientRunning():
             self.__cleanupTasksExecutors()
+
+    def __setupAgvClient(self):
+        # since connecting to AGV Controller may take a while, clean up "old" client which will soon become invalid
+        # so the other threads do not user corrupted client
+        self.__agvCache.setClient(None)
+        self.__agvRequestor.setClient(None)
+        # update the client
+        self.__agvControllerClient = AgvControllerClient(self.__ip, self.__port)
+        if self.isClientRunning():
+            # if connection succeeded, inject the dependencies
+            self.__agvCache.setClient(self.__agvControllerClient)
+            self.__agvRequestor.setClient(self.__agvControllerClient)
 
     def __reconnect(self):
         while not self.isClientRunning():

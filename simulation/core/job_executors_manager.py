@@ -71,6 +71,9 @@ class JobExecutorsManager:
     def refreshExecutors(self):
         self.__taskExecutorsManager.refreshTasksExecutors()
 
+    def performRequests(self):
+        self.__taskExecutorsManager.performRequests()
+
     def trafficController(self):
         return self.__trafficController
 

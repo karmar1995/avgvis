@@ -1,6 +1,5 @@
 import time, random
 from simulation.core.task_executor import TaskExecutor, TaskExecutorException
-from agv_adapter.agv_controller_client import AgvControllerClient
 
 
 BASE_POLLING_PROBABILITY = 0.1
@@ -8,12 +7,13 @@ BASE_POLLING_PROBABILITY = 0.1
 
 class AgvTaskExecutor(TaskExecutor):
 
-    def __init__(self, agvId, agvControllerClient: AgvControllerClient, initialStatus, statusObserver):
+    def __init__(self, agvId, agvStatusProvider, agvRequestor, statusObserver, initialStatus):
         self.__agvId = agvId
-        self.__agvControllerClient = agvControllerClient
+        self.__agvStatusProvider = agvStatusProvider
+        self.__agvRequestor = agvRequestor
+        self.__statusObserver = statusObserver
         self.__location = initialStatus.location
         self.__online = initialStatus.online
-        self.__statusObserver = statusObserver
         self.__status = ""
         self.__killed = False
 
@@ -22,7 +22,7 @@ class AgvTaskExecutor(TaskExecutor):
 
     def execute(self, task, taskId):
         print("Requesting: {} go to point: {}".format(self.__agvId, task))
-        self.__agvControllerClient.requestGoToPoints(self.__agvId, task, taskId)
+        self.__agvRequestor.requestGoToPoints(self.__agvId, task, taskId)
 
         def locationPredicate():
             return self.getLocation() == str(task[0])
@@ -63,7 +63,7 @@ class AgvTaskExecutor(TaskExecutor):
         self.__killed = True
 
     def __requestStatus(self):
-        status = self.__agvControllerClient.requestAgvStatus(self.__agvId)
+        status = self.__agvStatusProvider.getAgvStatus(self.__agvId)
         if status is not None:
             self.updateStatus(status)
         return status is not None
