@@ -15,10 +15,9 @@ class AgvTaskExecutorManager(TasksExecutorManager):
         self.__observers = dict()
         self.__killed = False
         self.__pollingThread = None
-        self.__refreshCounter = 0
         self.__agvCache = AgvStateCache()
         self.__agvRequestor = AgvRequestor()
-        self.__ensureClientRunning()
+
         self.__createRefreshThread()
 
     def tasksExecutors(self):
@@ -47,14 +46,11 @@ class AgvTaskExecutorManager(TasksExecutorManager):
         self.__agvRequestor.processRequests()
 
     def refreshTasksExecutors(self):
-        if self.__agvControllerClient.busy() or not self.isClientRunning():
+        if not self.isClientRunning() or self.__agvControllerClient.busy():
             return
-        if self.__refreshCounter > 3:
-            self.__refreshCounter = 0
-            self.__updateAvailableAgvs()
-            self.__refreshExecutorsStatus()
-        else:
-            self.__refreshCounter += 1
+
+        self.__updateAvailableAgvs()
+        self.__refreshExecutorsStatus()
 
     def __updateAvailableAgvs(self):
         newAvailableAgvIds = self.__agvControllerClient.requestAgvsIds()
@@ -82,12 +78,18 @@ class AgvTaskExecutorManager(TasksExecutorManager):
 
     def __refreshExecutorsStatus(self):
         for agvId in self.__agvTaskExecutors:
-            self.__agvTaskExecutors[agvId].updateStatus(self.__agvCache.updateAgvState(agvId))
+            try:
+                self.__agvTaskExecutors[agvId].updateStatus(self.__agvCache.updateAgvState(agvId))
+            except KeyError:
+                pass
 
     def __refreshOfflineExecutors(self):
         for agvId in self.__agvTaskExecutors:
-            if not self.__agvTaskExecutors[agvId].isOnline:
-                self.__agvTaskExecutors[agvId].updateStatus(self.__agvCache.updateAgvState(agvId))
+            try:
+                if not self.__agvTaskExecutors[agvId].isOnline:
+                    self.__agvTaskExecutors[agvId].updateStatus(self.__agvCache.updateAgvState(agvId))
+            except KeyError:
+                pass
 
     def __availableAgvs(self):
         return list(self.__agvTaskExecutors.keys())
@@ -101,7 +103,6 @@ class AgvTaskExecutorManager(TasksExecutorManager):
             self.__broadcastExecutorsChanged()
 
     def __ensureClientRunning(self):
-        print("Connecting to AGV Hub...")
         if not self.isClientRunning():
             self.__setupAgvClient()
         if not self.isClientRunning():

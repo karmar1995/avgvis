@@ -36,13 +36,10 @@ class TcpClient:
 
     def connect(self):
         try:
-            print("Connecting to {}:{}...".format(self.__host, self.__port), end='')
             tempSocket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
             tempSocket.connect((self.__host, self.__port))
-            print("Connected")
             self.__socket = tempSocket
         except ConnectionRefusedError:
-            print("Cannot connect to: {}:{}".format(self.__host, self.__port))
             self.__socket = None
 
     def isConnected(self):

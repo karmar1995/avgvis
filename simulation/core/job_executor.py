@@ -8,6 +8,7 @@ class JobExecutorException(Exception):
     pass
 
 
+
 class JobExecutor:
     def __init__(self, actualExecutor: TaskExecutor, owner):
         self.__job = None
@@ -46,7 +47,12 @@ class JobExecutor:
         if threading.current_thread() == self.__thread:
             return
         if self.__thread is not None:
-            self.__thread.join()
+            print("Joining the job executor thread")
+            if self.__thread.is_alive():
+                self.__thread.join()
+                print("Joined the job executor thread")
+            else:
+                print("Job executor thread is dead")
             self.__thread = None
             self.__unassignJob()
 
@@ -94,8 +100,10 @@ class JobExecutor:
             self.__onJobFinished()
         except TaskExecutorException:
             self.__backupRemainingJob()
+            print("Task executor exception")
             return
         except JobExecutorException:
+            print("Job executor exception")
             return
         finally:
             if self.__path is not None:

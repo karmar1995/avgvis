@@ -2,6 +2,7 @@ import tempfile
 from flask import Flask, request, render_template, abort, send_file, redirect
 from dataclasses import dataclass
 from composition_root import CompositionRoot, TmsInitInfo, QueueObserver
+import logging
 
 @dataclass
 class AGV:
@@ -106,6 +107,10 @@ class WebTms:
 
 
 app = Flask(__name__)
+
+log = logging.getLogger('werkzeug')
+log.setLevel(logging.ERROR)
+
 tms = WebTms()
 
 @app.route('/')

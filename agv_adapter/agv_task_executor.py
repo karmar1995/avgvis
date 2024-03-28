@@ -21,14 +21,12 @@ class AgvTaskExecutor(TaskExecutor):
         self.__requestStatus()
 
     def execute(self, task, taskId):
-        print("Requesting: {} go to point: {}".format(self.__agvId, task))
         self.__agvRequestor.requestGoToPoints(self.__agvId, task, taskId)
 
         def locationPredicate():
             return self.getLocation() == str(task[0])
 
         def statusPredicate():
-            print("Waiting for status not busy, current: {}".format(self.__status))
             return self.__status != 'busy'
 
         self.__waitFor(locationPredicate)

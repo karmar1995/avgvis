@@ -1,4 +1,4 @@
-import random
+import random, threading
 from simulation.core.job_executor import JobExecutor, JobExecutorView
 from simulation.core.tasks_executor_manager import TasksExecutorManager
 
@@ -10,28 +10,32 @@ class JobExecutorsManager:
         self.__taskExecutorsManager.addTasksExecutorObserver(self)
         self.__trafficController = trafficController
         self.__queue = queue
+        self.__lock = threading.Lock()
 
     def freeExecutors(self):
-        res = []
-        for executorId in self.__executors:
-            if self.__executors[executorId].availableForJobs():
-                res.append(self.__executors[executorId])
-        return res
+        with self.__lock:
+            res = []
+            for executorId in self.__executors:
+                if self.__executors[executorId].availableForJobs():
+                    res.append(self.__executors[executorId])
+            return res
 
     def freeExecutorsNumber(self):
-        res = 0
-        for executorId in self.__executors:
-            if self.__executors[executorId].availableForJobs():
-                res += 1
-        return res
+        with self.__lock:
+            res = 0
+            for executorId in self.__executors:
+                if self.__executors[executorId].availableForJobs():
+                    res += 1
+            return res
 
     def freeExecutor(self):
-        executor = None
-        while executor is None:
-            executorId = random.choice(list(self.__executors.keys()))
-            if self.__executors[executorId].availableForJobs():
-                executor = self.__executors[executorId]
-        return executor
+        with self.__lock:
+            executor = None
+            while executor is None:
+                executorId = random.choice(list(self.__executors.keys()))
+                if self.__executors[executorId].availableForJobs():
+                    executor = self.__executors[executorId]
+            return executor
 
     def closestFreeExecutor(self, task):
         candidates = self.freeExecutors()
@@ -49,20 +53,23 @@ class JobExecutorsManager:
         pass
 
     def executorsNumber(self):
-        return len(self.__executors)
+        with self.__lock:
+            return len(self.__executors)
 
     def onlineExecutorsNumber(self):
-        res = 0
-        for executorId in self.__executors:
-            if self.__executors[executorId].online():
-                res += 1
-        return res
+        with self.__lock:
+            res = 0
+            for executorId in self.__executors:
+                if self.__executors[executorId].online():
+                    res += 1
+            return res
 
     def executorsViews(self):
-        res = list()
-        for executorId in self.__executors:
-            res.append(JobExecutorView(self.__executors[executorId]))
-        return res
+        with self.__lock:
+            res = list()
+            for executorId in self.__executors:
+                res.append(JobExecutorView(self.__executors[executorId]))
+            return res
 
     def onTasksExecutorsChanged(self):
         self.__unregisterUnavailableExecutors()
@@ -78,29 +85,31 @@ class JobExecutorsManager:
         return self.__trafficController
 
     def __unregisterUnavailableExecutors(self):
-        executorsToCleanup = []
-        for executorId in self.__executors:
-            found = False
-            for tasksExecutor in self.__taskExecutorsManager.tasksExecutors():
-                if tasksExecutor.getId() == executorId:
-                    found = True
-                    break
-            if not found:
-                executorsToCleanup.append(executorId)
+        with self.__lock:
+            executorsToCleanup = []
+            for executorId in self.__executors:
+                found = False
+                for tasksExecutor in self.__taskExecutorsManager.tasksExecutors():
+                    if tasksExecutor.getId() == executorId:
+                        found = True
+                        break
+                if not found:
+                    executorsToCleanup.append(executorId)
 
-        for executorId in executorsToCleanup:
-            self.__revokeJobFromUnavailableExecutor(self.__executors[executorId])
-            del self.__executors[executorId]
+            for executorId in executorsToCleanup:
+                self.__revokeJobFromUnavailableExecutor(self.__executors[executorId])
+                del self.__executors[executorId]
 
     def __revokeJobFromUnavailableExecutor(self, executor):
         self.__queue.batchEnqueue(executor.remainingJob())
         executor.kill()
 
     def __refreshAvailableExecutors(self):
-        for tasksExecutor in self.__taskExecutorsManager.tasksExecutors():
-            executorId = tasksExecutor.getId()
-            if executorId not in self.__executors:
-                self.__executors[executorId] = JobExecutor(tasksExecutor, self)
-            else:
-                if not tasksExecutor.isOnline() and self.__executors[executorId].busy():
-                    self.__revokeJobFromUnavailableExecutor(self.__executors[executorId])
+        with self.__lock:
+            for tasksExecutor in self.__taskExecutorsManager.tasksExecutors():
+                executorId = tasksExecutor.getId()
+                if executorId not in self.__executors:
+                    self.__executors[executorId] = JobExecutor(tasksExecutor, self)
+                else:
+                    if not tasksExecutor.isOnline() and self.__executors[executorId].busy():
+                        self.__revokeJobFromUnavailableExecutor(self.__executors[executorId])
