@@ -101,8 +101,8 @@ class JobExecutorsManager:
                 del self.__executors[executorId]
 
     def __revokeJobFromUnavailableExecutor(self, executor):
-        self.__queue.batchEnqueue(executor.remainingJob())
         executor.kill()
+        self.__queue.batchEnqueue(executor.remainingJob())
 
     def __refreshAvailableExecutors(self):
         with self.__lock:

@@ -40,11 +40,8 @@ class JobExecutor:
 
     def kill(self):
         self.__killed = True
-        if threading.current_thread() == self.__thread:
-            return
-        if self.__thread is not None:
-            if self.__thread.is_alive():
-                self.__thread.join()
+        if not self.__killed:
+            self.__thread.join()
             self.__thread = None
             self.__unassignJob()
 
