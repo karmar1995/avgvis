@@ -1,5 +1,5 @@
 import time, random
-from simulation.core.task_executor import TaskExecutor, TaskExecutorException
+from simulation.core.task_executor import TaskExecutor
 
 
 BASE_POLLING_PROBABILITY = 0.1
@@ -21,16 +21,23 @@ class AgvTaskExecutor(TaskExecutor):
         self.__requestStatus()
 
     def execute(self, task, taskId):
-        self.__agvRequestor.requestGoToPoints(self.__agvId, task, taskId)
+        try:
+            self.__agvRequestor.requestGoToPoints(self.__agvId, task, taskId)
 
-        def locationPredicate():
-            return self.getLocation() == str(task[0])
+            def locationPredicate():
+                return self.getLocation() == str(task[0])
 
-        def statusPredicate():
-            return self.__status != 'busy'
+            def statusPredicate():
+                return self.__status != 'busy'
 
-        self.__waitFor(locationPredicate)
-        self.__waitFor(statusPredicate)
+            if not self.__waitFor(locationPredicate):
+                return False
+            if not self.__waitFor(statusPredicate):
+                return False
+            return True
+        except Exception as e:
+            print("Unhandle AGV task executor exception: {}".format(str(e)), flush=True)
+
 
     def updateStatus(self, status):
         if status is None:
@@ -72,13 +79,14 @@ class AgvTaskExecutor(TaskExecutor):
         sleepTime = 0.5
         while not predicate():
             if self.__killed:
-                raise TaskExecutorException()
+                return False
 
             if retries == 0:
                 self.assumeOffline()
-                return
+                return False
             if random.random() < pollingProbability:
                 pollingProbability += BASE_POLLING_PROBABILITY
                 if not self.__requestStatus():
                     retries -= 1
             time.sleep(random.uniform(sleepTime * 0.5, sleepTime * 1.5))
+        return True

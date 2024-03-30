@@ -3,9 +3,10 @@ import socket, sys, time, signal, select, json, threading
 from tms.test_utils.logger import Logger
 
 
-FAILURE_PROBABILITY = 0.15
+FAILURE_PROBABILITY = 0.5
 EMERGENCY_PROBABILITY = 0.0
 AGV_NUMBER = 5
+SLEEP_TIME = 3
 
 
 class FakeAgv:
@@ -29,17 +30,17 @@ class FakeAgv:
     def __processingThread(self):
         self.__status = "running"
         print("AGV: {} heading to: {}, task id: {}".format(self.agvId, self.__headingToLocation, self.__taskId))
-        time.sleep(random.gauss(10))
+        time.sleep(abs(random.gauss(SLEEP_TIME)))
         self.location = self.__headingToLocation
         self.__status = "busy"
-        time.sleep(random.gauss(10))
+        time.sleep(abs(random.gauss(SLEEP_TIME)))
         self.__status = "idle"
 
         if self.faulty:
             if random.random() < FAILURE_PROBABILITY:
                 self.online = False
                 print("Faulty AGV going offline: {}".format(self.agvId))
-                time.sleep(random.gauss(10))
+                time.sleep(abs(random.gauss(12)))
                 self.online = True
                 print("Faulty AGV going online: {}".format(self.agvId))
             else:
@@ -47,7 +48,7 @@ class FakeAgv:
                     self.online = False
                     self.dead = True
                     print("Faulty AGV going dead: {}".format(self.agvId))
-                    time.sleep(random.gauss(10))
+                    time.sleep(abs(random.gauss(12)))
                     self.dead = False
                     self.online = True
                     print("Faulty AGV going dead: {}".format(self.agvId))

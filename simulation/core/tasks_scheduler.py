@@ -19,13 +19,20 @@ class TasksScheduler:
         while not self.__killed:
             self.optimizeQueue(iterations=1000)  # todo: un-hardcode this stuff
             self.dispatchTasks()
+            if self.__executorsManagerThread is not None:
+                if not self.__executorsManagerThread.is_alive():
+                    print("Process executor thread dead!", flush=True)
+
             time.sleep(1)
 
     def __processExecutors(self):
-        while not self.__killed:
-            self.__executorsManager.performRequests()
-            self.__executorsManager.refreshExecutors()
-            time.sleep(1)
+        try:
+            while not self.__killed:
+                self.__executorsManager.refreshExecutors()
+                self.__executorsManager.performRequests()
+                time.sleep(1)
+        except Exception as e:
+            print("Process executors exception! : {}".format(str(e)), flush=True)
 
     # public only for testing purposes
     def optimizeQueue(self, iterations):

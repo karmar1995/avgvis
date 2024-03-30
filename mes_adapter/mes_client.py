@@ -27,13 +27,11 @@ class MesClient:
                     if not self.__running: # TMS killed in the meantime
                         break
                 self.__mesDataSource.sendDataToServer(bytes("TMS_READY", encoding='ASCII'))
-                print("Sending TMS Ready")
                 data = self.__mesDataSource.readDataFromServer()
                 if data is not None:
                     parsed = self.__requestParser.parse(data)
                     productionOrderId = parsed.orderId
                     taskId = parsed.uniqueId
-                    print("Received: {}".format(productionOrderId))
                     self.__tasksSource.handleRequest(productionOrderId, taskId)
                     confirmation = bytes(str(productionOrderId), encoding='ASCII')
                     self.__mesDataSource.sendDataToServer(confirmation)

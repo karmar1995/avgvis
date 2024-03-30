@@ -1,7 +1,3 @@
-class TaskExecutorException(Exception):
-    pass
-
-
 class TaskExecutor:
 
     def execute(self, task, taskId):
